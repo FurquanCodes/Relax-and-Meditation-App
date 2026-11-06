@@ -8,9 +8,14 @@
 - [x] Generated offline CC0 test audio assets (`white_noise.wav` loop and `bell.wav`).
 - [x] Configured Android media permissions and foreground service (`FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `POST_NOTIFICATIONS`).
 - [x] Built standalone Release APK and installed directly onto physical phone (`ZY22GF4LZ9`).
+- [x] **Milestone 0: Spike A completed & verified on physical phone:**
+  - Audio playback works offline.
+  - Media notification widget appears in notification shade with Play/Pause/Stop controls.
+  - Background audio playback verified with screen turned OFF (`state=PLAYING(3)`).
+  - TurboModules and Bridgeless New Architecture patches saved via `patch-package`.
 
 ## In progress
-- Milestone 0: Spike A verification on physical device (background audio playback, loop continuity, media notification, and screen-off behavior).
+- Milestone 0: Spike B (2-minute wall-clock background meditation timer via foreground service).
 
 ## Pending
 - Spike B: Wall-clock meditation timer running in background/screen-off via foreground service.
