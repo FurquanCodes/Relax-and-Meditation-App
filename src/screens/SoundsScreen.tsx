@@ -21,6 +21,11 @@ import {
   AmbientTrack,
 } from '../services/audioService';
 import { formatTimeMMSS } from '../logic/formatters';
+import {
+  AtmosphereThemeView,
+  AtmosphereThemeType,
+  ATMOSPHERE_THEMES,
+} from '../components/AtmosphereThemeView';
 
 const SLEEP_TIMER_OPTIONS = [0, 1, 15, 30, 60];
 
@@ -55,6 +60,21 @@ export const SoundsScreen: React.FC = () => {
     };
   }, []);
 
+  // Compute theme for current track
+  const currentTheme: AtmosphereThemeType =
+    activeTrackId === 'forest_river_birds'
+      ? 'river'
+      : selectedCategory === 'rain'
+      ? 'rain'
+      : selectedCategory === 'forest'
+      ? 'forest'
+      : selectedCategory === 'ocean'
+      ? 'ocean'
+      : 'zen';
+
+  const activeThemeMeta =
+    ATMOSPHERE_THEMES.find((t) => t.id === currentTheme) || ATMOSPHERE_THEMES[0];
+
   // Filter tracks by currently selected category
   const filteredTracks = AMBIENT_TRACKS.filter(
     (track) => track.categoryId === selectedCategory
@@ -67,6 +87,18 @@ export const SoundsScreen: React.FC = () => {
   const handleSelectTrack = async (track: AmbientTrack) => {
     setActiveTrackId(track.id);
     await audioService.playTrack(track.id);
+  };
+
+  const handleSelectThemePill = async (themeType: AtmosphereThemeType) => {
+    const meta = ATMOSPHERE_THEMES.find((t) => t.id === themeType);
+    if (!meta) return;
+
+    const track = AMBIENT_TRACKS.find((t) => t.id === meta.associatedTrackId);
+    if (track) {
+      setSelectedCategory(track.categoryId);
+      setActiveTrackId(track.id);
+      await audioService.playTrack(track.id);
+    }
   };
 
   const handleTogglePlayPause = async () => {
@@ -96,6 +128,8 @@ export const SoundsScreen: React.FC = () => {
     }
   };
 
+  const currentTrack = AMBIENT_TRACKS.find((t) => t.id === activeTrackId);
+
   return (
     <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
@@ -105,7 +139,7 @@ export const SoundsScreen: React.FC = () => {
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.xl }]}
+        contentContainerStyle={[styles.scrollContent, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
         <Text
@@ -114,14 +148,189 @@ export const SoundsScreen: React.FC = () => {
             { color: colors.textSecondary, marginBottom: spacing.md },
           ]}
         >
-          Choose a soothing sound category, then select your ambience.
+          Choose a soothing sound category or theme, then relax with live ambient
+          atmospheres.
         </Text>
 
-        {/* 1. Category Selector Strip */}
+        {/* 1. Quick Atmospheric Themes Bar */}
         <Text
           style={[
             typography.subheader,
-            { color: colors.textPrimary, marginBottom: spacing.sm },
+            { color: colors.textPrimary, marginBottom: spacing.xs },
+          ]}
+        >
+          Atmosphere Themes
+        </Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.themeChipsRow}
+        >
+          {ATMOSPHERE_THEMES.map((theme) => {
+            const isThemeActive = currentTheme === theme.id;
+            return (
+              <TouchableOpacity
+                key={theme.id}
+                style={[
+                  styles.themePill,
+                  {
+                    backgroundColor: isThemeActive
+                      ? isDark
+                        ? theme.darkBg
+                        : theme.lightBg
+                      : colors.surface,
+                    borderColor: isThemeActive
+                      ? theme.accent
+                      : colors.surfaceBorder,
+                    borderWidth: isThemeActive ? 1.8 : 1,
+                  },
+                ]}
+                onPress={() => handleSelectThemePill(theme.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={{ fontSize: 18, marginRight: 6 }}>{theme.icon}</Text>
+                <Text
+                  style={[
+                    styles.themePillText,
+                    {
+                      color: isThemeActive
+                        ? isDark
+                          ? '#FFFFFF'
+                          : '#1A2E22'
+                        : colors.textPrimary,
+                      fontWeight: isThemeActive ? '700' : '500',
+                    },
+                  ]}
+                >
+                  {theme.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* 2. LIVE THEMATIC BACKDROP BEHIND ACTIVE SOUND PLAYING */}
+        <AtmosphereThemeView
+          theme={currentTheme}
+          isActive={isPlaying}
+          height={260}
+          style={[styles.playerThematicCard, { marginTop: spacing.md }]}
+        >
+          <View
+            style={[
+              styles.playerInterior,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(15, 27, 21, 0.82)'
+                  : 'rgba(255, 255, 255, 0.88)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(0, 0, 0, 0.06)',
+              },
+            ]}
+          >
+            {/* Header pill inside player */}
+            <View style={styles.thematicBadgeRow}>
+              <View
+                style={[
+                  styles.atmosphereTag,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : activeThemeMeta.lightBg,
+                    borderColor: activeThemeMeta.accent,
+                  },
+                ]}
+              >
+                <Text style={{ fontSize: 12, marginRight: 4 }}>
+                  {activeThemeMeta.icon}
+                </Text>
+                <Text
+                  style={[
+                    styles.atmosphereTagText,
+                    { color: isDark ? '#FFFFFF' : '#1A2E22' },
+                  ]}
+                >
+                  {activeThemeMeta.name.toUpperCase()} THEME
+                </Text>
+              </View>
+
+              <Text
+                style={[
+                  typography.caption,
+                  {
+                    color: isPlaying ? colors.accentTerracotta : colors.textMuted,
+                    fontWeight: '700',
+                    letterSpacing: 0.5,
+                  },
+                ]}
+              >
+                {isPlaying ? '● PLAYING' : 'PAUSED'}
+              </Text>
+            </View>
+
+            {/* Track Info */}
+            <View style={styles.thematicTrackInfo}>
+              <Text
+                style={[
+                  styles.nowPlayingTitle,
+                  { color: colors.textPrimary },
+                ]}
+                numberOfLines={1}
+              >
+                {currentTrack?.title}
+              </Text>
+              <Text
+                style={[
+                  typography.caption,
+                  { color: colors.textSecondary, marginTop: 2 },
+                ]}
+                numberOfLines={1}
+              >
+                {currentTrack?.subtitle}
+              </Text>
+            </View>
+
+            {/* Volume Control */}
+            <View style={styles.volumeContainer}>
+              <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                🔊 {Math.round(volume * 100)}%
+              </Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={volume}
+                onValueChange={handleVolumeChange}
+                minimumTrackTintColor={activeThemeMeta.accent}
+                maximumTrackTintColor={colors.surfaceBorder}
+                thumbTintColor={activeThemeMeta.accent}
+              />
+            </View>
+
+            {/* Control Buttons */}
+            <View style={styles.playerButtonsRow}>
+              <PrimaryButton
+                title={isPlaying ? 'Pause' : 'Play'}
+                onPress={handleTogglePlayPause}
+                variant={isPlaying ? 'secondary' : 'primary'}
+                style={styles.halfBtn}
+              />
+              <PrimaryButton
+                title="Stop"
+                onPress={handleStop}
+                variant="danger"
+                style={styles.halfBtn}
+              />
+            </View>
+          </View>
+        </AtmosphereThemeView>
+
+        {/* 3. Category Selector Strip */}
+        <Text
+          style={[
+            typography.subheader,
+            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.xs },
           ]}
         >
           Categories
@@ -189,7 +398,7 @@ export const SoundsScreen: React.FC = () => {
           })}
         </View>
 
-        {/* 2. Audios in Selected Category */}
+        {/* 4. Audios in Selected Category */}
         <View style={styles.trackSectionHeader}>
           <Text
             style={[
@@ -280,66 +489,7 @@ export const SoundsScreen: React.FC = () => {
           );
         })}
 
-        {/* 3. Now Playing Card */}
-        <Card
-          style={[
-            styles.playerCard,
-            {
-              backgroundColor: colors.surfaceElevated,
-              borderColor: colors.surfaceBorder,
-              marginTop: spacing.xl,
-            },
-          ]}
-        >
-          <View style={styles.playerCardHeader}>
-            <Text style={[typography.caption, { color: colors.textMuted, letterSpacing: 1 }]}>
-              {isPlaying ? 'NOW PLAYING' : 'PAUSED'}
-            </Text>
-            <Text
-              style={[
-                styles.nowPlayingTitle,
-                { color: colors.textPrimary, marginTop: 2 },
-              ]}
-            >
-              {AMBIENT_TRACKS.find((t) => t.id === activeTrackId)?.title}
-            </Text>
-          </View>
-
-          {/* Volume Control */}
-          <View style={styles.volumeContainer}>
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>
-              VOLUME: {Math.round(volume * 100)}%
-            </Text>
-            <Slider
-              style={styles.slider}
-              minimumValue={0}
-              maximumValue={1}
-              value={volume}
-              onValueChange={handleVolumeChange}
-              minimumTrackTintColor={colors.accentTerracotta}
-              maximumTrackTintColor={colors.surfaceBorder}
-              thumbTintColor={colors.accentTerracotta}
-            />
-          </View>
-
-          {/* Control Buttons */}
-          <View style={styles.playerButtonsRow}>
-            <PrimaryButton
-              title={isPlaying ? 'Pause' : 'Play'}
-              onPress={handleTogglePlayPause}
-              variant={isPlaying ? 'secondary' : 'primary'}
-              style={styles.halfBtn}
-            />
-            <PrimaryButton
-              title="Stop"
-              onPress={handleStop}
-              variant="danger"
-              style={styles.halfBtn}
-            />
-          </View>
-        </Card>
-
-        {/* 4. Sleep Timer Section */}
+        {/* 5. Sleep Timer Section */}
         <Text
           style={[
             typography.subheader,
@@ -354,7 +504,7 @@ export const SoundsScreen: React.FC = () => {
             { color: colors.textSecondary, marginBottom: spacing.md },
           ]}
         >
-          Automatically fade out and stop sound after chosen time
+          Automatically stop sound playback after chosen duration
         </Text>
 
         <View style={styles.sleepChipsRow}>
@@ -426,6 +576,73 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
+  themeChipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 6,
+  },
+  themePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
+  },
+  themePillText: {
+    fontSize: 13,
+  },
+  playerThematicCard: {
+    width: '100%',
+    borderRadius: 24,
+  },
+  playerInterior: {
+    width: '92%',
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 16,
+    alignSelf: 'center',
+  },
+  thematicBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  atmosphereTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  atmosphereTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  thematicTrackInfo: {
+    marginBottom: 10,
+  },
+  nowPlayingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  volumeContainer: {
+    marginBottom: 12,
+  },
+  slider: {
+    width: '100%',
+    height: 36,
+  },
+  playerButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfBtn: {
+    flex: 1,
+  },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -452,25 +669,26 @@ const styles = StyleSheet.create({
   },
   trackSectionHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: 12,
   },
   trackCard: {
-    marginVertical: 5,
-    borderRadius: 20,
+    marginBottom: 10,
+    padding: 14,
+    borderRadius: 18,
   },
   trackRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   trackIconBubble: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   trackIcon: {
     fontSize: 22,
@@ -479,58 +697,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statusIndicator: {
-    marginLeft: 8,
-    paddingRight: 4,
+    paddingLeft: 8,
   },
   playArrow: {
-    fontSize: 14,
-    opacity: 0.6,
-  },
-  playerCard: {
-    paddingVertical: 20,
-    borderRadius: 24,
-    borderWidth: 1,
-  },
-  playerCardHeader: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  nowPlayingTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    fontFamily: 'serif',
-  },
-  volumeContainer: {
-    marginVertical: 8,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  playerButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 12,
-  },
-  halfBtn: {
-    flex: 0.48,
+    fontSize: 16,
   },
   sleepChipsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 6,
+    gap: 10,
+    marginTop: 8,
   },
   sleepChip: {
     flex: 1,
-    height: 48,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   sleepTimerActiveBanner: {
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 14,
+    padding: 12,
+    alignItems: 'center',
   },
 });
