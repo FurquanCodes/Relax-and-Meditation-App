@@ -19,20 +19,25 @@
   - Visual cues ("Inhale", "Hold", "Exhale") with live phase countdown.
   - Pause/Resume and Stop controls.
   - Automatic progress recording on completion.
-- [x] **Milestone 3: Meditation Timer**
-  - Duration selector: 1m test, 5, 10, 15, 20 minutes.
-  - Soft 528Hz singing bowl start and end bells (respecting bell setting).
-  - Background foreground service with live countdown notification and "Stop" action.
-  - Screen-off execution guaranteed with wake lock and wall-clock time math.
-  - Automatic progress recording on completion.
-- [x] **Milestone 4: Categorized Ambient Sounds and Sleep Timer**
+- [x] **Milestone 3: Enhanced Meditation Experience**
+  - Session Intentions selector (Peace & Calm, Release Stress, Deep Rest, Clarity & Focus) with guiding mantras.
+  - Ambient Soundscape Companion during meditation (River Stream, Gentle Rain, Forest Birds, Ocean Waves, Zen Harmony, or Pure Silence).
+  - Animated pulsing Zen breathing aura / halo around the countdown timer.
+  - Live soundscape volume stepper (+ / − buttons) directly on the active meditation view.
+  - Configurable durations (1m test, 5, 10, 15, 20 minutes) with singing bowl bell at start and completion.
+  - Native Android Foreground Service with ongoing notification and screen-off guarantee.
+  - Mindful reflection quote completion screen with saved progress.
+- [x] **Milestone 4: Categorized Ambient Sounds, Atmosphere Themes & Controls**
   - 12 real, high-quality CC0 ambient tracks organized into 4 distinct categories:
     - 🌧️ Rain (Gentle Night Rain, Sleepy Rain Music, Rain & Thunder)
     - 🌊 Ocean (Ocean Waves, Ocean Vibes, Ocean Waves Music)
     - 🌲 Forest (Forest Ambience & Birds, Forest River & Birds, Forest Bird Chirping)
     - 🧘 Calm & Meditate (Meditation Calm, Calm Atmosphere, White Noise Relax)
+  - Animated 60fps Atmosphere Themes (Mountain River, Gentle Rain, Deep Forest, Ocean Tide, Zen Twilight) rendered live behind sound playback.
+  - Quick theme selector bar with one-tap atmospheric switches.
+  - Resume from paused timestamp (playing after pause resumes exactly where left off).
+  - Dedicated + / − volume stepper buttons (10% increments) with smooth slider.
   - Interactive category selector grid filtering tracks on demand.
-  - Play/pause indicators, track card feedback, and smooth volume slider (`@react-native-community/slider`).
   - Background playback with Android media controls notification widget.
   - Sleep timer: Off, 1m test, 15m, 30m, 60m with live countdown display and wall-clock accuracy.
 - [x] **Milestone 5: Polish, UX Safety & Visual Redesign**
