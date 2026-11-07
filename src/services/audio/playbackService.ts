@@ -16,10 +16,8 @@ export async function playbackService(): Promise<void> {
   TrackPlayer.addEventListener(Event.RemoteDuck, async (e: RemoteDuckEvent) => {
     if (e.permanent || e.paused) {
       await TrackPlayer.pause();
-    } else if (e.ducking) {
-      await TrackPlayer.setVolume(0.3);
     } else {
-      await TrackPlayer.setVolume(1.0);
+      await TrackPlayer.play();
     }
   });
 }
