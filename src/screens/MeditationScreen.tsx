@@ -675,27 +675,91 @@ export const MeditationScreen: React.FC = () => {
               “{selectedIntention.mantra}”
             </Text>
 
-            {/* Live Volume Slider if soundscape is playing */}
+            {/* Live Volume Slider with + and - if soundscape is playing */}
             {selectedSoundscape.trackId && (
-              <View style={styles.ambientVolumeRow}>
-                <Text
-                  style={[
-                    typography.caption,
-                    { color: colors.textSecondary, marginRight: 8 },
-                  ]}
-                >
-                  🔊 {Math.round(ambientVolume * 100)}%
-                </Text>
-                <Slider
-                  style={{ flex: 1, height: 36 }}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={ambientVolume}
-                  onValueChange={handleVolumeChange}
-                  minimumTrackTintColor={colors.accentTerracotta}
-                  maximumTrackTintColor={colors.surfaceBorder}
-                  thumbTintColor={colors.accentTerracotta}
-                />
+              <View style={styles.ambientVolumeContainer}>
+                <View style={styles.ambientVolumeHeader}>
+                  <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                    SOUNDSCAPE VOLUME
+                  </Text>
+                  <Text
+                    style={[
+                      typography.caption,
+                      { color: colors.textPrimary, fontWeight: '700' },
+                    ]}
+                  >
+                    🔊 {Math.round(ambientVolume * 100)}%
+                  </Text>
+                </View>
+
+                <View style={styles.ambientVolumeRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.volStepBtn,
+                      {
+                        backgroundColor: isDark
+                          ? 'rgba(255, 255, 255, 0.12)'
+                          : 'rgba(0, 0, 0, 0.06)',
+                        borderColor: isDark
+                          ? 'rgba(255, 255, 255, 0.2)'
+                          : 'rgba(0, 0, 0, 0.12)',
+                      },
+                    ]}
+                    onPress={() =>
+                      handleVolumeChange(
+                        Math.max(0, Math.round((ambientVolume - 0.1) * 10) / 10)
+                      )
+                    }
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text
+                      style={[styles.volStepText, { color: colors.textPrimary }]}
+                    >
+                      −
+                    </Text>
+                  </TouchableOpacity>
+
+                  <View style={styles.sliderWrapper}>
+                    <Slider
+                      style={{ width: '100%', height: 36 }}
+                      minimumValue={0}
+                      maximumValue={1}
+                      value={ambientVolume}
+                      onValueChange={handleVolumeChange}
+                      minimumTrackTintColor={colors.accentTerracotta}
+                      maximumTrackTintColor={colors.surfaceBorder}
+                      thumbTintColor={colors.accentTerracotta}
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.volStepBtn,
+                      {
+                        backgroundColor: isDark
+                          ? 'rgba(255, 255, 255, 0.12)'
+                          : 'rgba(0, 0, 0, 0.06)',
+                        borderColor: isDark
+                          ? 'rgba(255, 255, 255, 0.2)'
+                          : 'rgba(0, 0, 0, 0.12)',
+                      },
+                    ]}
+                    onPress={() =>
+                      handleVolumeChange(
+                        Math.min(1, Math.round((ambientVolume + 0.1) * 10) / 10)
+                      )
+                    }
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text
+                      style={[styles.volStepText, { color: colors.textPrimary }]}
+                    >
+                      +
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
 
@@ -922,12 +986,38 @@ const styles = StyleSheet.create({
     fontFamily: 'serif',
     fontVariant: ['tabular-nums'],
   },
+  ambientVolumeContainer: {
+    width: '100%',
+    paddingHorizontal: 8,
+    marginTop: 6,
+  },
+  ambientVolumeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
   ambientVolumeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 10,
-    marginTop: 6,
+  },
+  volStepBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  volStepText: {
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  sliderWrapper: {
+    flex: 1,
+    marginHorizontal: 8,
   },
   completedView: {
     flex: 1,

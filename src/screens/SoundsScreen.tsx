@@ -119,6 +119,11 @@ export const SoundsScreen: React.FC = () => {
     await audioService.setVolume(value);
   };
 
+  const handleVolumeStep = (delta: number) => {
+    const next = Math.max(0, Math.min(1, Math.round((volume + delta) * 10) / 10));
+    handleVolumeChange(next);
+  };
+
   const handleSelectSleepTimer = (minutes: number) => {
     setSelectedSleepMin(minutes);
     if (minutes === 0) {
@@ -291,21 +296,74 @@ export const SoundsScreen: React.FC = () => {
               </Text>
             </View>
 
-            {/* Volume Control */}
+            {/* Volume Control with + and - buttons */}
             <View style={styles.volumeContainer}>
-              <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                🔊 {Math.round(volume * 100)}%
-              </Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={1}
-                value={volume}
-                onValueChange={handleVolumeChange}
-                minimumTrackTintColor={activeThemeMeta.accent}
-                maximumTrackTintColor={colors.surfaceBorder}
-                thumbTintColor={activeThemeMeta.accent}
-              />
+              <View style={styles.volumeHeaderRow}>
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                  VOLUME
+                </Text>
+                <Text
+                  style={[
+                    typography.caption,
+                    { color: colors.textPrimary, fontWeight: '700' },
+                  ]}
+                >
+                  🔊 {Math.round(volume * 100)}%
+                </Text>
+              </View>
+
+              <View style={styles.volumeControlsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.volStepBtn,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : 'rgba(0, 0, 0, 0.06)',
+                      borderColor: isDark
+                        ? 'rgba(255, 255, 255, 0.2)'
+                        : 'rgba(0, 0, 0, 0.12)',
+                    },
+                  ]}
+                  onPress={() => handleVolumeStep(-0.1)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={[styles.volStepText, { color: colors.textPrimary }]}>−</Text>
+                </TouchableOpacity>
+
+                <View style={styles.sliderWrapper}>
+                  <Slider
+                    style={styles.slider}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={volume}
+                    onValueChange={handleVolumeChange}
+                    minimumTrackTintColor={activeThemeMeta.accent}
+                    maximumTrackTintColor={colors.surfaceBorder}
+                    thumbTintColor={activeThemeMeta.accent}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  style={[
+                    styles.volStepBtn,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : 'rgba(0, 0, 0, 0.06)',
+                      borderColor: isDark
+                        ? 'rgba(255, 255, 255, 0.2)'
+                        : 'rgba(0, 0, 0, 0.12)',
+                    },
+                  ]}
+                  onPress={() => handleVolumeStep(0.1)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Text style={[styles.volStepText, { color: colors.textPrimary }]}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Control Buttons */}
@@ -631,6 +689,33 @@ const styles = StyleSheet.create({
   },
   volumeContainer: {
     marginBottom: 12,
+  },
+  volumeHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  volumeControlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  volStepBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  volStepText: {
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  sliderWrapper: {
+    flex: 1,
+    marginHorizontal: 8,
   },
   slider: {
     width: '100%',

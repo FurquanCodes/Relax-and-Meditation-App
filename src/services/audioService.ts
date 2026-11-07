@@ -172,6 +172,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
 ];
 
 let isPlayerSetup = false;
+let currentlyLoadedTrackId: string | null = null;
 let sleepTimerStopAt: number | null = null;
 let sleepTimerInterval: ReturnType<typeof setInterval> | null = null;
 const sleepTimerListeners = new Set<(remainingSeconds: number | null) => void>();
@@ -217,10 +218,19 @@ export const audioService = {
     }
   },
 
-  async playTrack(trackId: string): Promise<void> {
+  async playTrack(trackId: string, forceRestart = false): Promise<void> {
     await this.setupPlayerIfNeeded();
     const trackConfig = AMBIENT_TRACKS.find((t) => t.id === trackId);
     if (!trackConfig) return;
+
+    // If the same track is already loaded in TrackPlayer, resume from where paused!
+    if (!forceRestart && currentlyLoadedTrackId === trackId) {
+      const activeTrack = await TrackPlayer.getActiveTrack();
+      if (activeTrack && activeTrack.id === trackId) {
+        await TrackPlayer.play();
+        return;
+      }
+    }
 
     await TrackPlayer.reset();
 
@@ -233,6 +243,11 @@ export const audioService = {
     };
 
     await TrackPlayer.add(track);
+    await TrackPlayer.play();
+    currentlyLoadedTrackId = trackId;
+  },
+
+  async resume(): Promise<void> {
     await TrackPlayer.play();
   },
 
@@ -247,6 +262,7 @@ export const audioService = {
   async stop(): Promise<void> {
     await TrackPlayer.stop();
     await TrackPlayer.reset();
+    currentlyLoadedTrackId = null;
     this.cancelSleepTimer();
   },
 
