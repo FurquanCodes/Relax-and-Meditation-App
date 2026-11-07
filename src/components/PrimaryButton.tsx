@@ -1,5 +1,12 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import React, { useRef } from 'react';
+import {
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  Animated,
+  Pressable,
+} from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
 interface PrimaryButtonProps {
@@ -20,6 +27,7 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   disabled = false,
 }) => {
   const { colors, typography } = useTheme();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   let bgColor = colors.accentTerracotta;
   let textColor = '#FFFFFF';
@@ -32,55 +40,75 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
     textColor = '#FFFFFF';
   }
 
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 4,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 8,
+    }).start();
+  };
+
   return (
-    <TouchableOpacity
-      style={[
-        styles.button,
-        {
-          backgroundColor: disabled ? colors.surfaceBorder : bgColor,
-          borderRadius: 26,
-        },
-        variant === 'secondary' && {
-          borderWidth: 1,
-          borderColor: colors.surfaceBorder,
-        },
-        style,
-      ]}
-      onPress={onPress}
-      disabled={disabled}
-      activeOpacity={0.8}
-    >
-      <Text
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }, style]}>
+      <Pressable
         style={[
-          typography.bodyBold,
-          styles.text,
-          { color: disabled ? colors.textMuted : textColor },
-          textStyle,
+          styles.button,
+          {
+            backgroundColor: disabled ? colors.surfaceBorder : bgColor,
+            borderRadius: 28,
+          },
+          variant === 'secondary' && {
+            borderWidth: 1.5,
+            borderColor: colors.surfaceBorder,
+          },
         ]}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled}
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
+        <Text
+          style={[
+            typography.bodyBold,
+            styles.text,
+            { color: disabled ? colors.textMuted : textColor },
+            textStyle,
+          ]}
+        >
+          {title}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 52, // Large touch target > 48dp
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    minHeight: 56, // Generous, comfortable touch target
+    paddingHorizontal: 28,
+    paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 2,
+    elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
   },
   text: {
     textAlign: 'center',
-    letterSpacing: 0.3,
-    fontSize: 16,
+    letterSpacing: 0.5,
+    fontSize: 17,
     fontWeight: '700',
   },
 });

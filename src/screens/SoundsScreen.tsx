@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Animated,
+  Easing,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useNavigation } from '@react-navigation/native';
@@ -27,6 +29,92 @@ import {
 } from '../components/AtmosphereThemeView';
 
 const SLEEP_OPTIONS = [0, 15, 30, 60];
+
+// Animated soundwave equalizer bars that dance when playing
+const AnimatedSoundWaves: React.FC<{ isPlaying: boolean; color: string }> = ({
+  isPlaying,
+  color,
+}) => {
+  const bar1 = useRef(new Animated.Value(6)).current;
+  const bar2 = useRef(new Animated.Value(14)).current;
+  const bar3 = useRef(new Animated.Value(8)).current;
+
+  useEffect(() => {
+    if (!isPlaying) {
+      bar1.setValue(6);
+      bar2.setValue(10);
+      bar3.setValue(6);
+      return;
+    }
+
+    const anim1 = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bar1, {
+          toValue: 20,
+          duration: 400,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(bar1, {
+          toValue: 6,
+          duration: 400,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+    const anim2 = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bar2, {
+          toValue: 6,
+          duration: 350,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(bar2, {
+          toValue: 22,
+          duration: 350,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+    const anim3 = Animated.loop(
+      Animated.sequence([
+        Animated.timing(bar3, {
+          toValue: 18,
+          duration: 480,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(bar3, {
+          toValue: 6,
+          duration: 480,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+      ])
+    );
+
+    anim1.start();
+    anim2.start();
+    anim3.start();
+
+    return () => {
+      anim1.stop();
+      anim2.stop();
+      anim3.stop();
+    };
+  }, [isPlaying]);
+
+  return (
+    <View style={styles.equalizerWrap}>
+      <Animated.View style={[styles.equalizerBar, { height: bar1, backgroundColor: color }]} />
+      <Animated.View style={[styles.equalizerBar, { height: bar2, backgroundColor: color }]} />
+      <Animated.View style={[styles.equalizerBar, { height: bar3, backgroundColor: color }]} />
+    </View>
+  );
+};
 
 export const SoundsScreen: React.FC = () => {
   const { colors, typography, spacing, isDark } = useTheme();
@@ -58,7 +146,6 @@ export const SoundsScreen: React.FC = () => {
     };
   }, []);
 
-  // Map category to matching atmosphere theme
   const getThemeForCategory = (cat: SoundCategoryId): AtmosphereThemeType => {
     switch (cat) {
       case 'rain':
@@ -119,7 +206,6 @@ export const SoundsScreen: React.FC = () => {
     handleVolumeChange(next);
   };
 
-  // Cycle sleep timer: 0 -> 15m -> 30m -> 60m -> 0
   const cycleSleepTimer = () => {
     const currentIndex = SLEEP_OPTIONS.indexOf(selectedSleepMin);
     const nextIndex = (currentIndex + 1) % SLEEP_OPTIONS.length;
@@ -143,7 +229,7 @@ export const SoundsScreen: React.FC = () => {
         onBackPress={() => navigation.goBack()}
       />
 
-      {/* 1. Category Switcher (Horizontal scrollable pill tabs) */}
+      {/* 1. Large, Tactile Category Switcher */}
       <View style={styles.categoryTabsContainer}>
         <ScrollView
           horizontal
@@ -164,13 +250,13 @@ export const SoundsScreen: React.FC = () => {
                         : cat.pastelBg
                       : colors.surface,
                     borderColor: isSelected ? cat.borderColor : colors.surfaceBorder,
-                    borderWidth: isSelected ? 2 : 1,
+                    borderWidth: isSelected ? 2.5 : 1,
                   },
                 ]}
                 onPress={() => setSelectedCategory(cat.id)}
                 activeOpacity={0.7}
               >
-                <Text style={{ fontSize: 18, marginRight: 6 }}>{cat.icon}</Text>
+                <Text style={{ fontSize: 22, marginRight: 8 }}>{cat.icon}</Text>
                 <Text
                   style={[
                     styles.categoryTabText,
@@ -192,13 +278,13 @@ export const SoundsScreen: React.FC = () => {
         </ScrollView>
       </View>
 
-      {/* 2. Main Track List */}
+      {/* 2. Main Track List with generous tap targets */}
       <ScrollView
         contentContainerStyle={[styles.trackListContainer, { padding: spacing.lg }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.categoryHeader}>
-          <Text style={[typography.subheader, { color: colors.textPrimary }]}>
+          <Text style={[styles.categoryHeaderTitle, { color: colors.textPrimary }]}>
             {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Sounds
           </Text>
           <Text style={[typography.caption, { color: colors.textSecondary }]}>
@@ -218,8 +304,8 @@ export const SoundsScreen: React.FC = () => {
                 {
                   backgroundColor: isCurrentlyPlayingThis
                     ? isDark
-                      ? 'rgba(224, 122, 95, 0.22)'
-                      : colors.cardSoundsBg + '30'
+                      ? 'rgba(224, 122, 95, 0.25)'
+                      : colors.cardSoundsBg + '35'
                     : isSelected
                     ? isDark
                       ? 'rgba(255, 255, 255, 0.08)'
@@ -230,7 +316,7 @@ export const SoundsScreen: React.FC = () => {
                     : isSelected
                     ? colors.primaryLight
                     : colors.surfaceBorder,
-                  borderWidth: isCurrentlyPlayingThis ? 2 : 1,
+                  borderWidth: isCurrentlyPlayingThis ? 2.5 : 1,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
@@ -258,7 +344,7 @@ export const SoundsScreen: React.FC = () => {
                       {
                         color: colors.textPrimary,
                         fontFamily: 'serif',
-                        fontSize: 16,
+                        fontSize: 17,
                       },
                     ]}
                   >
@@ -267,7 +353,7 @@ export const SoundsScreen: React.FC = () => {
                   <Text
                     style={[
                       typography.caption,
-                      { color: colors.textSecondary, marginTop: 2 },
+                      { color: colors.textSecondary, marginTop: 3 },
                     ]}
                     numberOfLines={1}
                   >
@@ -275,6 +361,7 @@ export const SoundsScreen: React.FC = () => {
                   </Text>
                 </View>
 
+                {/* Generous Play / Pause indicator button */}
                 <View style={styles.playStateBtn}>
                   {isCurrentlyPlayingThis ? (
                     <View style={[styles.playingBadge, { backgroundColor: colors.accentTerracotta }]}>
@@ -286,12 +373,12 @@ export const SoundsScreen: React.FC = () => {
                         styles.playCircle,
                         {
                           backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.12)'
+                            ? 'rgba(255, 255, 255, 0.14)'
                             : colors.surfaceBorder,
                         },
                       ]}
                     >
-                      <Text style={{ fontSize: 13, color: colors.textPrimary, marginLeft: 2 }}>▶</Text>
+                      <Text style={{ fontSize: 16, color: colors.textPrimary, marginLeft: 2 }}>▶</Text>
                     </View>
                   )}
                 </View>
@@ -300,15 +387,15 @@ export const SoundsScreen: React.FC = () => {
           );
         })}
 
-        <View style={{ height: 260 }} />
+        <View style={{ height: 270 }} />
       </ScrollView>
 
-      {/* 3. DOCKED BOTTOM PLAYER (With Live Animated Atmosphere Theme Behind It!) */}
+      {/* 3. DOCKED BOTTOM PLAYER WITH BIG BUTTONS & ANIMATED SOUNDWAVES */}
       <View style={styles.dockedPlayerWrapper}>
         <AtmosphereThemeView
           theme={currentTheme}
           isActive={isPlaying}
-          height={210}
+          height={225}
           style={styles.dockedPlayerCard}
         >
           <View
@@ -316,38 +403,44 @@ export const SoundsScreen: React.FC = () => {
               styles.playerInterior,
               {
                 backgroundColor: isDark
-                  ? 'rgba(15, 27, 21, 0.88)'
-                  : 'rgba(255, 255, 255, 0.92)',
+                  ? 'rgba(15, 27, 21, 0.90)'
+                  : 'rgba(255, 255, 255, 0.94)',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.14)'
+                  ? 'rgba(255, 255, 255, 0.16)'
                   : 'rgba(0, 0, 0, 0.08)',
               },
             ]}
           >
-            {/* Top row: Track Title & Sleep Timer Pill */}
+            {/* Top row: Track Title, Soundwaves, Sleep Timer */}
             <View style={styles.playerTopRow}>
               <View style={styles.playerTrackTitleBox}>
-                <Text
-                  style={[
-                    styles.playerTrackTitle,
-                    { color: colors.textPrimary },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {currentTrack.title}
-                </Text>
+                <View style={styles.titleWithWaveRow}>
+                  <Text
+                    style={[
+                      styles.playerTrackTitle,
+                      { color: colors.textPrimary },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {currentTrack.title}
+                  </Text>
+                  <AnimatedSoundWaves
+                    isPlaying={isPlaying}
+                    color={activeThemeMeta.accent}
+                  />
+                </View>
                 <Text
                   style={[
                     typography.caption,
-                    { color: colors.textSecondary },
+                    { color: colors.textSecondary, marginTop: 1 },
                   ]}
                   numberOfLines={1}
                 >
-                  {activeThemeMeta.name} • {isPlaying ? 'Playing' : 'Paused'}
+                  {activeThemeMeta.name} • {isPlaying ? 'Playing loop' : 'Paused'}
                 </Text>
               </View>
 
-              {/* Sleep timer button */}
+              {/* Large sleep timer button */}
               <TouchableOpacity
                 style={[
                   styles.sleepBtn,
@@ -355,8 +448,8 @@ export const SoundsScreen: React.FC = () => {
                     backgroundColor: selectedSleepMin > 0
                       ? colors.accentTerracotta + '30'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(0, 0, 0, 0.05)',
+                      ? 'rgba(255, 255, 255, 0.10)'
+                      : 'rgba(0, 0, 0, 0.06)',
                     borderColor: selectedSleepMin > 0
                       ? colors.accentTerracotta
                       : colors.surfaceBorder,
@@ -365,14 +458,14 @@ export const SoundsScreen: React.FC = () => {
                 onPress={cycleSleepTimer}
                 activeOpacity={0.7}
               >
-                <Text style={{ fontSize: 13 }}>🌙</Text>
+                <Text style={{ fontSize: 16 }}>🌙</Text>
                 <Text
                   style={[
                     styles.sleepBtnText,
                     {
                       color: selectedSleepMin > 0
                         ? colors.accentTerracotta
-                        : colors.textSecondary,
+                        : colors.textPrimary,
                     },
                   ]}
                 >
@@ -380,23 +473,23 @@ export const SoundsScreen: React.FC = () => {
                     ? formatTimeMMSS(sleepRemainingSeconds)
                     : selectedSleepMin > 0
                     ? `${selectedSleepMin}m`
-                    : 'Sleep'}
+                    : 'Timer'}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Middle row: Clean Volume Stepper */}
+            {/* Middle row: Large Volume Stepper (+ / - buttons) */}
             <View style={styles.volumeStepperRow}>
               <TouchableOpacity
                 style={[
                   styles.stepBtn,
                   {
                     backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.12)'
-                      : 'rgba(0, 0, 0, 0.06)',
+                      ? 'rgba(255, 255, 255, 0.14)'
+                      : 'rgba(0, 0, 0, 0.08)',
                     borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.18)'
-                      : 'rgba(0, 0, 0, 0.12)',
+                      ? 'rgba(255, 255, 255, 0.22)'
+                      : 'rgba(0, 0, 0, 0.15)',
                   },
                 ]}
                 onPress={() => handleVolumeStep(-0.1)}
@@ -408,7 +501,7 @@ export const SoundsScreen: React.FC = () => {
 
               <View style={styles.sliderContainer}>
                 <Slider
-                  style={{ width: '100%', height: 32 }}
+                  style={{ width: '100%', height: 36 }}
                   minimumValue={0}
                   maximumValue={1}
                   value={volume}
@@ -424,11 +517,11 @@ export const SoundsScreen: React.FC = () => {
                   styles.stepBtn,
                   {
                     backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.12)'
-                      : 'rgba(0, 0, 0, 0.06)',
+                      ? 'rgba(255, 255, 255, 0.14)'
+                      : 'rgba(0, 0, 0, 0.08)',
                     borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.18)'
-                      : 'rgba(0, 0, 0, 0.12)',
+                      ? 'rgba(255, 255, 255, 0.22)'
+                      : 'rgba(0, 0, 0, 0.15)',
                   },
                 ]}
                 onPress={() => handleVolumeStep(0.1)}
@@ -442,8 +535,8 @@ export const SoundsScreen: React.FC = () => {
                 style={[
                   typography.caption,
                   {
-                    color: colors.textSecondary,
-                    width: 38,
+                    color: colors.textPrimary,
+                    width: 44,
                     textAlign: 'right',
                     fontWeight: '700',
                   },
@@ -453,7 +546,7 @@ export const SoundsScreen: React.FC = () => {
               </Text>
             </View>
 
-            {/* Bottom row: Play/Pause and Stop buttons */}
+            {/* Bottom row: Big, Juicy Play/Pause and Stop buttons */}
             <View style={styles.playerButtonsRow}>
               <TouchableOpacity
                 style={[
@@ -461,8 +554,8 @@ export const SoundsScreen: React.FC = () => {
                   {
                     backgroundColor: isPlaying
                       ? isDark
-                        ? 'rgba(255, 255, 255, 0.15)'
-                        : 'rgba(0, 0, 0, 0.08)'
+                        ? 'rgba(255, 255, 255, 0.18)'
+                        : 'rgba(0, 0, 0, 0.10)'
                       : colors.accentTerracotta,
                   },
                 ]}
@@ -479,7 +572,7 @@ export const SoundsScreen: React.FC = () => {
                     },
                   ]}
                 >
-                  {isPlaying ? '❚❚ Pause' : '▶ Play'}
+                  {isPlaying ? '❚❚ Pause' : '▶ Play Now'}
                 </Text>
               </TouchableOpacity>
 
@@ -489,8 +582,8 @@ export const SoundsScreen: React.FC = () => {
                     styles.stopBtn,
                     {
                       backgroundColor: isDark
-                        ? 'rgba(222, 119, 91, 0.2)'
-                        : 'rgba(222, 119, 91, 0.15)',
+                        ? 'rgba(222, 119, 91, 0.25)'
+                        : 'rgba(222, 119, 91, 0.2)',
                     },
                   ]}
                   onPress={handleStop}
@@ -519,18 +612,18 @@ const styles = StyleSheet.create({
   },
   categoryTabsScroll: {
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 8,
+    paddingVertical: 12,
+    gap: 10,
   },
   categoryTab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
   categoryTabText: {
-    fontSize: 14,
+    fontSize: 15,
   },
   trackListContainer: {
     paddingBottom: 20,
@@ -539,27 +632,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  categoryHeaderTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
   },
   trackCard: {
-    marginBottom: 10,
-    padding: 14,
-    borderRadius: 18,
+    marginBottom: 12,
+    padding: 16,
+    borderRadius: 22,
+    minHeight: 82,
+    justifyContent: 'center',
   },
   trackRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   trackIconBubble: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 14,
   },
   trackIcon: {
-    fontSize: 22,
+    fontSize: 24,
   },
   trackInfo: {
     flex: 1,
@@ -570,21 +670,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   playingBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 18,
   },
   playingBadgeText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
   },
   playCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  equalizerWrap: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 3,
+    height: 22,
+    marginLeft: 8,
+  },
+  equalizerBar: {
+    width: 3.5,
+    borderRadius: 2,
   },
   dockedPlayerWrapper: {
     position: 'absolute',
@@ -592,95 +703,105 @@ const styles = StyleSheet.create({
     right: 12,
     bottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 10,
   },
   dockedPlayerCard: {
-    borderRadius: 24,
+    borderRadius: 28,
   },
   playerInterior: {
     width: '94%',
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 12,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    padding: 14,
     alignSelf: 'center',
   },
   playerTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   playerTrackTitleBox: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 10,
+  },
+  titleWithWaveRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   playerTrackTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     fontFamily: 'serif',
+    maxWidth: '78%',
   },
   sleepBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
+    borderWidth: 1.5,
   },
   sleepBtnText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    marginLeft: 4,
+    marginLeft: 5,
   },
   volumeStepperRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   stepBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepBtnText: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: '700',
-    lineHeight: 20,
+    lineHeight: 24,
   },
   sliderContainer: {
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: 6,
   },
   playerButtonsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
   },
   mainPlayBtn: {
     flex: 1,
-    height: 40,
-    borderRadius: 20,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   mainPlayBtnText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
   },
   stopBtn: {
-    width: 75,
-    height: 40,
-    borderRadius: 20,
+    width: 86,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stopBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
 });
