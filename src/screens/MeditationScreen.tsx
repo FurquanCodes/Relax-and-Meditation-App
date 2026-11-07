@@ -36,11 +36,10 @@ interface MeditationSoundscape {
 }
 
 const SOUNDSCAPES: MeditationSoundscape[] = [
-  { id: 'river', name: 'River', icon: '🏞️', trackId: 'forest_river_birds', theme: 'river' },
-  { id: 'rain', name: 'Rain', icon: '🌧️', trackId: 'gentle_night_rain', theme: 'rain' },
   { id: 'forest', name: 'Forest', icon: '🌿', trackId: 'forest_ambience_birds', theme: 'forest' },
+  { id: 'rain', name: 'Rain', icon: '🌧️', trackId: 'gentle_night_rain', theme: 'rain' },
   { id: 'ocean', name: 'Ocean', icon: '🌊', trackId: 'ocean_waves', theme: 'ocean' },
-  { id: 'zen', name: 'Zen', icon: '🧘', trackId: 'meditation_audio', theme: 'zen' },
+  { id: 'zen', name: 'Calm', icon: '🧘', trackId: 'meditation_audio', theme: 'zen' },
   { id: 'silence', name: 'Silent', icon: '🤫', trackId: null, theme: 'zen' },
 ];
 
@@ -56,7 +55,7 @@ export const MeditationScreen: React.FC = () => {
   const navigation = useNavigation();
 
   const [selectedDurationMin, setSelectedDurationMin] = useState<number>(5);
-  const [selectedSoundscapeId, setSelectedSoundscapeId] = useState<string>('river');
+  const [selectedSoundscapeId, setSelectedSoundscapeId] = useState<string>('forest');
   const [ambientVolume, setAmbientVolume] = useState<number>(0.6);
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -620,7 +619,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 20,
-    flexBasis: '31%',
+    minWidth: '47%',
+    flex: 1,
     justifyContent: 'center',
   },
   soundscapeText: {

@@ -150,8 +150,6 @@ export const SoundsScreen: React.FC = () => {
     switch (cat) {
       case 'rain':
         return 'rain';
-      case 'river':
-        return 'river';
       case 'forest':
         return 'forest';
       case 'ocean':

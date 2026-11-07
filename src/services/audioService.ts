@@ -5,7 +5,7 @@ import TrackPlayer, {
   Track,
 } from 'react-native-track-player';
 
-export type SoundCategoryId = 'rain' | 'river' | 'forest' | 'ocean' | 'calm';
+export type SoundCategoryId = 'rain' | 'ocean' | 'forest' | 'calm';
 
 export interface SoundCategory {
   id: SoundCategoryId;
@@ -35,15 +35,6 @@ export const SOUND_CATEGORIES: SoundCategory[] = [
     pastelBg: '#E8F1F5',
     pastelBgDark: '#1E2D34',
     borderColor: '#7FA8BD',
-  },
-  {
-    id: 'river',
-    title: 'River',
-    subtitle: 'Babbling stream & water',
-    icon: '🏞️',
-    pastelBg: '#E2F3F5',
-    pastelBgDark: '#132C33',
-    borderColor: '#84C7D0',
   },
   {
     id: 'forest',
@@ -101,7 +92,33 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     fileRequire: require('../../assets/audio/ambient/rain_thunder.mp3'),
   },
 
-  // 2. Ocean Sounds
+  // 2. Forest Sounds
+  {
+    id: 'forest_ambience_birds',
+    title: 'Forest Ambience',
+    subtitle: 'Morning birdsong and peaceful tree canopy breeze',
+    categoryId: 'forest',
+    artworkIcon: '🍃',
+    fileRequire: require('../../assets/audio/ambient/forest_ambience_birds.mp3'),
+  },
+  {
+    id: 'forest_river_birds',
+    title: 'Forest River & Birds',
+    subtitle: 'Babbling woodland stream with singing birds',
+    categoryId: 'forest',
+    artworkIcon: '🏞️',
+    fileRequire: require('../../assets/audio/ambient/forest_river_birds.mp3'),
+  },
+  {
+    id: 'forest_bird_chirping',
+    title: 'Morning Songbirds',
+    subtitle: 'Vibrant uplifting forest birds greeting the dawn',
+    categoryId: 'forest',
+    artworkIcon: '🐦',
+    fileRequire: require('../../assets/audio/ambient/forest_bird_chirping.mp3'),
+  },
+
+  // 3. Ocean Sounds
   {
     id: 'ocean_waves',
     title: 'Ocean Waves',
@@ -125,34 +142,6 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     categoryId: 'ocean',
     artworkIcon: '🌅',
     fileRequire: require('../../assets/audio/ambient/ocean_waves_music.mp3'),
-  },
-
-  // 2. River Sounds
-  {
-    id: 'forest_river_birds',
-    title: 'Mountain River Stream',
-    subtitle: 'Babbling water stream with singing woodland birds',
-    categoryId: 'river',
-    artworkIcon: '🏞️',
-    fileRequire: require('../../assets/audio/ambient/forest_river_birds.mp3'),
-  },
-
-  // 3. Forest Sounds
-  {
-    id: 'forest_ambience_birds',
-    title: 'Forest Ambience',
-    subtitle: 'Morning birdsong and peaceful tree canopy breeze',
-    categoryId: 'forest',
-    artworkIcon: '🍃',
-    fileRequire: require('../../assets/audio/ambient/forest_ambience_birds.mp3'),
-  },
-  {
-    id: 'forest_bird_chirping',
-    title: 'Morning Songbirds',
-    subtitle: 'Vibrant uplifting forest birds greeting the dawn',
-    categoryId: 'forest',
-    artworkIcon: '🐦',
-    fileRequire: require('../../assets/audio/ambient/forest_bird_chirping.mp3'),
   },
 
   // 4. Calm & Meditation Sounds
