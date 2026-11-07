@@ -6,22 +6,78 @@ import {
   Switch,
   ScrollView,
   TouchableOpacity,
+  Image,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
-import { Card } from '../components/Card';
-import { settingsStore, ThemePreference } from '../data/settingsStore';
+import { settingsStore, ThemePreference, SceneId } from '../data/settingsStore';
+import { ScenicBackground, SCENIC_IMAGES } from '../components/ScenicBackground';
+
+interface SceneOption {
+  id: SceneId;
+  title: string;
+  subtitle: string;
+  image?: any;
+  icon: string;
+}
+
+const SCENE_OPTIONS: SceneOption[] = [
+  {
+    id: 'auto',
+    title: 'Time of Day',
+    subtitle: 'Changes softly from morning to starry night',
+    icon: '⏳',
+  },
+  {
+    id: 'meadow',
+    title: 'Sunrise Meadow',
+    subtitle: 'Golden morning warmth & soft mist',
+    image: SCENIC_IMAGES.meadow,
+    icon: '🌅',
+  },
+  {
+    id: 'forest',
+    title: 'Misty Forest',
+    subtitle: 'Deep tranquil evergreens',
+    image: SCENIC_IMAGES.forest,
+    icon: '🌲',
+  },
+  {
+    id: 'ocean',
+    title: 'Sunset Coast',
+    subtitle: 'Gentle pastel tidal shores',
+    image: SCENIC_IMAGES.ocean,
+    icon: '🌊',
+  },
+  {
+    id: 'rain',
+    title: 'Rain Window',
+    subtitle: 'Quiet droplets on window glass',
+    image: SCENIC_IMAGES.rain,
+    icon: '🌧️',
+  },
+  {
+    id: 'night',
+    title: 'Starry Cosmos',
+    subtitle: 'Tranquil deep night sky',
+    image: SCENIC_IMAGES.night,
+    icon: '✨',
+  },
+];
 
 export const SettingsScreen: React.FC = () => {
-  const { colors, typography, spacing, borderRadius, themePreference, setThemePreference } = useTheme();
+  const { colors, isDark, themePreference, setThemePreference } = useTheme();
   const navigation = useNavigation();
 
   const [bellEnabled, setBellEnabled] = useState<boolean>(settingsStore.isBellEnabled());
+  const [selectedScene, setSelectedScene] = useState<SceneId>(settingsStore.getScenePreference());
 
   useEffect(() => {
     const unsub = settingsStore.subscribe(() => {
       setBellEnabled(settingsStore.isBellEnabled());
+      setSelectedScene(settingsStore.getScenePreference());
     });
     return unsub;
   }, []);
@@ -31,6 +87,11 @@ export const SettingsScreen: React.FC = () => {
     await settingsStore.setBellEnabled(value);
   };
 
+  const handleSelectScene = async (sceneId: SceneId) => {
+    setSelectedScene(sceneId);
+    await settingsStore.setScenePreference(sceneId);
+  };
+
   const THEME_OPTIONS: { id: ThemePreference; label: string; icon: string }[] = [
     { id: 'dark', label: 'Dark Mode', icon: '🌙' },
     { id: 'light', label: 'Light Mode', icon: '☀️' },
@@ -38,7 +99,9 @@ export const SettingsScreen: React.FC = () => {
   ];
 
   return (
-    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <ScenicBackground scene={selectedScene} style={styles.safeArea}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+
       <Header
         title="Settings"
         showBack={true}
@@ -46,15 +109,121 @@ export const SettingsScreen: React.FC = () => {
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.xl }]}
+        contentContainerStyle={[styles.scrollContent, { padding: 18, paddingBottom: 60 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Appearance Section */}
-        <Text style={[typography.subheader, { color: colors.textPrimary, marginBottom: spacing.sm }]}>
-          Appearance
+        {/* 1. SCENE THEMES PICKER */}
+        <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
+          Background Scene
+        </Text>
+        <Text style={[styles.sectionDesc, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+          Choose your favorite scenic environment for Home and rest screens
         </Text>
 
-        <Card style={styles.sectionCard}>
+        <View style={styles.scenesGrid}>
+          {SCENE_OPTIONS.map((opt) => {
+            const isSelected = selectedScene === opt.id;
+            return (
+              <TouchableOpacity
+                key={opt.id}
+                style={[
+                  styles.sceneCard,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(17, 29, 37, 0.70)'
+                      : 'rgba(255, 255, 255, 0.75)',
+                    borderColor: isSelected
+                      ? isDark
+                        ? '#8CD5B4'
+                        : '#265C43'
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.14)'
+                      : 'rgba(255, 255, 255, 0.88)',
+                    borderWidth: isSelected ? 2.5 : 1.5,
+                  },
+                ]}
+                onPress={() => handleSelectScene(opt.id)}
+                activeOpacity={0.8}
+              >
+                {opt.image ? (
+                  <Image source={opt.image} style={styles.sceneThumb} resizeMode="cover" />
+                ) : (
+                  <View
+                    style={[
+                      styles.sceneThumbFallback,
+                      {
+                        backgroundColor: isDark
+                          ? 'rgba(140, 213, 180, 0.20)'
+                          : 'rgba(38, 92, 67, 0.12)',
+                      },
+                    ]}
+                  >
+                    <Text style={{ fontSize: 24 }}>{opt.icon}</Text>
+                  </View>
+                )}
+
+                <View style={styles.sceneInfoWrap}>
+                  <View style={styles.sceneTitleRow}>
+                    <Text style={[styles.sceneTitle, { color: colors.textPrimary }]}>
+                      {opt.title}
+                    </Text>
+                    {isSelected && (
+                      <View
+                        style={[
+                          styles.activeCheckPill,
+                          {
+                            backgroundColor: isDark ? '#8CD5B4' : '#265C43',
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.activeCheckText,
+                            { color: isDark ? '#0B131A' : '#FFFFFF' },
+                          ]}
+                        >
+                          Active
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text
+                    style={[
+                      styles.sceneSubtitle,
+                      { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                    ]}
+                  >
+                    {opt.subtitle}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* 2. THEME MODE */}
+        <Text
+          style={[
+            styles.sectionHeading,
+            { color: colors.textPrimary, marginTop: 24 },
+          ]}
+        >
+          Theme Mode
+        </Text>
+
+        <View
+          style={[
+            styles.glassSectionCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(17, 29, 37, 0.70)'
+                : 'rgba(255, 255, 255, 0.75)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.14)'
+                : 'rgba(255, 255, 255, 0.88)',
+            },
+          ]}
+        >
           {THEME_OPTIONS.map((opt, idx) => {
             const isSelected = themePreference === opt.id;
             return (
@@ -64,7 +233,9 @@ export const SettingsScreen: React.FC = () => {
                   styles.themeOptionRow,
                   idx < THEME_OPTIONS.length - 1 && {
                     borderBottomWidth: 1,
-                    borderBottomColor: colors.surfaceBorder,
+                    borderBottomColor: isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : 'rgba(0, 0, 0, 0.06)',
                   },
                 ]}
                 onPress={() => setThemePreference(opt.id)}
@@ -73,110 +244,149 @@ export const SettingsScreen: React.FC = () => {
                 <Text style={styles.themeIcon}>{opt.icon}</Text>
                 <Text
                   style={[
-                    typography.body,
+                    styles.themeLabel,
                     {
                       flex: 1,
-                      color: isSelected ? colors.primary : colors.textPrimary,
-                      fontWeight: isSelected ? '700' : '400',
+                      color: colors.textPrimary,
+                      fontWeight: isSelected ? '700' : '500',
                     },
                   ]}
                 >
                   {opt.label}
                 </Text>
                 {isSelected && (
-                  <View style={[styles.checkCircle, { backgroundColor: colors.accentSage }]}>
-                    <Text style={styles.checkmarkText}>✓</Text>
+                  <View
+                    style={[
+                      styles.checkCircle,
+                      { backgroundColor: isDark ? '#8CD5B4' : '#265C43' },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.checkmarkText,
+                        { color: isDark ? '#0B131A' : '#FFFFFF' },
+                      ]}
+                    >
+                      ✓
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>
             );
           })}
-        </Card>
+        </View>
 
-        {/* Audio Preferences */}
+        {/* 3. SOUND & SIGNALS */}
         <Text
           style={[
-            typography.subheader,
-            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.sm },
+            styles.sectionHeading,
+            { color: colors.textPrimary, marginTop: 24 },
           ]}
         >
           Sound & Signals
         </Text>
 
-        <Card style={styles.sectionCard}>
+        <View
+          style={[
+            styles.glassSectionCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(17, 29, 37, 0.70)'
+                : 'rgba(255, 255, 255, 0.75)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.14)'
+                : 'rgba(255, 255, 255, 0.88)',
+            },
+          ]}
+        >
           <View style={styles.settingRow}>
             <View style={{ flex: 1, paddingRight: 12 }}>
-              <Text style={[typography.bodyBold, { color: colors.textPrimary }]}>
+              <Text style={[styles.settingRowTitle, { color: colors.textPrimary }]}>
                 Singing Bowl Bell
               </Text>
               <Text
                 style={[
-                  typography.caption,
-                  { color: colors.textSecondary, marginTop: 2 },
+                  styles.settingRowDesc,
+                  { color: isDark ? '#D0E3D9' : '#4B5F54' },
                 ]}
               >
-                Chime at the start and end of each meditation session
+                Soft chime at the start and completion of each meditation
               </Text>
             </View>
 
             <Switch
               value={bellEnabled}
               onValueChange={handleToggleBell}
-              trackColor={{ false: colors.surfaceBorder, true: colors.accentSage }}
+              trackColor={{
+                false: isDark ? '#263D31' : '#E6DECF',
+                true: isDark ? '#8CD5B4' : '#265C43',
+              }}
               thumbColor={bellEnabled ? colors.accentTerracotta : '#F4F3F4'}
             />
           </View>
-        </Card>
+        </View>
 
-        {/* About App */}
+        {/* 4. ABOUT */}
         <Text
           style={[
-            typography.subheader,
-            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.sm },
+            styles.sectionHeading,
+            { color: colors.textPrimary, marginTop: 24 },
           ]}
         >
           About
         </Text>
 
-        <Card style={styles.sectionCard}>
+        <View
+          style={[
+            styles.glassSectionCard,
+            {
+              backgroundColor: isDark
+                ? 'rgba(17, 29, 37, 0.70)'
+                : 'rgba(255, 255, 255, 0.75)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.14)'
+                : 'rgba(255, 255, 255, 0.88)',
+            },
+          ]}
+        >
           <View style={styles.aboutRow}>
-            <Text style={[typography.body, { color: colors.textSecondary }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
               Application
             </Text>
-            <Text style={[typography.bodyBold, { color: colors.textPrimary }]}>
+            <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
               Q9 Relax
             </Text>
           </View>
 
-          <View style={[styles.aboutRow, { marginTop: 12 }]}>
-            <Text style={[typography.body, { color: colors.textSecondary }]}>
-              Version
+          <View style={[styles.aboutRow, { marginTop: 10 }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+              Design System
             </Text>
-            <Text style={[typography.body, { color: colors.textPrimary }]}>
-              1.0.0 (Offline)
+            <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
+              Scenic Glassmorphism
             </Text>
           </View>
 
-          <View style={[styles.aboutRow, { marginTop: 12 }]}>
-            <Text style={[typography.body, { color: colors.textSecondary }]}>
-              Network Status
+          <View style={[styles.aboutRow, { marginTop: 10 }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+              Privacy & Network
             </Text>
-            <Text style={[typography.caption, { color: colors.accentGreen, fontWeight: '700' }]}>
+            <Text style={[styles.aboutValue, { color: '#34D399', fontWeight: '700' }]}>
               ● 100% Offline
             </Text>
           </View>
 
           <Text
             style={[
-              typography.caption,
-              { color: colors.textMuted, marginTop: 16, lineHeight: 18 },
+              styles.aboutDisclaimer,
+              { color: isDark ? '#809E90' : '#788C81' },
             ]}
           >
-            A calm, quiet companion designed for mindful breathing, restful meditation, and ambient relaxation. No accounts, no data collection.
+            A calm, quiet companion designed for mindful breathing, restful meditation, and ambient relaxation. No accounts, no telemetry, no network calls.
           </Text>
-        </Card>
+        </View>
       </ScrollView>
-    </View>
+    </ScenicBackground>
   );
 };
 
@@ -185,21 +395,99 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingTop: 8,
   },
-  sectionCard: {
-    paddingVertical: 4,
+  sectionHeading: {
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 4,
+  },
+  sectionDesc: {
+    fontSize: 13,
+    fontFamily: 'Nunito-Regular',
+    marginBottom: 14,
+  },
+  scenesGrid: {
+    gap: 10,
+  },
+  sceneCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sceneThumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+  },
+  sceneThumbFallback: {
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sceneInfoWrap: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  sceneTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 2,
+  },
+  sceneTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+  },
+  sceneSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    lineHeight: 16,
+  },
+  activeCheckPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  activeCheckText: {
+    fontSize: 11,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
+  },
+  glassSectionCard: {
     borderRadius: 22,
+    borderWidth: 1.5,
+    padding: 16,
+    marginTop: 8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   themeOptionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 12,
   },
   themeIcon: {
     fontSize: 20,
     marginRight: 14,
+  },
+  themeLabel: {
+    fontSize: 15,
+    fontFamily: 'Nunito-Regular',
   },
   checkCircle: {
     width: 24,
@@ -209,7 +497,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkmarkText: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -217,13 +504,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+  },
+  settingRowTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 2,
+  },
+  settingRowDesc: {
+    fontSize: 13,
+    fontFamily: 'Nunito-Regular',
+    lineHeight: 17,
   },
   aboutRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  aboutLabel: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Regular',
+  },
+  aboutValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
+  },
+  aboutDisclaimer: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Regular',
+    marginTop: 14,
+    lineHeight: 18,
   },
 });

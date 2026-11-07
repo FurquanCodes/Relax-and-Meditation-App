@@ -14,6 +14,19 @@ export interface ThemeColors {
   accentRed: string;
   cardShadow: string;
 
+  // Glassmorphic tokens
+  glassSurface: string;
+  glassBorder: string;
+  glassTextSecondary: string;
+
+  // Gradients
+  bgGradient: [string, string, ...string[]];
+  scrimGradient: [string, string, ...string[]];
+  cardHeroGradient: [string, string, ...string[]];
+  cardBreatheGradient: [string, string, ...string[]];
+  cardMeditateGradient: [string, string, ...string[]];
+  cardSoundsGradient: [string, string, ...string[]];
+
   // Organic calm pastel tokens
   accentTerracotta: string;
   accentSage: string;
@@ -44,91 +57,112 @@ export interface ThemeColors {
 }
 
 export const lightColors: ThemeColors = {
-  background: '#FAF7F0', // Warm organic ivory / linen
+  background: '#FAF6EE', // Warm organic ivory mist
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceBorder: '#EAE4D8',
-  primary: '#1A2E22', // Deep forest charcoal
-  primaryLight: '#8FB4A4',
+  surfaceBorder: '#E6DECF',
+  primary: '#14221A', // Deep forest obsidian
+  primaryLight: '#789F8E',
   primaryMuted: '#EBF2EE',
-  secondary: '#4A5D52',
-  textPrimary: '#1A2E22', // Deep forest charcoal
-  textSecondary: '#4A5D52', // Slate moss
-  textMuted: '#7B8F84',
-  accentGreen: '#2E684C',
-  accentRed: '#DE775B',
-  cardShadow: 'rgba(26, 46, 34, 0.08)',
+  secondary: '#43584C',
+  textPrimary: '#14221A',
+  textSecondary: '#2C4235',
+  textMuted: '#5C7365',
+  accentGreen: '#265C43',
+  accentRed: '#D66D52',
+  cardShadow: 'rgba(20, 34, 26, 0.08)',
 
-  accentTerracotta: '#DE775B', // Warm terracotta / coral
-  accentSage: '#9BBBAE', // Soothing sage green
-  accentLavender: '#D4D3F8', // Calm lavender / lilac
-  accentPeach: '#FAD5C0', // Soft peach apricot
-  accentButter: '#F7E5A9', // Creamy buttercup yellow
+  glassSurface: 'rgba(255, 255, 255, 0.78)',
+  glassBorder: 'rgba(255, 255, 255, 0.92)',
+  glassTextSecondary: '#2C4235',
 
-  cardHeroBg: '#9BBBAE',
-  cardHeroBtn: '#DE775B',
-  cardBreatheBg: '#9BBBAE',
-  cardMeditateBg: '#D4D3F8',
-  cardSoundsBg: '#E28168',
+  bgGradient: ['#FAF6EE', '#F3ECE0', '#E7DDD0'],
+  scrimGradient: ['rgba(250, 246, 238, 0.82)', 'rgba(250, 246, 238, 0.94)'],
+  cardHeroGradient: ['#8EAFA1', '#729888'],
+  cardBreatheGradient: ['#92B5A5', '#769D8C'],
+  cardMeditateGradient: ['#CFCEF5', '#AEAEE8'],
+  cardSoundsGradient: ['#E68B74', '#CD7058'],
 
-  navActive: '#1A2E22',
-  navInactive: '#8E9E95',
+  accentTerracotta: '#D66D52',
+  accentSage: '#8EAFA1',
+  accentLavender: '#CFCEF5',
+  accentPeach: '#FAD5C0',
+  accentButter: '#F7E5A9',
+
+  cardHeroBg: '#8EAFA1',
+  cardHeroBtn: '#D66D52',
+  cardBreatheBg: '#8EAFA1',
+  cardMeditateBg: '#CFCEF5',
+  cardSoundsBg: '#E68B74',
+
+  navActive: '#14221A',
+  navInactive: '#7C8E84',
   navBackground: '#FFFFFF',
-  navBorder: '#EAE4D8',
+  navBorder: '#E6DECF',
 
-  statsSessionsBg: '#F7E5A9',
-  statsSessionsText: '#2B2310',
-  statsSessionsIcon: '#9E8024',
-  statsMinutesBg: '#FAD5C0',
-  statsMinutesText: '#3A1E11',
-  statsMinutesIcon: '#B06540',
+  statsSessionsBg: '#F8E8B6',
+  statsSessionsText: '#2C220E',
+  statsSessionsIcon: '#96791E',
+  statsMinutesBg: '#FCD8C4',
+  statsMinutesText: '#3B1E12',
+  statsMinutesIcon: '#AC5F3A',
 
   iconBtnBg: '#FFFFFF',
-  iconBtnBorder: '#EAE4D8',
+  iconBtnBorder: '#E6DECF',
 };
 
 export const darkColors: ThemeColors = {
-  background: '#0D1712', // Deep Midnight Botanical Forest
-  surface: '#15241C',
-  surfaceElevated: '#1B2E24',
-  surfaceBorder: '#263D31',
-  primary: '#FFFFFF', // Pure luminous white
-  primaryLight: '#8FD0B2',
-  primaryMuted: '#1A3326',
-  secondary: '#A3C2B3',
-  textPrimary: '#FFFFFF', // Ultra crisp white
-  textSecondary: '#C5D8CF', // Highly legible soft mint-slate
-  textMuted: '#7E9C8E',
+  background: '#0B131A', // Deep night navy-teal
+  surface: '#111D25',
+  surfaceElevated: '#172732',
+  surfaceBorder: '#203442',
+  primary: '#FFFFFF',
+  primaryLight: '#8CD5B4',
+  primaryMuted: '#14252D',
+  secondary: '#ADC7BA',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#D8E8E0',
+  textMuted: '#809E90',
   accentGreen: '#4ADE80',
   accentRed: '#F87171',
-  cardShadow: 'rgba(0, 0, 0, 0.45)',
+  cardShadow: 'rgba(0, 0, 0, 0.55)',
 
-  accentTerracotta: '#E07A5F', // Glowing coral terracotta
+  glassSurface: 'rgba(17, 29, 37, 0.72)',
+  glassBorder: 'rgba(255, 255, 255, 0.16)',
+  glassTextSecondary: '#D8E8E0',
+
+  bgGradient: ['#0B131A', '#0F1A24', '#152431'],
+  scrimGradient: ['rgba(11, 19, 26, 0.70)', 'rgba(11, 19, 26, 0.92)'],
+  cardHeroGradient: ['#1C372D', '#132820'],
+  cardBreatheGradient: ['#1E3A2F', '#152C23'],
+  cardMeditateGradient: ['#28234D', '#1A1736'],
+  cardSoundsGradient: ['#48231B', '#32150E'],
+
+  accentTerracotta: '#E07A5F',
   accentSage: '#76A691',
-  accentLavender: '#8582C4',
+  accentLavender: '#8D8AC9',
   accentPeach: '#E29775',
   accentButter: '#E6C665',
 
-  // Cards in Dark Mode: Rich jewel tones with ambient glow
-  cardHeroBg: '#193327',
-  cardHeroBtn: '#DE775B',
-  cardBreatheBg: '#1B372B', // Enchanted Pine
-  cardMeditateBg: '#252147', // Twilight Violet
-  cardSoundsBg: '#442118', // Warm Sunset Ember
+  cardHeroBg: '#1C372D',
+  cardHeroBtn: '#E07A5F',
+  cardBreatheBg: '#1E3A2F',
+  cardMeditateBg: '#28234D',
+  cardSoundsBg: '#48231B',
 
   navActive: '#FFFFFF',
   navInactive: '#769485',
-  navBackground: '#111F18',
-  navBorder: '#1F3429',
+  navBackground: '#0F1A24',
+  navBorder: '#203442',
 
-  statsSessionsBg: '#262112',
+  statsSessionsBg: '#2A2412',
   statsSessionsText: '#FDE68A',
   statsSessionsIcon: '#F59E0B',
-  statsMinutesBg: '#2D1B15',
+  statsMinutesBg: '#2F1B15',
   statsMinutesText: '#FFEDD5',
   statsMinutesIcon: '#F97316',
 
-  iconBtnBg: 'rgba(255, 255, 255, 0.1)',
+  iconBtnBg: 'rgba(255, 255, 255, 0.10)',
   iconBtnBorder: 'rgba(255, 255, 255, 0.18)',
 };
 
@@ -147,25 +181,34 @@ export const borderRadius = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 22,
-  xxl: 28,
+  xl: 20,
+  xxl: 26,
+  huge: 32,
   full: 9999,
 };
 
 export const typography = {
   hero: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '700' as const,
     fontFamily: 'serif',
-    lineHeight: 38,
+    lineHeight: 42,
+    letterSpacing: -0.3,
   },
   header: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '700' as const,
     fontFamily: 'serif',
-    lineHeight: 32,
+    lineHeight: 34,
+    letterSpacing: -0.2,
   },
   subheader: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    fontFamily: 'serif',
+    lineHeight: 28,
+  },
+  title: {
     fontSize: 18,
     fontWeight: '700' as const,
     fontFamily: 'serif',
@@ -174,21 +217,25 @@ export const typography = {
   body: {
     fontSize: 15,
     fontWeight: '400' as const,
+    fontFamily: 'sans-serif',
     lineHeight: 22,
   },
   bodyBold: {
     fontSize: 15,
-    fontWeight: '600' as const,
+    fontWeight: '700' as const,
+    fontFamily: 'sans-serif',
     lineHeight: 22,
   },
   caption: {
     fontSize: 13,
-    fontWeight: '500' as const,
+    fontWeight: '600' as const,
+    fontFamily: 'sans-serif',
     lineHeight: 18,
   },
   small: {
     fontSize: 11,
-    fontWeight: '500' as const,
-    lineHeight: 14,
+    fontWeight: '700' as const,
+    fontFamily: 'sans-serif',
+    lineHeight: 15,
   },
 };

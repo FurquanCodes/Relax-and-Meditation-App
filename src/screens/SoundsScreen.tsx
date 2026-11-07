@@ -7,13 +7,14 @@ import {
   ScrollView,
   Animated,
   Easing,
+  StatusBar,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
+import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { usePlaybackState, State } from 'react-native-track-player';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
-import { Card } from '../components/Card';
 import {
   audioService,
   AMBIENT_TRACKS,
@@ -22,11 +23,8 @@ import {
   AmbientTrack,
 } from '../services/audioService';
 import { formatTimeMMSS } from '../logic/formatters';
-import {
-  AtmosphereThemeView,
-  AtmosphereThemeType,
-  ATMOSPHERE_THEMES,
-} from '../components/AtmosphereThemeView';
+import { ScenicBackground } from '../components/ScenicBackground';
+import { SceneId } from '../data/settingsStore';
 
 const SLEEP_OPTIONS = [0, 15, 30, 60];
 
@@ -117,7 +115,7 @@ const AnimatedSoundWaves: React.FC<{ isPlaying: boolean; color: string }> = ({
 };
 
 export const SoundsScreen: React.FC = () => {
-  const { colors, typography, spacing, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation();
   const playbackState = usePlaybackState();
 
@@ -146,7 +144,7 @@ export const SoundsScreen: React.FC = () => {
     };
   }, []);
 
-  const getThemeForCategory = (cat: SoundCategoryId): AtmosphereThemeType => {
+  const getSceneForCategory = (cat: SoundCategoryId): SceneId => {
     switch (cat) {
       case 'rain':
         return 'rain';
@@ -156,13 +154,31 @@ export const SoundsScreen: React.FC = () => {
         return 'ocean';
       case 'calm':
       default:
-        return 'zen';
+        return 'night';
     }
   };
 
-  const currentTheme = getThemeForCategory(selectedCategory);
-  const activeThemeMeta =
-    ATMOSPHERE_THEMES.find((t) => t.id === currentTheme) || ATMOSPHERE_THEMES[0];
+  const getGradientForCategory = (cat: SoundCategoryId): [string, string] => {
+    switch (cat) {
+      case 'rain':
+        return isDark
+          ? ['rgba(44, 62, 80, 0.45)', 'rgba(25, 38, 50, 0.45)']
+          : ['rgba(176, 196, 214, 0.35)', 'rgba(142, 166, 189, 0.35)'];
+      case 'forest':
+        return isDark
+          ? ['rgba(29, 66, 48, 0.45)', 'rgba(16, 42, 30, 0.45)']
+          : ['rgba(168, 206, 185, 0.35)', 'rgba(132, 178, 153, 0.35)'];
+      case 'ocean':
+        return isDark
+          ? ['rgba(20, 68, 84, 0.45)', 'rgba(11, 44, 55, 0.45)']
+          : ['rgba(165, 209, 222, 0.35)', 'rgba(128, 183, 199, 0.35)'];
+      case 'calm':
+      default:
+        return isDark
+          ? ['rgba(54, 42, 82, 0.45)', 'rgba(34, 25, 54, 0.45)']
+          : ['rgba(203, 194, 235, 0.35)', 'rgba(172, 160, 214, 0.35)'];
+    }
+  };
 
   const filteredTracks = AMBIENT_TRACKS.filter(
     (track) => track.categoryId === selectedCategory
@@ -171,6 +187,9 @@ export const SoundsScreen: React.FC = () => {
   const activeCategoryMeta = SOUND_CATEGORIES.find(
     (cat) => cat.id === selectedCategory
   );
+
+  const activeTrack =
+    AMBIENT_TRACKS.find((t) => t.id === activeTrackId) || AMBIENT_TRACKS[0];
 
   const handleSelectTrack = async (track: AmbientTrack) => {
     setActiveTrackId(track.id);
@@ -181,7 +200,7 @@ export const SoundsScreen: React.FC = () => {
     }
   };
 
-  const handleTogglePlayPause = async () => {
+  const handleTogglePlay = async () => {
     if (isPlaying) {
       await audioService.pause();
     } else {
@@ -189,50 +208,42 @@ export const SoundsScreen: React.FC = () => {
     }
   };
 
-  const handleStop = async () => {
-    await audioService.stop();
-    setSelectedSleepMin(0);
+  const handleVolumeChange = async (val: number) => {
+    setVolume(val);
+    await audioService.setVolume(val);
   };
 
-  const handleVolumeChange = async (value: number) => {
-    setVolume(value);
-    await audioService.setVolume(value);
+  const handleVolumeStep = async (delta: number) => {
+    const newVol = Math.max(0, Math.min(1, Math.round((volume + delta) * 10) / 10));
+    setVolume(newVol);
+    await audioService.setVolume(newVol);
   };
 
-  const handleVolumeStep = (delta: number) => {
-    const next = Math.max(0, Math.min(1, Math.round((volume + delta) * 10) / 10));
-    handleVolumeChange(next);
-  };
-
-  const cycleSleepTimer = () => {
-    const currentIndex = SLEEP_OPTIONS.indexOf(selectedSleepMin);
-    const nextIndex = (currentIndex + 1) % SLEEP_OPTIONS.length;
-    const nextMin = SLEEP_OPTIONS[nextIndex];
-    setSelectedSleepMin(nextMin);
-    if (nextMin === 0) {
+  const handleSelectSleep = (min: number) => {
+    setSelectedSleepMin(min);
+    if (min === 0) {
       audioService.cancelSleepTimer();
     } else {
-      audioService.startSleepTimer(nextMin);
+      audioService.startSleepTimer(min);
     }
   };
 
-  const currentTrack =
-    AMBIENT_TRACKS.find((t) => t.id === activeTrackId) || AMBIENT_TRACKS[0];
-
   return (
-    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <ScenicBackground scene={getSceneForCategory(selectedCategory)} style={styles.safeArea}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+
       <Header
-        title="Calming Sounds"
-        showBack={true}
+        title="Ambient Sounds"
+        showBack
         onBackPress={() => navigation.goBack()}
       />
 
-      {/* 1. Large, Tactile Category Switcher */}
-      <View style={styles.categoryTabsContainer}>
+      {/* 1. HORIZONTAL CATEGORY PILLS */}
+      <View style={styles.categoryPillsContainer}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoryTabsScroll}
+          contentContainerStyle={styles.categoryScrollContent}
         >
           {SOUND_CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id;
@@ -240,31 +251,37 @@ export const SoundsScreen: React.FC = () => {
               <TouchableOpacity
                 key={cat.id}
                 style={[
-                  styles.categoryTab,
+                  styles.categoryPill,
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? cat.pastelBgDark
-                        : cat.pastelBg
-                      : colors.surface,
-                    borderColor: isSelected ? cat.borderColor : colors.surfaceBorder,
-                    borderWidth: isSelected ? 2.5 : 1,
+                        ? '#8CD5B4'
+                        : '#265C43'
+                      : isDark
+                      ? 'rgba(17, 29, 37, 0.65)'
+                      : 'rgba(255, 255, 255, 0.75)',
+                    borderColor: isSelected
+                      ? isDark
+                        ? '#8CD5B4'
+                        : '#265C43'
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.16)'
+                      : 'rgba(255, 255, 255, 0.90)',
                   },
                 ]}
                 onPress={() => setSelectedCategory(cat.id)}
-                activeOpacity={0.7}
+                activeOpacity={0.8}
               >
-                <Text style={{ fontSize: 22, marginRight: 8 }}>{cat.icon}</Text>
+                <Text style={styles.categoryPillIcon}>{cat.icon}</Text>
                 <Text
                   style={[
-                    styles.categoryTabText,
+                    styles.categoryPillText,
                     {
                       color: isSelected
                         ? isDark
-                          ? '#FFFFFF'
-                          : '#1A2E22'
-                        : colors.textSecondary,
-                      fontWeight: isSelected ? '700' : '500',
+                          ? '#0B131A'
+                          : '#FFFFFF'
+                        : colors.textPrimary,
                     },
                   ]}
                 >
@@ -276,327 +293,237 @@ export const SoundsScreen: React.FC = () => {
         </ScrollView>
       </View>
 
-      {/* 2. Main Track List with generous tap targets */}
+      {/* 2. TRACK LIST */}
       <ScrollView
-        contentContainerStyle={[styles.trackListContainer, { padding: spacing.lg }]}
+        style={styles.tracksScroll}
+        contentContainerStyle={[styles.tracksContainer, { paddingBottom: 220 }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.categoryHeader}>
-          <Text style={[styles.categoryHeaderTitle, { color: colors.textPrimary }]}>
-            {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Sounds
-          </Text>
-          <Text style={[typography.caption, { color: colors.textSecondary }]}>
-            {filteredTracks.length} tracks • Tap to play
-          </Text>
-        </View>
+        <Text style={[styles.categoryHeaderTitle, { color: colors.textPrimary }]}>
+          {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Atmosphere
+        </Text>
+        <Text style={[styles.categorySubtitle, { color: isDark ? '#D8E8E0' : '#2A3F33' }]}>
+          {activeCategoryMeta?.subtitle}
+        </Text>
 
         {filteredTracks.map((track) => {
-          const isSelected = activeTrackId === track.id;
-          const isCurrentlyPlayingThis = isSelected && isPlaying;
+          const isThisActive = activeTrackId === track.id;
+          const isThisPlaying = isThisActive && isPlaying;
+          const categoryGradient = getGradientForCategory(track.categoryId);
 
           return (
-            <Card
+            <TouchableOpacity
               key={track.id}
               style={[
                 styles.trackCard,
                 {
-                  backgroundColor: isCurrentlyPlayingThis
+                  backgroundColor: isThisActive
                     ? isDark
-                      ? 'rgba(224, 122, 95, 0.25)'
-                      : colors.cardSoundsBg + '35'
-                    : isSelected
+                      ? 'rgba(140, 213, 180, 0.22)'
+                      : 'rgba(38, 92, 67, 0.14)'
+                    : isDark
+                    ? 'rgba(17, 29, 37, 0.65)'
+                    : 'rgba(255, 255, 255, 0.75)',
+                  borderColor: isThisActive
                     ? isDark
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : colors.surfaceElevated
-                    : colors.surface,
-                  borderColor: isCurrentlyPlayingThis
-                    ? colors.accentTerracotta
-                    : isSelected
-                    ? colors.primaryLight
-                    : colors.surfaceBorder,
-                  borderWidth: isCurrentlyPlayingThis ? 2.5 : 1,
+                      ? '#8CD5B4'
+                      : '#265C43'
+                    : isDark
+                    ? 'rgba(255, 255, 255, 0.14)'
+                    : 'rgba(255, 255, 255, 0.88)',
+                  borderWidth: isThisActive ? 2 : 1.5,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
+              activeOpacity={0.88}
             >
-              <View style={styles.trackRow}>
+              <LinearGradient
+                colors={categoryGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+
+              <View style={styles.trackCardLeft}>
                 <View
                   style={[
-                    styles.trackIconBubble,
+                    styles.trackPlayIndicator,
                     {
-                      backgroundColor: isCurrentlyPlayingThis
-                        ? colors.accentTerracotta + '35'
+                      backgroundColor: isThisActive
+                        ? isDark
+                          ? '#8CD5B4'
+                          : '#265C43'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.08)'
-                        : colors.surfaceBorder,
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : 'rgba(0, 0, 0, 0.05)',
                     },
                   ]}
                 >
-                  <Text style={styles.trackIcon}>{track.artworkIcon}</Text>
+                  <Text
+                    style={{
+                      color: isThisActive
+                        ? isDark
+                          ? '#0B131A'
+                          : '#FFFFFF'
+                        : colors.textPrimary,
+                      fontSize: 14,
+                      fontWeight: '700',
+                    }}
+                  >
+                    {isThisPlaying ? '❚❚' : '▶'}
+                  </Text>
                 </View>
 
                 <View style={styles.trackInfo}>
-                  <Text
-                    style={[
-                      typography.bodyBold,
-                      {
-                        color: colors.textPrimary,
-                        fontFamily: 'serif',
-                        fontSize: 17,
-                      },
-                    ]}
-                  >
+                  <Text style={[styles.trackTitle, { color: colors.textPrimary }]}>
                     {track.title}
                   </Text>
-                  <Text
-                    style={[
-                      typography.caption,
-                      { color: colors.textSecondary, marginTop: 3 },
-                    ]}
-                    numberOfLines={1}
-                  >
+                  <Text style={[styles.trackDesc, { color: isDark ? '#D8E8E0' : '#2C4235' }]}>
                     {track.subtitle}
                   </Text>
                 </View>
-
-                {/* Generous Play / Pause indicator button */}
-                <View style={styles.playStateBtn}>
-                  {isCurrentlyPlayingThis ? (
-                    <View style={[styles.playingBadge, { backgroundColor: colors.accentTerracotta }]}>
-                      <Text style={styles.playingBadgeText}>❚❚ Pause</Text>
-                    </View>
-                  ) : (
-                    <View
-                      style={[
-                        styles.playCircle,
-                        {
-                          backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.14)'
-                            : colors.surfaceBorder,
-                        },
-                      ]}
-                    >
-                      <Text style={{ fontSize: 16, color: colors.textPrimary, marginLeft: 2 }}>▶</Text>
-                    </View>
-                  )}
-                </View>
               </View>
-            </Card>
+
+              {isThisPlaying && (
+                <AnimatedSoundWaves
+                  isPlaying={isThisPlaying}
+                  color={isDark ? '#8CD5B4' : '#265C43'}
+                />
+              )}
+            </TouchableOpacity>
           );
         })}
-
-        <View style={{ height: 270 }} />
       </ScrollView>
 
-      {/* 3. DOCKED BOTTOM PLAYER WITH BIG BUTTONS & ANIMATED SOUNDWAVES */}
-      <View style={styles.dockedPlayerWrapper}>
-        <AtmosphereThemeView
-          theme={currentTheme}
-          isActive={isPlaying}
-          height={225}
-          style={styles.dockedPlayerCard}
-        >
-          <View
+      {/* 3. DOCKED BOTTOM PLAYER WITH LARGE PLAY/PAUSE, VOLUME & SLEEP */}
+      <View
+        style={[
+          styles.dockedPlayer,
+          {
+            backgroundColor: isDark
+              ? 'rgba(15, 26, 34, 0.92)'
+              : 'rgba(255, 255, 255, 0.92)',
+            borderColor: isDark
+              ? 'rgba(255, 255, 255, 0.16)'
+              : 'rgba(255, 255, 255, 0.95)',
+          },
+        ]}
+      >
+        <View style={styles.dockedMainRow}>
+          <View style={styles.dockedTrackDetails}>
+            <Text style={[styles.dockedTrackTitle, { color: colors.textPrimary }]} numberOfLines={1}>
+              {activeTrack.title}
+            </Text>
+            <Text style={[styles.dockedTrackSubtitle, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+              {isPlaying ? 'Now Playing Loop' : 'Paused'}
+              {sleepRemainingSeconds !== null && ` • 🌙 ${formatTimeMMSS(sleepRemainingSeconds)}`}
+            </Text>
+          </View>
+
+          {/* Large Circular Play/Pause Button */}
+          <TouchableOpacity
             style={[
-              styles.playerInterior,
+              styles.largePlayPauseCircle,
               {
-                backgroundColor: isDark
-                  ? 'rgba(15, 27, 21, 0.90)'
-                  : 'rgba(255, 255, 255, 0.94)',
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.16)'
-                  : 'rgba(0, 0, 0, 0.08)',
+                backgroundColor: isDark ? '#8CD5B4' : '#265C43',
+                shadowColor: isDark ? '#8CD5B4' : '#265C43',
               },
             ]}
+            onPress={handleTogglePlay}
+            activeOpacity={0.8}
           >
-            {/* Top row: Track Title, Soundwaves, Sleep Timer */}
-            <View style={styles.playerTopRow}>
-              <View style={styles.playerTrackTitleBox}>
-                <View style={styles.titleWithWaveRow}>
+            <Text style={[styles.largePlayPauseGlyph, { color: isDark ? '#0B131A' : '#FFFFFF' }]}>
+              {isPlaying ? '❚❚' : '▶'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Volume Steppers + Slider */}
+        <View style={styles.playerVolumeRow}>
+          <TouchableOpacity
+            style={[
+              styles.volStepBtn,
+              { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' },
+            ]}
+            onPress={() => handleVolumeStep(-0.1)}
+          >
+            <Text style={[styles.volStepGlyph, { color: colors.textPrimary }]}>−</Text>
+          </TouchableOpacity>
+
+          <Slider
+            style={{ flex: 1, marginHorizontal: 8 }}
+            minimumValue={0}
+            maximumValue={1}
+            step={0.05}
+            value={volume}
+            onValueChange={handleVolumeChange}
+            minimumTrackTintColor={isDark ? '#8CD5B4' : '#265C43'}
+            maximumTrackTintColor={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+            thumbTintColor={isDark ? '#8CD5B4' : '#265C43'}
+          />
+
+          <TouchableOpacity
+            style={[
+              styles.volStepBtn,
+              { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' },
+            ]}
+            onPress={() => handleVolumeStep(0.1)}
+          >
+            <Text style={[styles.volStepGlyph, { color: colors.textPrimary }]}>+</Text>
+          </TouchableOpacity>
+
+          <Text style={[styles.volPercentText, { color: colors.textPrimary }]}>
+            {Math.round(volume * 100)}%
+          </Text>
+        </View>
+
+        {/* Sleep Timer Pills */}
+        <View style={styles.sleepRow}>
+          <Text style={[styles.sleepLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+            🌙 Timer:
+          </Text>
+          <View style={styles.sleepChips}>
+            {SLEEP_OPTIONS.map((min) => {
+              const isSelected = selectedSleepMin === min;
+              return (
+                <TouchableOpacity
+                  key={min}
+                  style={[
+                    styles.sleepChip,
+                    {
+                      backgroundColor: isSelected
+                        ? isDark
+                          ? '#8CD5B4'
+                          : '#265C43'
+                        : isDark
+                        ? 'rgba(255, 255, 255, 0.10)'
+                        : 'rgba(0, 0, 0, 0.05)',
+                    },
+                  ]}
+                  onPress={() => handleSelectSleep(min)}
+                >
                   <Text
                     style={[
-                      styles.playerTrackTitle,
-                      { color: colors.textPrimary },
+                      styles.sleepChipText,
+                      {
+                        color: isSelected
+                          ? isDark
+                            ? '#0B131A'
+                            : '#FFFFFF'
+                          : colors.textPrimary,
+                        fontWeight: isSelected ? '700' : '600',
+                      },
                     ]}
-                    numberOfLines={1}
                   >
-                    {currentTrack.title}
-                  </Text>
-                  <AnimatedSoundWaves
-                    isPlaying={isPlaying}
-                    color={activeThemeMeta.accent}
-                  />
-                </View>
-                <Text
-                  style={[
-                    typography.caption,
-                    { color: colors.textSecondary, marginTop: 1 },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {activeThemeMeta.name} • {isPlaying ? 'Playing loop' : 'Paused'}
-                </Text>
-              </View>
-
-              {/* Large sleep timer button */}
-              <TouchableOpacity
-                style={[
-                  styles.sleepBtn,
-                  {
-                    backgroundColor: selectedSleepMin > 0
-                      ? colors.accentTerracotta + '30'
-                      : isDark
-                      ? 'rgba(255, 255, 255, 0.10)'
-                      : 'rgba(0, 0, 0, 0.06)',
-                    borderColor: selectedSleepMin > 0
-                      ? colors.accentTerracotta
-                      : colors.surfaceBorder,
-                  },
-                ]}
-                onPress={cycleSleepTimer}
-                activeOpacity={0.7}
-              >
-                <Text style={{ fontSize: 16 }}>🌙</Text>
-                <Text
-                  style={[
-                    styles.sleepBtnText,
-                    {
-                      color: selectedSleepMin > 0
-                        ? colors.accentTerracotta
-                        : colors.textPrimary,
-                    },
-                  ]}
-                >
-                  {sleepRemainingSeconds !== null && sleepRemainingSeconds > 0
-                    ? formatTimeMMSS(sleepRemainingSeconds)
-                    : selectedSleepMin > 0
-                    ? `${selectedSleepMin}m`
-                    : 'Timer'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Middle row: Large Volume Stepper (+ / - buttons) */}
-            <View style={styles.volumeStepperRow}>
-              <TouchableOpacity
-                style={[
-                  styles.stepBtn,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.14)'
-                      : 'rgba(0, 0, 0, 0.08)',
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.22)'
-                      : 'rgba(0, 0, 0, 0.15)',
-                  },
-                ]}
-                onPress={() => handleVolumeStep(-0.1)}
-                activeOpacity={0.7}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={[styles.stepBtnText, { color: colors.textPrimary }]}>−</Text>
-              </TouchableOpacity>
-
-              <View style={styles.sliderContainer}>
-                <Slider
-                  style={{ width: '100%', height: 36 }}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={volume}
-                  onValueChange={handleVolumeChange}
-                  minimumTrackTintColor={activeThemeMeta.accent}
-                  maximumTrackTintColor={colors.surfaceBorder}
-                  thumbTintColor={activeThemeMeta.accent}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[
-                  styles.stepBtn,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.14)'
-                      : 'rgba(0, 0, 0, 0.08)',
-                    borderColor: isDark
-                      ? 'rgba(255, 255, 255, 0.22)'
-                      : 'rgba(0, 0, 0, 0.15)',
-                  },
-                ]}
-                onPress={() => handleVolumeStep(0.1)}
-                activeOpacity={0.7}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={[styles.stepBtnText, { color: colors.textPrimary }]}>+</Text>
-              </TouchableOpacity>
-
-              <Text
-                style={[
-                  typography.caption,
-                  {
-                    color: colors.textPrimary,
-                    width: 44,
-                    textAlign: 'right',
-                    fontWeight: '700',
-                  },
-                ]}
-              >
-                {Math.round(volume * 100)}%
-              </Text>
-            </View>
-
-            {/* Bottom row: Big, Juicy Play/Pause and Stop buttons */}
-            <View style={styles.playerButtonsRow}>
-              <TouchableOpacity
-                style={[
-                  styles.mainPlayBtn,
-                  {
-                    backgroundColor: isPlaying
-                      ? isDark
-                        ? 'rgba(255, 255, 255, 0.18)'
-                        : 'rgba(0, 0, 0, 0.10)'
-                      : colors.accentTerracotta,
-                  },
-                ]}
-                onPress={handleTogglePlayPause}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    styles.mainPlayBtnText,
-                    {
-                      color: isPlaying
-                        ? colors.textPrimary
-                        : '#FFFFFF',
-                    },
-                  ]}
-                >
-                  {isPlaying ? '❚❚ Pause' : '▶ Play Now'}
-                </Text>
-              </TouchableOpacity>
-
-              {isPlaying && (
-                <TouchableOpacity
-                  style={[
-                    styles.stopBtn,
-                    {
-                      backgroundColor: isDark
-                        ? 'rgba(222, 119, 91, 0.25)'
-                        : 'rgba(222, 119, 91, 0.2)',
-                    },
-                  ]}
-                  onPress={handleStop}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.stopBtnText, { color: colors.accentTerracotta }]}>
-                    ◼ Stop
+                    {min === 0 ? 'Off' : `${min}m`}
                   </Text>
                 </TouchableOpacity>
-              )}
-            </View>
+              );
+            })}
           </View>
-        </AtmosphereThemeView>
+        </View>
       </View>
-    </View>
+    </ScenicBackground>
   );
 };
 
@@ -604,202 +531,201 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  categoryTabsContainer: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+  categoryPillsContainer: {
+    marginVertical: 8,
   },
-  categoryTabsScroll: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  categoryScrollContent: {
+    paddingHorizontal: 18,
     gap: 10,
   },
-  categoryTab: {
+  categoryPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
     paddingHorizontal: 18,
-    paddingVertical: 12,
     borderRadius: 24,
+    borderWidth: 1.5,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  categoryTabText: {
-    fontSize: 15,
+  categoryPillIcon: {
+    fontSize: 18,
+    marginRight: 8,
   },
-  trackListContainer: {
-    paddingBottom: 20,
+  categoryPillText: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
   },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 14,
+  tracksScroll: {
+    flex: 1,
+  },
+  tracksContainer: {
+    paddingHorizontal: 18,
+    paddingTop: 8,
   },
   categoryHeaderTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'serif',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 4,
+  },
+  categorySubtitle: {
+    fontSize: 14,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '600',
+    marginBottom: 16,
   },
   trackCard: {
-    marginBottom: 12,
-    padding: 16,
     borderRadius: 22,
-    minHeight: 82,
-    justifyContent: 'center',
-  },
-  trackRow: {
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    padding: 16,
+    marginVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 74,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  trackIconBubble: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  trackCardLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  trackPlayIndicator: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
   },
-  trackIcon: {
-    fontSize: 24,
-  },
   trackInfo: {
     flex: 1,
-    marginRight: 8,
   },
-  playStateBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playingBadge: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 18,
-  },
-  playingBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 13,
+  trackTitle: {
+    fontSize: 16,
     fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 2,
   },
-  playCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: 'center',
-    justifyContent: 'center',
+  trackDesc: {
+    fontSize: 13,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '600',
   },
   equalizerWrap: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    height: 24,
     gap: 3,
-    height: 22,
-    marginLeft: 8,
+    marginLeft: 10,
   },
   equalizerBar: {
     width: 3.5,
     borderRadius: 2,
   },
-  dockedPlayerWrapper: {
+  dockedPlayer: {
     position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
+    left: 16,
+    right: 16,
+    bottom: 16,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    padding: 16,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
     elevation: 10,
   },
-  dockedPlayerCard: {
-    borderRadius: 28,
-  },
-  playerInterior: {
-    width: '94%',
-    borderRadius: 22,
-    borderWidth: 1.5,
-    padding: 14,
-    alignSelf: 'center',
-  },
-  playerTopRow: {
+  dockedMainRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  playerTrackTitleBox: {
+  dockedTrackDetails: {
     flex: 1,
-    marginRight: 10,
+    paddingRight: 12,
   },
-  titleWithWaveRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  playerTrackTitle: {
+  dockedTrackTitle: {
     fontSize: 17,
     fontWeight: '700',
-    fontFamily: 'serif',
-    maxWidth: '78%',
+    fontFamily: 'PlayfairDisplay-Bold',
   },
-  sleepBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 16,
-    borderWidth: 1.5,
-  },
-  sleepBtnText: {
+  dockedTrackSubtitle: {
     fontSize: 12,
-    fontWeight: '700',
-    marginLeft: 5,
+    fontFamily: 'Nunito-Bold',
+    marginTop: 2,
   },
-  volumeStepperRow: {
+  largePlayPauseCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  largePlayPauseGlyph: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  playerVolumeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
   },
-  stepBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1.5,
+  volStepBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  stepBtnText: {
-    fontSize: 22,
+  volStepGlyph: {
+    fontSize: 18,
     fontWeight: '700',
-    lineHeight: 24,
+    lineHeight: 20,
   },
-  sliderContainer: {
-    flex: 1,
-    marginHorizontal: 6,
+  volPercentText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
+    minWidth: 36,
+    textAlign: 'right',
   },
-  playerButtonsRow: {
+  sleepRow: {
     flexDirection: 'row',
-    gap: 10,
-  },
-  mainPlayBtn: {
-    flex: 1,
-    height: 48,
-    borderRadius: 24,
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'space-between',
   },
-  mainPlayBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
+  sleepLabel: {
+    fontSize: 13,
+    fontFamily: 'Nunito-Bold',
   },
-  stopBtn: {
-    width: 86,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+  sleepChips: {
+    flexDirection: 'row',
+    gap: 6,
   },
-  stopBtnText: {
-    fontSize: 14,
-    fontWeight: '700',
+  sleepChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+  },
+  sleepChipText: {
+    fontSize: 12,
+    fontFamily: 'Nunito-Bold',
   },
 });

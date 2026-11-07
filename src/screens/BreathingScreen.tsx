@@ -7,11 +7,13 @@ import {
   Easing,
   TouchableOpacity,
   ScrollView,
+  StatusBar,
+  Pressable,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
-import { Card } from '../components/Card';
 import { PrimaryButton } from '../components/PrimaryButton';
 import {
   BREATHING_PATTERNS,
@@ -21,11 +23,13 @@ import {
 } from '../logic/patterns';
 import { formatTimeMMSS } from '../logic/formatters';
 import { progressStore } from '../data/progressStore';
+import { ScenicBackground } from '../components/ScenicBackground';
+import { BreatheIcon } from '../components/SvgIcons';
 
 type ScreenState = 'setup' | 'active' | 'completed';
 
 export const BreathingScreen: React.FC = () => {
-  const { colors, typography, spacing, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation();
 
   // Setup state
@@ -41,8 +45,13 @@ export const BreathingScreen: React.FC = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState<number>(0);
   const [phaseSecondsLeft, setPhaseSecondsLeft] = useState<number>(0);
 
-  // Animation scale: 1.0 (min / exhaled) to 1.55 (max / inhaled)
-  const circleScale = useRef(new Animated.Value(1.0)).current;
+  // Glowing orb animation scales & rings
+  const orbScale = useRef(new Animated.Value(1.0)).current;
+  const ring1Scale = useRef(new Animated.Value(1.0)).current;
+  const ring2Scale = useRef(new Animated.Value(1.0)).current;
+  const ring3Scale = useRef(new Animated.Value(1.0)).current;
+  const bgPhaseAnim = useRef(new Animated.Value(0)).current; // 0 = neutral, 1 = light (inhale), 0.5 = hold, 0 = deep (exhale)
+
   const currentAnimation = useRef<Animated.CompositeAnimation | null>(null);
 
   // Wall-clock refs
@@ -64,7 +73,6 @@ export const BreathingScreen: React.FC = () => {
     sessionEndTimeRef.current = Date.now() + totalSec * 1000;
     setScreenState('active');
 
-    // Start initial phase animation
     animatePhase(selectedPattern.phases[0]);
   };
 
@@ -72,19 +80,73 @@ export const BreathingScreen: React.FC = () => {
     currentAnimation.current?.stop();
 
     if (phase.type === 'inhale') {
-      currentAnimation.current = Animated.timing(circleScale, {
-        toValue: 1.55,
-        duration: phase.durationSeconds * 1000,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true,
-      });
+      const dur = phase.durationSeconds * 1000;
+      currentAnimation.current = Animated.parallel([
+        Animated.timing(orbScale, {
+          toValue: 1.48,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring1Scale, {
+          toValue: 1.65,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring2Scale, {
+          toValue: 1.85,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring3Scale, {
+          toValue: 2.1,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bgPhaseAnim, {
+          toValue: 1,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]);
     } else if (phase.type === 'exhale') {
-      currentAnimation.current = Animated.timing(circleScale, {
-        toValue: 1.0,
-        duration: phase.durationSeconds * 1000,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true,
-      });
+      const dur = phase.durationSeconds * 1000;
+      currentAnimation.current = Animated.parallel([
+        Animated.timing(orbScale, {
+          toValue: 1.0,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring1Scale, {
+          toValue: 1.0,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring2Scale, {
+          toValue: 1.0,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(ring3Scale, {
+          toValue: 1.0,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(bgPhaseAnim, {
+          toValue: 0,
+          duration: dur,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]);
     } else {
       // Hold stays at current scale
       currentAnimation.current = null;
@@ -139,12 +201,10 @@ export const BreathingScreen: React.FC = () => {
 
   const handlePauseResume = () => {
     if (isPaused) {
-      // Resume
       sessionEndTimeRef.current = Date.now() + pausedRemainingRef.current * 1000;
       setIsPaused(false);
       animatePhase(activePhase);
     } else {
-      // Pause
       pausedRemainingRef.current = sessionSecondsLeft;
       setIsPaused(true);
       currentAnimation.current?.stop();
@@ -153,61 +213,71 @@ export const BreathingScreen: React.FC = () => {
 
   const handleStopSession = () => {
     currentAnimation.current?.stop();
-    Animated.timing(circleScale, {
-      toValue: 1.0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(orbScale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
+      Animated.timing(ring1Scale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
+      Animated.timing(ring2Scale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
+      Animated.timing(ring3Scale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
+      Animated.timing(bgPhaseAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
     setScreenState('setup');
     setIsPaused(false);
   };
 
   const handleSessionCompleted = async () => {
     currentAnimation.current?.stop();
-    Animated.timing(circleScale, {
-      toValue: 1.0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(orbScale, { toValue: 1.0, duration: 500, useNativeDriver: true }),
+      Animated.timing(ring1Scale, { toValue: 1.0, duration: 500, useNativeDriver: true }),
+      Animated.timing(ring2Scale, { toValue: 1.0, duration: 500, useNativeDriver: true }),
+      Animated.timing(ring3Scale, { toValue: 1.0, duration: 500, useNativeDriver: true }),
+    ]).start();
 
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
 
-    // Record progress once
     await progressStore.recordCompletedSession(totalSessionSeconds);
     setScreenState('completed');
   };
 
+  const bgInhaleOpacity = bgPhaseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 0.40],
+  });
+
   return (
-    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <ScenicBackground scene="forest" style={styles.safeArea}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+
       <Header
         title="Guided Breathing"
         showBack={screenState === 'setup'}
         onBackPress={() => navigation.goBack()}
       />
 
+      {/* Screen 1: SETUP */}
       {screenState === 'setup' && (
         <ScrollView
           style={styles.contentContainer}
-          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
           <Text
             style={[
-              typography.body,
-              { color: colors.textSecondary, marginBottom: spacing.lg },
+              styles.screenSubtitle,
+              { color: isDark ? '#D0E3D9' : '#4B5F54' },
             ]}
           >
-            Select a breathing rhythm and session duration.
+            Select a soothing rhythm and session duration.
           </Text>
 
           {/* Pattern Options */}
           <Text
             style={[
-              typography.subheader,
-              { color: colors.textPrimary, marginBottom: spacing.sm },
+              styles.sectionTitle,
+              { color: colors.textPrimary },
             ]}
           >
             Breathing Pattern
@@ -215,80 +285,112 @@ export const BreathingScreen: React.FC = () => {
           {BREATHING_PATTERNS.map((pattern) => {
             const isSelected = selectedPattern.id === pattern.id;
             return (
-              <Card
+              <Pressable
                 key={pattern.id}
                 style={[
-                  styles.optionCard,
+                  styles.glassPatternCard,
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? 'rgba(118, 166, 145, 0.22)'
-                        : colors.accentSage + '30'
-                      : colors.surface,
+                        ? 'rgba(140, 213, 180, 0.25)'
+                        : 'rgba(38, 92, 67, 0.15)'
+                      : isDark
+                      ? 'rgba(17, 29, 37, 0.65)'
+                      : 'rgba(255, 255, 255, 0.72)',
                     borderColor: isSelected
-                      ? colors.accentSage
-                      : colors.surfaceBorder,
-                    borderWidth: isSelected ? 1.8 : 1,
+                      ? isDark
+                        ? '#8CD5B4'
+                        : '#265C43'
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.14)'
+                      : 'rgba(255, 255, 255, 0.85)',
+                    borderWidth: isSelected ? 2 : 1.5,
                   },
                 ]}
                 onPress={() => setSelectedPattern(pattern)}
               >
-                <View style={styles.optionRow}>
+                <View style={styles.patternLeft}>
+                  <View
+                    style={[
+                      styles.patternIconBadge,
+                      {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? 'rgba(140, 213, 180, 0.35)'
+                            : 'rgba(38, 92, 67, 0.22)'
+                          : isDark
+                          ? 'rgba(255, 255, 255, 0.10)'
+                          : 'rgba(0, 0, 0, 0.05)',
+                      },
+                    ]}
+                  >
+                    <BreatheIcon
+                      size={22}
+                      color={
+                        isSelected
+                          ? isDark
+                            ? '#8CD5B4'
+                            : '#265C43'
+                          : isDark
+                          ? '#D0E3D9'
+                          : '#4B5F54'
+                      }
+                    />
+                  </View>
                   <View style={{ flex: 1 }}>
                     <Text
                       style={[
-                        typography.bodyBold,
-                        {
-                          color: colors.textPrimary,
-                          fontFamily: 'serif',
-                          fontSize: 16,
-                        },
+                        styles.patternTitle,
+                        { color: colors.textPrimary },
                       ]}
                     >
                       {pattern.name}
                     </Text>
                     <Text
                       style={[
-                        typography.caption,
-                        { color: colors.textSecondary, marginTop: 4 },
+                        styles.patternDesc,
+                        { color: isDark ? '#D0E3D9' : '#4B5F54' },
                       ]}
                     >
                       {pattern.subtitle}
                     </Text>
                   </View>
-                  <View
-                    style={[
-                      styles.radioCircle,
-                      {
-                        borderColor: isSelected
-                          ? colors.accentSage
-                          : colors.surfaceBorder,
-                      },
-                    ]}
-                  >
-                    {isSelected && (
-                      <View
-                        style={[
-                          styles.radioDot,
-                          { backgroundColor: colors.accentSage },
-                        ]}
-                      />
-                    )}
-                  </View>
                 </View>
-              </Card>
+
+                <View
+                  style={[
+                    styles.radioCircle,
+                    {
+                      borderColor: isSelected
+                        ? isDark
+                          ? '#8CD5B4'
+                          : '#265C43'
+                        : isDark
+                        ? 'rgba(255, 255, 255, 0.25)'
+                        : 'rgba(0, 0, 0, 0.2)',
+                    },
+                  ]}
+                >
+                  {isSelected && (
+                    <View
+                      style={[
+                        styles.radioDot,
+                        {
+                          backgroundColor: isDark ? '#8CD5B4' : '#265C43',
+                        },
+                      ]}
+                    />
+                  )}
+                </View>
+              </Pressable>
             );
           })}
 
           {/* Duration Chips */}
           <Text
             style={[
-              typography.subheader,
-              {
-                color: colors.textPrimary,
-                marginTop: spacing.xl,
-                marginBottom: spacing.sm,
-              },
+              styles.sectionTitle,
+              { color: colors.textPrimary, marginTop: 24 },
             ]}
           >
             Duration
@@ -303,11 +405,19 @@ export const BreathingScreen: React.FC = () => {
                     styles.durationChip,
                     {
                       backgroundColor: isSelected
-                        ? colors.accentSage
-                        : colors.surface,
+                        ? isDark
+                          ? '#8CD5B4'
+                          : '#265C43'
+                        : isDark
+                        ? 'rgba(17, 29, 37, 0.65)'
+                        : 'rgba(255, 255, 255, 0.72)',
                       borderColor: isSelected
-                        ? colors.accentSage
-                        : colors.surfaceBorder,
+                        ? isDark
+                          ? '#8CD5B4'
+                          : '#265C43'
+                        : isDark
+                        ? 'rgba(255, 255, 255, 0.16)'
+                        : 'rgba(255, 255, 255, 0.85)',
                     },
                   ]}
                   onPress={() => setSelectedDurationMin(min)}
@@ -315,10 +425,13 @@ export const BreathingScreen: React.FC = () => {
                 >
                   <Text
                     style={[
-                      typography.bodyBold,
+                      styles.durationChipText,
                       {
-                        color: isSelected ? '#FFFFFF' : colors.textPrimary,
-                        fontSize: 15,
+                        color: isSelected
+                          ? isDark
+                            ? '#0B131A'
+                            : '#FFFFFF'
+                          : colors.textPrimary,
                       },
                     ]}
                   >
@@ -332,21 +445,39 @@ export const BreathingScreen: React.FC = () => {
           <PrimaryButton
             title="Start Breathing"
             onPress={handleStartSession}
-            style={{ marginTop: spacing.xxl }}
+            style={{ marginTop: 32 }}
           />
         </ScrollView>
       )}
 
+      {/* Screen 2: ACTIVE SESSION */}
       {screenState === 'active' && (
-        <View style={[styles.activeContainer, { padding: spacing.xl }]}>
-          {/* Header Progress */}
-          <View style={styles.activeHeader}>
-            <Text style={[typography.caption, { color: colors.textSecondary, letterSpacing: 1 }]}>
+        <View style={styles.activeContainer}>
+          {/* Dynamic background color shift for inhalation lightness */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: isDark ? '#1C3E32' : '#C7E2D5',
+                opacity: bgInhaleOpacity,
+              },
+            ]}
+          />
+
+          {/* Top Session Progress */}
+          <View style={styles.activeTopBar}>
+            <Text
+              style={[
+                styles.patternBadgeText,
+                { color: isDark ? '#A7F3D0' : '#265C43' },
+              ]}
+            >
               {selectedPattern.name.toUpperCase()}
             </Text>
             <Text
               style={[
-                styles.remainingTimeText,
+                styles.remainingTimeDigits,
                 { color: colors.textPrimary },
               ]}
             >
@@ -354,44 +485,104 @@ export const BreathingScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Animated Breathing Circle */}
-          <View style={styles.circleWrapper}>
-            {/* Outer halo */}
+          {/* GLOWING ORB WITH FAINT EXPANDING RINGS */}
+          <View style={styles.orbSceneWrapper}>
+            {/* Faint Expanding Ring 3 */}
             <Animated.View
               style={[
-                styles.breathingCircle,
+                styles.faintRing,
+                styles.ring3,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(118, 166, 145, 0.2)'
-                    : colors.accentSage + '35',
-                  borderColor: colors.accentSage,
-                  transform: [{ scale: circleScale }],
+                  borderColor: isDark
+                    ? 'rgba(140, 213, 180, 0.18)'
+                    : 'rgba(38, 92, 67, 0.14)',
+                  transform: [{ scale: ring3Scale }],
                 },
               ]}
             />
 
-            {/* Inner text cue */}
-            <View style={styles.cueOverlay}>
-              <Text
+            {/* Faint Expanding Ring 2 */}
+            <Animated.View
+              style={[
+                styles.faintRing,
+                styles.ring2,
+                {
+                  borderColor: isDark
+                    ? 'rgba(140, 213, 180, 0.28)'
+                    : 'rgba(38, 92, 67, 0.22)',
+                  transform: [{ scale: ring2Scale }],
+                },
+              ]}
+            />
+
+            {/* Faint Expanding Ring 1 */}
+            <Animated.View
+              style={[
+                styles.faintRing,
+                styles.ring1,
+                {
+                  borderColor: isDark
+                    ? 'rgba(140, 213, 180, 0.40)'
+                    : 'rgba(38, 92, 67, 0.32)',
+                  transform: [{ scale: ring1Scale }],
+                },
+              ]}
+            />
+
+            {/* Glowing Main Center Orb */}
+            <Animated.View
+              style={[
+                styles.mainGlowingOrb,
+                {
+                  transform: [{ scale: orbScale }],
+                  shadowColor: isDark ? '#8CD5B4' : '#265C43',
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={
+                  isDark
+                    ? ['rgba(140, 213, 180, 0.45)', 'rgba(38, 92, 67, 0.65)']
+                    : ['rgba(174, 216, 196, 0.70)', 'rgba(118, 175, 150, 0.85)']
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View
                 style={[
-                  styles.cueTitle,
-                  { color: colors.textPrimary },
+                  styles.orbInnerGlow,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(255, 255, 255, 0.20)'
+                      : 'rgba(255, 255, 255, 0.45)',
+                  },
                 ]}
-              >
-                {activePhase.label}
-              </Text>
-              <Text
-                style={[
-                  styles.cueSeconds,
-                  { color: colors.accentTerracotta },
-                ]}
-              >
-                {phaseSecondsLeft}s
-              </Text>
-            </View>
+              />
+
+              {/* Cue Text in the Center */}
+              <View style={styles.cueOverlay}>
+                <Text
+                  style={[
+                    styles.cueTitle,
+                    { color: isDark ? '#FFFFFF' : '#14221A' },
+                  ]}
+                >
+                  {activePhase.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.cueSeconds,
+                    { color: isDark ? '#FDE68A' : '#D66D52' },
+                  ]}
+                >
+                  {phaseSecondsLeft}s
+                </Text>
+              </View>
+            </Animated.View>
           </View>
 
-          {/* Controls */}
+          {/* Bottom Tactile Controls */}
           <View style={styles.controlsRow}>
             <PrimaryButton
               title={isPaused ? 'Resume' : 'Pause'}
@@ -409,28 +600,37 @@ export const BreathingScreen: React.FC = () => {
         </View>
       )}
 
+      {/* Screen 3: COMPLETED VIEW */}
       {screenState === 'completed' && (
-        <View style={[styles.completedContainer, { padding: spacing.xl }]}>
-          <Text style={styles.completedEmoji}>🌿</Text>
+        <View style={styles.completedContainer}>
+          <View
+            style={[
+              styles.completedAuraWrap,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(140, 213, 180, 0.20)'
+                  : 'rgba(38, 92, 67, 0.12)',
+              },
+            ]}
+          >
+            <Text style={styles.completedEmoji}>🌿</Text>
+          </View>
+
           <Text
             style={[
-              typography.hero,
-              { color: colors.textPrimary, marginTop: spacing.md },
+              styles.completedTitle,
+              { color: colors.textPrimary },
             ]}
           >
             Well done.
           </Text>
           <Text
             style={[
-              typography.body,
-              {
-                color: colors.textSecondary,
-                textAlign: 'center',
-                marginTop: spacing.sm,
-              },
+              styles.completedSubtitle,
+              { color: isDark ? '#D0E3D9' : '#4B5F54' },
             ]}
           >
-            You completed {selectedDurationMin} minute of{' '}
+            Take a quiet moment for yourself. You finished {selectedDurationMin} minute of{' '}
             {selectedPattern.name.toLowerCase()}.
           </Text>
 
@@ -439,11 +639,11 @@ export const BreathingScreen: React.FC = () => {
           <PrimaryButton
             title="Return Home"
             onPress={() => navigation.goBack()}
-            style={{ width: '100%', marginBottom: spacing.md }}
+            style={{ width: '100%', marginBottom: 16 }}
           />
         </View>
       )}
-    </View>
+    </ScenicBackground>
   );
 };
 
@@ -454,16 +654,52 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
   },
-  optionCard: {
-    marginVertical: 5,
-    minHeight: 68,
-    borderRadius: 20,
-    justifyContent: 'center',
+  screenSubtitle: {
+    fontSize: 15,
+    fontFamily: 'Nunito-Regular',
+    marginBottom: 20,
   },
-  optionRow: {
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 10,
+  },
+  glassPatternCard: {
+    borderRadius: 22,
+    padding: 16,
+    marginVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  patternLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  patternIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  patternTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 2,
+  },
+  patternDesc: {
+    fontSize: 13,
+    fontFamily: 'Nunito-Regular',
   },
   radioCircle: {
     width: 22,
@@ -482,75 +718,145 @@ const styles = StyleSheet.create({
   durationRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
     gap: 10,
+    marginVertical: 8,
   },
   durationChip: {
     flex: 1,
     height: 56,
     borderRadius: 28,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.8,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  durationChipText: {
+    fontSize: 15,
+    fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
   },
   activeContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-between',
+    padding: 24,
   },
-  activeHeader: {
+  activeTopBar: {
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 8,
   },
-  remainingTimeText: {
-    fontSize: 32,
+  patternBadgeText: {
+    fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'serif',
-    marginTop: 6,
+    fontFamily: 'Nunito-Bold',
+    letterSpacing: 1.5,
   },
-  circleWrapper: {
-    width: 290,
-    height: 290,
+  remainingTimeDigits: {
+    fontSize: 36,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginTop: 4,
+  },
+  orbSceneWrapper: {
+    width: 320,
+    height: 320,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
-  breathingCircle: {
-    width: 185,
-    height: 185,
-    borderRadius: 93,
-    borderWidth: 3,
+  faintRing: {
     position: 'absolute',
+    borderRadius: 9999,
+    borderWidth: 1.5,
+  },
+  ring1: {
+    width: 210,
+    height: 210,
+  },
+  ring2: {
+    width: 250,
+    height: 250,
+  },
+  ring3: {
+    width: 290,
+    height: 290,
+  },
+  mainGlowingOrb: {
+    width: 175,
+    height: 175,
+    borderRadius: 88,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  orbInnerGlow: {
+    position: 'absolute',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
   },
   cueOverlay: {
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 3,
   },
   cueTitle: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '700',
-    fontFamily: 'serif',
+    fontFamily: 'PlayfairDisplay-Bold',
   },
   cueSeconds: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
-    marginTop: 6,
+    fontFamily: 'Nunito-Bold',
+    marginTop: 4,
   },
   controlsRow: {
     flexDirection: 'row',
     width: '100%',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 16,
   },
   halfButton: {
-    flex: 0.48,
+    flex: 1,
   },
   completedContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 24,
+  },
+  completedAuraWrap: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
   },
   completedEmoji: {
-    fontSize: 64,
+    fontSize: 52,
+  },
+  completedTitle: {
+    fontSize: 34,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    marginBottom: 8,
+  },
+  completedSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Nunito-Regular',
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 20,
   },
 });

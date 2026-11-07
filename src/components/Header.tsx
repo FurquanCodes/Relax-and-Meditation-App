@@ -16,7 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   onBackPress,
   rightAction,
 }) => {
-  const { colors, typography, spacing } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -24,10 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
       style={[
         styles.container,
         {
-          backgroundColor: colors.background,
-          borderBottomColor: colors.surfaceBorder,
-          paddingHorizontal: spacing.lg,
-          paddingTop: insets.top,
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 6,
           height: 60 + insets.top,
         },
       ]}
@@ -38,13 +36,17 @@ export const Header: React.FC<HeaderProps> = ({
             style={[
               styles.circleBackBtn,
               {
-                backgroundColor: colors.surface,
-                borderColor: colors.surfaceBorder,
+                backgroundColor: isDark
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(255, 255, 255, 0.75)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.20)'
+                  : 'rgba(255, 255, 255, 0.90)',
               },
             ]}
             onPress={onBackPress}
             activeOpacity={0.7}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Text style={[styles.backArrow, { color: colors.textPrimary }]}>‹</Text>
           </TouchableOpacity>
@@ -53,7 +55,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       <Text
         style={[
-          typography.header,
           styles.title,
           { color: colors.textPrimary },
         ]}
@@ -69,11 +70,10 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    backgroundColor: 'transparent',
   },
   leftContainer: {
     width: 44,
@@ -81,22 +81,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   circleBackBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   backArrow: {
-    fontSize: 26,
-    fontWeight: '600',
-    marginTop: -2,
+    fontSize: 28,
+    fontWeight: '700',
+    marginTop: -3,
+    lineHeight: 30,
   },
   title: {
     flex: 1,
     textAlign: 'center',
-    fontFamily: 'serif',
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'PlayfairDisplay-Bold',
+    letterSpacing: -0.2,
   },
   rightContainer: {
     width: 44,

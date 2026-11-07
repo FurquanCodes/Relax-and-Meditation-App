@@ -8,188 +8,67 @@ import {
   Animated,
   Easing,
   Pressable,
+  StatusBar,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { getDaytimeGreeting } from '../logic/formatters';
 import { progressStore } from '../data/progressStore';
+import { settingsStore, SceneId } from '../data/settingsStore';
 import { NavigationProp } from '../navigation/types';
+import { ScenicBackground } from '../components/ScenicBackground';
+import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../components/SvgIcons';
 
-// Custom clean vector icons matching high-end design
-const VectorAvatarIcon: React.FC<{ color: string }> = ({ color }) => (
-  <View style={styles.vectorAvatarWrap}>
-    <View style={[styles.vectorAvatarHead, { backgroundColor: color }]} />
-    <View style={[styles.vectorAvatarBody, { backgroundColor: color }]} />
-  </View>
-);
-
-const VectorClockIcon: React.FC<{ color: string }> = ({ color }) => (
-  <View style={[styles.vectorClockCircle, { borderColor: color }]}>
-    <View style={[styles.vectorClockHandH, { backgroundColor: color }]} />
-    <View style={[styles.vectorClockHandV, { backgroundColor: color }]} />
-  </View>
-);
-
-// Animated nature landscape illustration with floating glowing sun and swaying leaves
-const HeroIllustration: React.FC<{ isDark: boolean }> = ({ isDark }) => {
-  const sunColor = isDark ? '#F59E0B' : '#EE886B';
-  const hill1Color = isDark ? '#2E5743' : '#7FA293';
-  const hill2Color = isDark ? '#244736' : '#6A9081';
-  const hill3Color = isDark ? '#1B3629' : '#567A6B';
-  const outlineColor = isDark ? 'rgba(255,255,255,0.18)' : '#334D40';
-
-  const sunFloatAnim = useRef(new Animated.Value(0)).current;
-  const leafSwayAnim = useRef(new Animated.Value(0)).current;
+// Staggered animated entrance wrapper
+const FadeSlideIn: React.FC<{
+  delay: number;
+  children: React.ReactNode;
+  style?: any;
+}> = ({ delay, children, style }) => {
+  const anim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Sun floating pulse animation
-    const sunLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(sunFloatAnim, {
-          toValue: 1,
-          duration: 3000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(sunFloatAnim, {
-          toValue: 0,
-          duration: 3000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    );
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 550,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [anim, delay]);
 
-    // Leaf gentle swaying animation
-    const leafLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(leafSwayAnim, {
-          toValue: 1,
-          duration: 2500,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(leafSwayAnim, {
-          toValue: 0,
-          duration: 2500,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    sunLoop.start();
-    leafLoop.start();
-
-    return () => {
-      sunLoop.stop();
-      leafLoop.stop();
-    };
-  }, []);
-
-  const sunY = sunFloatAnim.interpolate({
+  const translateY = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -7],
-  });
-
-  const sunScale = sunFloatAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.96, 1.08],
-  });
-
-  const leafRotate = leafSwayAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['-10deg', '12deg'],
-  });
-
-  const leafY = leafSwayAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -4],
+    outputRange: [22, 0],
   });
 
   return (
-    <View style={styles.heroGraphicContainer}>
-      {/* Sun rays & Morning/Evening Sun with animation */}
-      <Animated.View
-        style={[
-          styles.sunWrapper,
-          {
-            transform: [{ translateY: sunY }, { scale: sunScale }],
-          },
-        ]}
-      >
-        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '-45deg' }] }]} />
-        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '0deg' }] }]} />
-        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '45deg' }] }]} />
-        <View style={[styles.sunCircle, { backgroundColor: sunColor }]} />
-      </Animated.View>
-
-      {/* Floating leaves with swaying animation */}
-      <Animated.View
-        style={[
-          styles.floatingLeaf,
-          styles.leaf1,
-          {
-            borderColor: outlineColor,
-            backgroundColor: hill1Color,
-            transform: [{ rotate: leafRotate }, { translateY: leafY }],
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.floatingLeaf,
-          styles.leaf2,
-          {
-            borderColor: outlineColor,
-            backgroundColor: hill2Color,
-            transform: [{ rotate: leafRotate }, { translateY: leafY }],
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.floatingLeaf,
-          styles.leaf3,
-          {
-            borderColor: outlineColor,
-            backgroundColor: hill3Color,
-            transform: [{ rotate: leafRotate }, { translateY: leafY }],
-          },
-        ]}
-      />
-
-      {/* Layered Rolling Hills with organic outlines */}
-      <View style={[styles.backHill, { backgroundColor: hill1Color, borderColor: outlineColor }]} />
-      <View style={[styles.midHill, { backgroundColor: hill2Color, borderColor: outlineColor }]} />
-      <View style={[styles.frontHill, { backgroundColor: hill3Color, borderColor: outlineColor }]} />
-    </View>
+    <Animated.View
+      style={[
+        style,
+        {
+          opacity: anim,
+          transform: [{ translateY }],
+        },
+      ]}
+    >
+      {children}
+    </Animated.View>
   );
 };
 
-// Interactive Animated Practice Card Component
-const AnimatedPracticeCard: React.FC<{
+// Premium Glassmorphic Practice Card Component
+const GlassPracticeCard: React.FC<{
   title: string;
   subtitle: string;
-  icon: string;
-  bgColor: string;
-  titleColor: string;
-  subColor: string;
-  arrowColor: string;
+  icon: React.ReactNode;
+  gradientColors: [string, string, ...string[]];
+  tintColor: string;
   onPress: () => void;
   isDark: boolean;
-}> = ({
-  title,
-  subtitle,
-  icon,
-  bgColor,
-  titleColor,
-  subColor,
-  arrowColor,
-  onPress,
-  isDark,
-}) => {
+}> = ({ title, subtitle, icon, gradientColors, tintColor, onPress, isDark }) => {
   const cardScale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -211,53 +90,86 @@ const AnimatedPracticeCard: React.FC<{
   };
 
   return (
-    <Animated.View style={{ transform: [{ scale: cardScale }] }}>
+    <Animated.View style={{ transform: [{ scale: cardScale }], marginVertical: 6 }}>
       <Pressable
         style={[
-          styles.practiceCard,
+          styles.glassCard,
           {
-            backgroundColor: bgColor,
-            borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
-            borderWidth: isDark ? 1.5 : 0,
+            backgroundColor: isDark
+              ? 'rgba(17, 29, 37, 0.70)'
+              : 'rgba(255, 255, 255, 0.75)',
+            borderColor: isDark
+              ? 'rgba(255, 255, 255, 0.16)'
+              : 'rgba(255, 255, 255, 0.90)',
           },
         ]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
+        <LinearGradient
+          colors={gradientColors}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.cardGradientOverlay}
+        />
+
         <View style={styles.practiceLeft}>
           <View
             style={[
-              styles.practiceIconBadge,
+              styles.iconOrbBadge,
               {
                 backgroundColor: isDark
-                  ? 'rgba(255, 255, 255, 0.14)'
+                  ? 'rgba(255, 255, 255, 0.12)'
                   : 'rgba(255, 255, 255, 0.45)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.20)'
+                  : 'rgba(255, 255, 255, 0.80)',
               },
             ]}
           >
-            <Text style={styles.practiceBadgeIcon}>{icon}</Text>
+            {icon}
           </View>
           <View style={styles.practiceTextWrap}>
-            <Text style={[styles.practiceTitle, { color: titleColor }]}>
+            <Text
+              style={[
+                styles.practiceTitle,
+                { color: isDark ? '#FFFFFF' : '#14221A' },
+              ]}
+            >
               {title}
             </Text>
-            <Text style={[styles.practiceSubtitle, { color: subColor }]}>
+            <Text
+              style={[
+                styles.practiceSubtitle,
+                { color: isDark ? '#D8E8E0' : '#2C4235' },
+              ]}
+            >
               {subtitle}
             </Text>
           </View>
         </View>
 
-        {/* Large, stylish circular arrow button */}
+        {/* Tactile Circular Glass Arrow Button */}
         <View
           style={[
-            styles.whiteArrowCircle,
+            styles.glassArrowCircle,
             {
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.22)' : '#FFFFFF',
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.22)'
+                : '#FFFFFF',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.25)'
+                : 'rgba(0, 0, 0, 0.05)',
             },
           ]}
         >
-          <Text style={[styles.whiteArrowText, { color: arrowColor }]}>
+          <Text
+            style={[
+              styles.arrowGlyph,
+              { color: isDark ? '#FFFFFF' : tintColor },
+            ]}
+          >
             ›
           </Text>
         </View>
@@ -266,7 +178,7 @@ const AnimatedPracticeCard: React.FC<{
   );
 };
 
-// Animated Floating Island Navigation Bar
+// Floating Island Bottom Navigation
 const FloatingIslandNav: React.FC<{
   activeTab: 'home' | 'practice' | 'sounds' | 'settings';
   onNavigate: (tab: 'home' | 'practice' | 'sounds' | 'settings') => void;
@@ -275,7 +187,7 @@ const FloatingIslandNav: React.FC<{
 }> = ({ activeTab, onNavigate, isDark, insetsBottom }) => {
   const tabs = [
     { id: 'home' as const, label: 'Home', icon: '🌿' },
-    { id: 'practice' as const, label: 'Practice', icon: '🫁' },
+    { id: 'practice' as const, label: 'Breathe', icon: '🫧' },
     { id: 'sounds' as const, label: 'Sounds', icon: '🎵' },
     { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
   ];
@@ -286,8 +198,12 @@ const FloatingIslandNav: React.FC<{
         styles.floatingNavContainer,
         {
           bottom: Math.max(insetsBottom + 8, 16),
-          backgroundColor: isDark ? '#14251B' : '#FFFFFF',
-          borderColor: isDark ? '#274332' : '#E8E1D5',
+          backgroundColor: isDark
+            ? 'rgba(15, 26, 34, 0.88)'
+            : 'rgba(255, 255, 255, 0.88)',
+          borderColor: isDark
+            ? 'rgba(255, 255, 255, 0.16)'
+            : 'rgba(255, 255, 255, 0.95)',
         },
       ]}
     >
@@ -300,8 +216,8 @@ const FloatingIslandNav: React.FC<{
               styles.navTabPill,
               isActive && {
                 backgroundColor: isDark
-                  ? 'rgba(155, 187, 174, 0.22)'
-                  : '#EAF3EF',
+                  ? 'rgba(140, 213, 180, 0.25)'
+                  : 'rgba(38, 92, 67, 0.12)',
               },
             ]}
             onPress={() => onNavigate(tab.id)}
@@ -322,11 +238,11 @@ const FloatingIslandNav: React.FC<{
                   color: isActive
                     ? isDark
                       ? '#FFFFFF'
-                      : '#1A2E22'
+                      : '#14221A'
                     : isDark
-                    ? '#7D9E8D'
-                    : '#7A8C81',
-                  fontWeight: isActive ? '700' : '500',
+                    ? '#809E90'
+                    : '#788C81',
+                  fontWeight: isActive ? '700' : '600',
                 },
               ]}
             >
@@ -337,7 +253,7 @@ const FloatingIslandNav: React.FC<{
                 style={[
                   styles.activeDot,
                   {
-                    backgroundColor: isDark ? '#8FD0B2' : '#2E684C',
+                    backgroundColor: isDark ? '#8CD5B4' : '#265C43',
                   },
                 ]}
               />
@@ -350,7 +266,7 @@ const FloatingIslandNav: React.FC<{
 };
 
 export const HomeScreen: React.FC = () => {
-  const { colors, typography, spacing, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
 
@@ -360,13 +276,22 @@ export const HomeScreen: React.FC = () => {
   const [totalMinutes, setTotalMinutes] = useState(
     progressStore.getTotalMinutes()
   );
+  const [scenePreference, setScenePreference] = useState<SceneId>(
+    settingsStore.getScenePreference()
+  );
 
   useEffect(() => {
-    const unsubscribe = progressStore.subscribe(() => {
+    const unsubProgress = progressStore.subscribe(() => {
       setCompletedSessions(progressStore.getCompletedSessions());
       setTotalMinutes(progressStore.getTotalMinutes());
     });
-    return unsubscribe;
+    const unsubSettings = settingsStore.subscribe(() => {
+      setScenePreference(settingsStore.getScenePreference());
+    });
+    return () => {
+      unsubProgress();
+      unsubSettings();
+    };
   }, []);
 
   const { greeting, subtitle } = getDaytimeGreeting();
@@ -379,20 +304,22 @@ export const HomeScreen: React.FC = () => {
   };
 
   return (
-    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <ScenicBackground scene={scenePreference} style={styles.safeArea}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+
       {/* 1. Header Bar: Leaf Brand Title + Outlined Settings Gear */}
       <View
         style={[
           styles.headerBar,
           {
-            paddingHorizontal: spacing.xl,
-            paddingTop: insets.top + 8,
+            paddingTop: insets.top + 10,
+            paddingHorizontal: 20,
             height: 64 + insets.top,
           },
         ]}
       >
         <View style={styles.brandContainer}>
-          <Text style={styles.brandLeaf}>🌿</Text>
+          <LeafLogoIcon size={30} color={isDark ? '#8CD5B4' : '#265C43'} />
           <Text style={[styles.brandTitle, { color: colors.textPrimary }]}>
             Q9 Relax
           </Text>
@@ -402,203 +329,288 @@ export const HomeScreen: React.FC = () => {
           style={[
             styles.settingsCircleBtn,
             {
-              backgroundColor: colors.iconBtnBg,
-              borderColor: colors.iconBtnBorder,
+              backgroundColor: isDark
+                ? 'rgba(255, 255, 255, 0.12)'
+                : 'rgba(255, 255, 255, 0.75)',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.20)'
+                : 'rgba(255, 255, 255, 0.90)',
             },
           ]}
           onPress={() => navigation.navigate('Settings')}
           activeOpacity={0.7}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={[styles.settingsGear, { color: colors.textPrimary }]}>⚙</Text>
+          <Text style={[styles.settingsGear, { color: colors.textPrimary }]}>
+            ⚙
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* 2. Main Scroll Content */}
+      {/* 2. Main Scroll Content with Staggered Entrance */}
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
           {
-            paddingHorizontal: spacing.lg,
-            paddingBottom: insets.bottom + 120, // Generous padding for floating nav bar
+            paddingHorizontal: 18,
+            paddingBottom: insets.bottom + 120,
           },
         ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Daytime Greeting */}
-        <View style={styles.greetingSection}>
-          <Text style={[styles.heroGreeting, { color: colors.textPrimary }]}>
-            {greeting}
-          </Text>
-          <Text style={[styles.heroSubtitle, { color: colors.textSecondary }]}>
-            {subtitle}
-          </Text>
-        </View>
+        <FadeSlideIn delay={80}>
+          <View style={styles.greetingSection}>
+            <Text style={[styles.heroGreeting, { color: colors.textPrimary }]}>
+              {greeting}
+            </Text>
+            <Text
+              style={[
+                styles.heroSubtitle,
+                { color: isDark ? '#D8E8E0' : '#2A3F33' },
+              ]}
+            >
+              {subtitle}
+            </Text>
+          </View>
+        </FadeSlideIn>
 
         {/* Hero Featured Card: "Start your day with calm" */}
-        <TouchableOpacity
-          style={[
-            styles.heroCard,
-            {
-              backgroundColor: colors.cardHeroBg,
-              borderColor: isDark ? 'rgba(155, 187, 174, 0.25)' : 'transparent',
-              borderWidth: isDark ? 1.5 : 0,
-            },
-          ]}
-          activeOpacity={0.92}
-          onPress={() => navigation.navigate('Breathing')}
-        >
-          <View style={styles.heroLeftContent}>
-            <Text style={[styles.heroCardTitle, { color: colors.textPrimary }]}>
-              Start your day{'\n'}with calm
-            </Text>
+        <FadeSlideIn delay={160}>
+          <TouchableOpacity
+            style={[
+              styles.heroFeaturedCard,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(28, 55, 45, 0.75)'
+                  : 'rgba(142, 175, 161, 0.85)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.18)'
+                  : 'rgba(255, 255, 255, 0.70)',
+              },
+            ]}
+            activeOpacity={0.92}
+            onPress={() => navigation.navigate('Breathing')}
+          >
+            <LinearGradient
+              colors={
+                isDark
+                  ? ['rgba(28, 55, 45, 0.90)', 'rgba(19, 40, 32, 0.90)']
+                  : ['rgba(142, 175, 161, 0.92)', 'rgba(114, 152, 136, 0.92)']
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
 
-            {/* Large, attractive pill button */}
-            <TouchableOpacity
-              style={[
-                styles.heroPillBtn,
-                { backgroundColor: colors.cardHeroBtn },
-              ]}
-              onPress={() => navigation.navigate('Breathing')}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.heroPillBtnText}>Begin breathing ›</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.heroLeftContent}>
+              <Text
+                style={[
+                  styles.heroCardTitle,
+                  { color: '#FFFFFF' },
+                ]}
+              >
+                Start your day{'\n'}with calm
+              </Text>
 
-          <HeroIllustration isDark={isDark} />
-        </TouchableOpacity>
+              {/* Large, tactile pill button */}
+              <TouchableOpacity
+                style={[
+                  styles.heroPillBtn,
+                  { backgroundColor: colors.accentTerracotta },
+                ]}
+                onPress={() => navigation.navigate('Breathing')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.heroPillBtnText}>Begin breathing ›</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.heroOrbGlow}>
+              <View style={styles.heroOrbInner} />
+            </View>
+          </TouchableOpacity>
+        </FadeSlideIn>
 
         {/* Progress Stats Split Cards (Sessions & Minutes) */}
-        <View style={styles.statsRow}>
-          {/* Sessions Card */}
-          <View
-            style={[
-              styles.statsCard,
-              {
-                backgroundColor: colors.statsSessionsBg,
-                borderColor: isDark ? 'rgba(253, 230, 138, 0.25)' : 'transparent',
-                borderWidth: isDark ? 1.5 : 0,
-              },
-            ]}
-          >
-            <View style={styles.statsHeaderRow}>
-              <View
+        <FadeSlideIn delay={240}>
+          <View style={styles.statsRow}>
+            {/* Sessions Card */}
+            <View
+              style={[
+                styles.statsGlassCard,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(42, 36, 18, 0.70)'
+                    : 'rgba(248, 232, 182, 0.85)',
+                  borderColor: isDark
+                    ? 'rgba(253, 230, 138, 0.25)'
+                    : 'rgba(255, 255, 255, 0.80)',
+                },
+              ]}
+            >
+              <View style={styles.statsHeaderRow}>
+                <View
+                  style={[
+                    styles.statsIconBadge,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(245, 158, 11, 0.25)'
+                        : 'rgba(150, 121, 30, 0.15)',
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 16 }}>👤</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.statsNumber,
+                    { color: colors.statsSessionsText },
+                  ]}
+                >
+                  {completedSessions}
+                </Text>
+              </View>
+              <Text
                 style={[
-                  styles.statsIconBadge,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(245, 158, 11, 0.2)'
-                      : '#F0DD9E',
-                  },
+                  styles.statsLabel,
+                  { color: colors.statsSessionsText, opacity: 0.9 },
                 ]}
               >
-                <VectorAvatarIcon color={colors.statsSessionsIcon} />
-              </View>
-              <Text style={[styles.statsNumber, { color: colors.statsSessionsText }]}>
-                {completedSessions}
+                Sessions
               </Text>
             </View>
-            <Text style={[styles.statsLabel, { color: colors.statsSessionsText, opacity: 0.9 }]}>
-              Sessions
-            </Text>
-          </View>
 
-          {/* Minutes Card */}
-          <View
-            style={[
-              styles.statsCard,
-              {
-                backgroundColor: colors.statsMinutesBg,
-                borderColor: isDark ? 'rgba(255, 237, 213, 0.25)' : 'transparent',
-                borderWidth: isDark ? 1.5 : 0,
-              },
-            ]}
-          >
-            <View style={styles.statsHeaderRow}>
-              <View
+            {/* Minutes Card */}
+            <View
+              style={[
+                styles.statsGlassCard,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(47, 27, 21, 0.70)'
+                    : 'rgba(252, 216, 196, 0.85)',
+                  borderColor: isDark
+                    ? 'rgba(255, 237, 213, 0.25)'
+                    : 'rgba(255, 255, 255, 0.80)',
+                },
+              ]}
+            >
+              <View style={styles.statsHeaderRow}>
+                <View
+                  style={[
+                    styles.statsIconBadge,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(249, 115, 22, 0.25)'
+                        : 'rgba(172, 95, 58, 0.15)',
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 16 }}>⏱️</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.statsNumber,
+                    { color: colors.statsMinutesText },
+                  ]}
+                >
+                  {totalMinutes}
+                </Text>
+              </View>
+              <Text
                 style={[
-                  styles.statsIconBadge,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(249, 115, 22, 0.2)'
-                      : '#F3CBB5',
-                  },
+                  styles.statsLabel,
+                  { color: colors.statsMinutesText, opacity: 0.9 },
                 ]}
               >
-                <VectorClockIcon color={colors.statsMinutesIcon} />
-              </View>
-              <Text style={[styles.statsNumber, { color: colors.statsMinutesText }]}>
-                {totalMinutes}
+                Minutes
               </Text>
             </View>
-            <Text style={[styles.statsLabel, { color: colors.statsMinutesText, opacity: 0.9 }]}>
-              Minutes
-            </Text>
           </View>
-        </View>
+        </FadeSlideIn>
 
         {/* Section Heading: "Choose a practice" */}
-        <Text
-          style={[
-            styles.practiceHeader,
-            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.md },
-          ]}
-        >
-          Choose a practice
-        </Text>
+        <FadeSlideIn delay={320}>
+          <Text
+            style={[
+              styles.practiceHeader,
+              { color: colors.textPrimary, marginTop: 24, marginBottom: 10 },
+            ]}
+          >
+            Choose a practice
+          </Text>
 
-        {/* Practice Cards with interactive scale feedback and large tactile buttons */}
-        <View style={styles.practiceStack}>
-          {/* Practice Card 1: Breathe */}
-          <AnimatedPracticeCard
+          {/* Three Big Glass-Style Practice Cards */}
+          <GlassPracticeCard
             title="Breathe"
             subtitle="Guided rhythmic breathing with visual cues"
-            icon="🫧"
-            bgColor={colors.cardBreatheBg}
-            titleColor={colors.textPrimary}
-            subColor={isDark ? '#D1E6DC' : '#2A4337'}
-            arrowColor={colors.textPrimary}
+            icon={
+              <BreatheIcon
+                size={26}
+                color={isDark ? '#8CD5B4' : '#265C43'}
+                secondaryColor={isDark ? 'rgba(140,213,180,0.3)' : 'rgba(38,92,67,0.25)'}
+              />
+            }
+            gradientColors={
+              isDark
+                ? ['rgba(30, 58, 47, 0.40)', 'rgba(21, 44, 35, 0.40)']
+                : ['rgba(146, 181, 165, 0.25)', 'rgba(118, 157, 140, 0.25)']
+            }
+            tintColor={colors.accentGreen}
             onPress={() => navigation.navigate('Breathing')}
             isDark={isDark}
           />
 
-          {/* Practice Card 2: Meditate */}
-          <AnimatedPracticeCard
+          <GlassPracticeCard
             title="Meditate"
             subtitle="Quiet timer with soothing background sounds"
-            icon="🧘"
-            bgColor={colors.cardMeditateBg}
-            titleColor={isDark ? '#FFFFFF' : '#1E1B4B'}
-            subColor={isDark ? '#E2E0FD' : '#3E3A6D'}
-            arrowColor={isDark ? '#FFFFFF' : '#1E1B4B'}
+            icon={
+              <MeditateIcon
+                size={26}
+                color={isDark ? '#AEAEE8' : '#5A58A8'}
+                secondaryColor={isDark ? 'rgba(174,174,232,0.3)' : 'rgba(90,88,168,0.25)'}
+              />
+            }
+            gradientColors={
+              isDark
+                ? ['rgba(40, 35, 77, 0.40)', 'rgba(26, 23, 54, 0.40)']
+                : ['rgba(207, 206, 245, 0.25)', 'rgba(174, 174, 232, 0.25)']
+            }
+            tintColor="#5A58A8"
             onPress={() => navigation.navigate('Meditation')}
             isDark={isDark}
           />
 
-          {/* Practice Card 3: Sounds */}
-          <AnimatedPracticeCard
+          <GlassPracticeCard
             title="Sounds"
             subtitle="Calming ambient loops with sleep timer"
-            icon="🎧"
-            bgColor={colors.cardSoundsBg}
-            titleColor="#FFFFFF"
-            subColor="#FFEBE4"
-            arrowColor={colors.cardSoundsBg}
+            icon={
+              <SoundsIcon
+                size={26}
+                color={isDark ? '#E07A5F' : '#D66D52'}
+                secondaryColor={isDark ? 'rgba(224,122,95,0.3)' : 'rgba(214,109,82,0.25)'}
+              />
+            }
+            gradientColors={
+              isDark
+                ? ['rgba(72, 35, 27, 0.40)', 'rgba(50, 21, 14, 0.40)']
+                : ['rgba(230, 139, 116, 0.25)', 'rgba(205, 112, 88, 0.25)']
+            }
+            tintColor={colors.accentTerracotta}
             onPress={() => navigation.navigate('Sounds')}
             isDark={isDark}
           />
-        </View>
+        </FadeSlideIn>
       </ScrollView>
 
-      {/* 3. STUNNING FLOATING ISLAND NAVIGATION BAR */}
+      {/* 3. Floating Island Navigation Bar */}
       <FloatingIslandNav
         activeTab="home"
         onNavigate={handleNavPress}
         isDark={isDark}
         insetsBottom={insets.bottom}
       />
-    </View>
+    </ScenicBackground>
   );
 };
 
@@ -614,10 +626,7 @@ const styles = StyleSheet.create({
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  brandLeaf: {
-    fontSize: 26,
-    marginRight: 8,
+    gap: 8,
   },
   brandTitle: {
     fontSize: 24,
@@ -626,320 +635,204 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   settingsCircleBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   settingsGear: {
-    fontSize: 22,
-    lineHeight: 24,
+    fontSize: 20,
+    lineHeight: 22,
   },
   scrollContent: {
-    paddingTop: 8,
+    paddingTop: 4,
   },
   greetingSection: {
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 6,
+    marginBottom: 16,
   },
   heroGreeting: {
     fontSize: 34,
     fontWeight: '700',
     fontFamily: 'serif',
-    letterSpacing: -0.5,
+    letterSpacing: -0.3,
   },
   heroSubtitle: {
     fontSize: 16,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '600',
     marginTop: 4,
-    lineHeight: 22,
   },
-  heroCard: {
-    borderRadius: 28,
+  heroFeaturedCard: {
+    borderRadius: 26,
+    borderWidth: 1.5,
+    overflow: 'hidden',
     padding: 22,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 180,
-    overflow: 'hidden',
-    position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    alignItems: 'center',
+    minHeight: 140,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 3,
-  },
-  heroLeftContent: {
-    flex: 1.1,
-    zIndex: 2,
-    justifyContent: 'center',
-  },
-  heroCardTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    fontFamily: 'serif',
-    lineHeight: 30,
+    elevation: 4,
     marginBottom: 16,
   },
+  heroLeftContent: {
+    flex: 1,
+    zIndex: 2,
+  },
+  heroCardTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    lineHeight: 28,
+    marginBottom: 14,
+  },
   heroPillBtn: {
-    paddingHorizontal: 22,
-    paddingVertical: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 24,
     alignSelf: 'flex-start',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
   },
   heroPillBtnText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: 0.3,
+    fontFamily: 'Nunito-Bold',
   },
-  heroGraphicContainer: {
-    width: 140,
-    height: 140,
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  sunWrapper: {
-    position: 'absolute',
-    top: 15,
-    right: 30,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1,
-  },
-  sunCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  sunRay: {
-    position: 'absolute',
-    width: 4,
-    height: 8,
-    borderRadius: 2,
-    top: -4,
-  },
-  floatingLeaf: {
-    position: 'absolute',
-    borderWidth: 1.2,
-    borderRadius: 12,
-  },
-  leaf1: {
-    width: 22,
-    height: 14,
-    top: 20,
-    right: 12,
-  },
-  leaf2: {
-    width: 20,
-    height: 12,
-    top: 40,
-    right: 2,
-  },
-  leaf3: {
-    width: 26,
-    height: 16,
-    bottom: 45,
-    right: 18,
-  },
-  backHill: {
-    position: 'absolute',
-    bottom: -15,
-    right: -20,
-    width: 150,
+  heroOrbGlow: {
+    width: 90,
     height: 90,
-    borderTopLeftRadius: 85,
-    borderTopRightRadius: 65,
-    borderWidth: 1.2,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  midHill: {
-    position: 'absolute',
-    bottom: -10,
-    right: 20,
-    width: 130,
-    height: 80,
-    borderTopLeftRadius: 75,
-    borderTopRightRadius: 55,
-    borderWidth: 1.2,
-  },
-  frontHill: {
-    position: 'absolute',
-    bottom: -25,
-    right: -10,
-    width: 170,
-    height: 75,
-    borderTopLeftRadius: 90,
-    borderTopRightRadius: 40,
-    borderWidth: 1.5,
+  heroOrbInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
   statsRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 12,
-    marginTop: 18,
+    marginBottom: 8,
   },
-  statsCard: {
+  statsGlassCard: {
     flex: 1,
     borderRadius: 22,
+    borderWidth: 1.5,
     padding: 16,
-    minHeight: 105,
-    justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   statsHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'space-between',
+    marginBottom: 6,
   },
   statsIconBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
   statsNumber: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '700',
     fontFamily: 'serif',
   },
   statsLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  vectorAvatarWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  vectorAvatarHead: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginBottom: 2,
-  },
-  vectorAvatarBody: {
-    width: 18,
-    height: 8,
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-  },
-  vectorClockCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  vectorClockHandH: {
-    position: 'absolute',
-    width: 6,
-    height: 2,
-    top: 7,
-    left: 8,
-    borderRadius: 1,
-  },
-  vectorClockHandV: {
-    position: 'absolute',
-    width: 2,
-    height: 6,
-    top: 4,
-    left: 8,
-    borderRadius: 1,
+    fontSize: 13,
+    fontFamily: 'sans-serif',
+    fontWeight: '700',
   },
   practiceHeader: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     fontFamily: 'serif',
   },
-  practiceStack: {
-    gap: 12,
-  },
-  practiceCard: {
+  glassCard: {
     borderRadius: 24,
+    borderWidth: 1.5,
+    overflow: 'hidden',
     padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 96,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    minHeight: 88,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardGradientOverlay: {
+    ...StyleSheet.absoluteFill,
   },
   practiceLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 12,
+    paddingRight: 10,
   },
-  practiceIconBadge: {
-    width: 52,
-    height: 52,
-    borderRadius: 20,
+  iconOrbBadge: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
-  },
-  practiceBadgeIcon: {
-    fontSize: 26,
   },
   practiceTextWrap: {
     flex: 1,
   },
   practiceTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     fontFamily: 'serif',
+    marginBottom: 3,
   },
   practiceSubtitle: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: 13.5,
+    fontFamily: 'Nunito-Bold',
+    fontWeight: '600',
     lineHeight: 18,
   },
-  whiteArrowCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+  glassArrowCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
   },
-  whiteArrowText: {
-    fontSize: 26,
+  arrowGlyph: {
+    fontSize: 22,
     fontWeight: '700',
-    lineHeight: 28,
+    lineHeight: 24,
   },
-
-  // Floating Island Navbar Styles
   floatingNavContainer: {
     position: 'absolute',
-    left: 16,
-    right: 16,
+    left: 20,
+    right: 20,
     height: 68,
     borderRadius: 34,
     borderWidth: 1.5,
@@ -947,22 +840,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.14,
-    shadowRadius: 14,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
     elevation: 10,
-    zIndex: 99,
   },
   navTabPill: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 22,
+    paddingHorizontal: 14,
+    borderRadius: 20,
     position: 'relative',
-    minWidth: 64,
   },
   navTabIcon: {
     fontSize: 20,
@@ -970,12 +861,12 @@ const styles = StyleSheet.create({
   },
   navTabLabel: {
     fontSize: 11,
-    letterSpacing: 0.2,
+    fontFamily: 'Nunito-Bold',
   },
   activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    marginTop: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginTop: 3,
   },
 });

@@ -1,10 +1,12 @@
 import { storage } from './storage';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
+export type SceneId = 'auto' | 'meadow' | 'forest' | 'ocean' | 'rain' | 'night';
 
 interface SettingsData {
   themePreference: ThemePreference;
   bellEnabled: boolean;
+  scenePreference: SceneId;
 }
 
 const SETTINGS_KEY = '@q9_relax_settings';
@@ -12,6 +14,7 @@ const SETTINGS_KEY = '@q9_relax_settings';
 let currentSettings: SettingsData = {
   themePreference: 'dark',
   bellEnabled: true,
+  scenePreference: 'auto',
 };
 
 const listeners = new Set<() => void>();
@@ -22,6 +25,7 @@ export const settingsStore = {
     currentSettings = {
       themePreference: saved.themePreference || 'dark',
       bellEnabled: saved.bellEnabled !== undefined ? saved.bellEnabled : true,
+      scenePreference: saved.scenePreference || 'auto',
     };
     listeners.forEach((l) => l());
   },
@@ -32,6 +36,10 @@ export const settingsStore = {
 
   isBellEnabled(): boolean {
     return currentSettings.bellEnabled;
+  },
+
+  getScenePreference(): SceneId {
+    return currentSettings.scenePreference;
   },
 
   async setThemePreference(pref: ThemePreference): Promise<void> {
@@ -46,9 +54,14 @@ export const settingsStore = {
     listeners.forEach((l) => l());
   },
 
+  async setScenePreference(scene: SceneId): Promise<void> {
+    currentSettings.scenePreference = scene;
+    await storage.setJson(SETTINGS_KEY, currentSettings);
+    listeners.forEach((l) => l());
+  },
+
   subscribe(listener: () => void): () => void {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
 };
-

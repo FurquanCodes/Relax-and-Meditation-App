@@ -34,9 +34,15 @@ cd android
 adb install -r android/app/build/outputs/apk/release/app-release.apk
 ```
 
-## What is Done (MVP Features)
-- [x] **Redesigned Relaxing UI & Floating Island Navigation:** Modern Floating Island Animated Bottom Navigation Bar with glowing active capsule pill, bouncy touch scale, and indicator dot; living hero banner with floating glowing sun and gently swaying leaves; large tactile buttons (`PrimaryButton` 56dp height with spring scale, 46x46 circular arrows, 44x44 volume steppers).
-- [x] **Home Screen:** Dynamic daytime greeting ("Good morning", "Good afternoon", "Good evening"), stored progress display (sessions and total minutes), three distinct navigation entry points, and settings shortcut.
+## What is Done (MVP Features & UI Upgrade)
+- [x] **Scenic Glassmorphic UI Upgrade (06_UI_UPGRADE.md):** Full-screen dynamic landscape environments (Sunrise Meadow, Misty Forest, Sunset Coast, Rain Window, Starry Cosmos) with frosted glassmorphism overlays and gradient scrims for optimal contrast.
+- [x] **Bundled SIL OFL Google Fonts:** Playfair Display for organic headings and Nunito for rounded, readable body text.
+- [x] **Home Screen:** Dynamic daytime greeting with staggered entrance animations, progress split glass cards, glass practice cards with custom vector SVG icons (`BreatheIcon`, `MeditateIcon`, `SoundsIcon`), and floating island dock.
+- [x] **Glowing Orb Guided Breathing:** Layered breathing orb with 3 faint expanding radiant rings, dynamic background phase lighting transitions, soft pill chips for pattern and duration selection, synchronized visual cues.
+- [x] **Large Ring SVG Meditation Timer:** Circular SVG progress countdown ring with centered remaining time, pulsing breathing aura, background soundscape accompaniment with live volume stepper buttons (+ / −), and screen-off foreground service.
+- [x] **Categorized Sounds & Docked Player:** Rain, Forest, Ocean, and Calm categories with tailored visual gradients, live animated soundwave equalizer bars, sleep timer pills, volume steppers, and background playback.
+- [x] **Custom Scene Picker & Theme Mode:** Settings screen features a scenic environment picker with thumbnail previews, dark/light/system theme toggles, and singing bowl bell preference.
+- [x] **Redesigned Relaxing UI & Floating Island Navigation:** Modern Floating Island Animated Bottom Navigation Bar with glowing active capsule pill, bouncy touch scale, and indicator dot.
 - [x] **Guided Breathing:** Data-driven breathing patterns (Box breathing 4-4-4-4, 4-7-8 relaxing breath, 4-6 steady breath) with 1, 3, 5 minute session choices; animated expanding/contracting circle using React Native `Animated` native driver; synchronized live visual cues ("Inhale", "Hold", "Exhale") with countdown timer; Pause/Resume/Stop; records progress on completion.
 - [x] **Enhanced Meditation Experience:** Clean 2-step setup: Duration selector (1, 5, 10, 15, 20m) & optional Ambient Soundscape companion (Forest, Rain, Ocean, Calm, or Pure Silence); pulsing Zen breathing halo around countdown timer; live soundscape volume stepper (+ / −); native screen-off foreground service with singing bowl bells.
 - [x] **Live Animated Atmosphere Themes:** Dynamic animations (Gentle Rain with falling droplets, Deep Forest with swaying leaves & fireflies, Ocean Tide with rhythmic swells, Zen Twilight with radiant breathing auras) rendered live behind sound playback and active meditation.
@@ -58,6 +64,12 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 
 ## Sources and Licences of Audio and Assets
 All 12 audio files packaged with this app are CC0 Public Domain / Royalty-Free ambient recordings carefully selected for mindfulness and stress relief. Full provenance and track mappings are documented in [assets/audio/SOURCES.md](assets/audio/SOURCES.md).
+
+All background imagery is licensed under the Unsplash Free License (no recognizable people, no logos, no text, compressed under 250KB each). Full photographer credits and license details are documented in [assets/images/SOURCES.md](assets/images/SOURCES.md).
+
+Fonts are open-source fonts licensed under the SIL Open Font License (OFL), Version 1.1:
+- **Playfair Display**: Designed by Claus Eggers Sørensen (Google Fonts).
+- **Nunito**: Designed by Vernon Adams, Cyreal (Google Fonts).
 
 ## Notes for Technical Lead
 - **Framework:** Bare React Native 0.88 with TypeScript.

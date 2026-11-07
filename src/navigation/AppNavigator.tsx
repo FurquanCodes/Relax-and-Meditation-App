@@ -17,7 +17,7 @@ export const AppNavigator: React.FC = () => {
         initialRouteName="Home"
         screenOptions={{
           headerShown: false,
-          animation: 'fade_from_bottom',
+          animation: 'fade',
         }}
       >
         <Stack.Screen name="Home" component={HomeScreen} />
@@ -29,4 +29,3 @@ export const AppNavigator: React.FC = () => {
     </NavigationContainer>
   );
 };
-

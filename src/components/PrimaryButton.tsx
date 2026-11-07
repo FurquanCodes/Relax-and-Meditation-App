@@ -26,15 +26,19 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   textStyle,
   disabled = false,
 }) => {
-  const { colors, typography } = useTheme();
+  const { colors, isDark } = useTheme();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   let bgColor = colors.accentTerracotta;
   let textColor = '#FFFFFF';
+  let borderColor = 'transparent';
+  let borderWidth = 0;
 
   if (variant === 'secondary') {
-    bgColor = colors.surface;
+    bgColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.80)';
     textColor = colors.textPrimary;
+    borderColor = isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.95)';
+    borderWidth = 1.5;
   } else if (variant === 'danger') {
     bgColor = '#C7513B';
     textColor = '#FFFFFF';
@@ -65,11 +69,9 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
           styles.button,
           {
             backgroundColor: disabled ? colors.surfaceBorder : bgColor,
+            borderColor,
+            borderWidth,
             borderRadius: 28,
-          },
-          variant === 'secondary' && {
-            borderWidth: 1.5,
-            borderColor: colors.surfaceBorder,
           },
         ]}
         onPress={onPress}
@@ -79,7 +81,6 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
       >
         <Text
           style={[
-            typography.bodyBold,
             styles.text,
             { color: disabled ? colors.textMuted : textColor },
             textStyle,
@@ -94,21 +95,22 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    minHeight: 56, // Generous, comfortable touch target
+    minHeight: 56,
     paddingHorizontal: 28,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
   },
   text: {
-    textAlign: 'center',
-    letterSpacing: 0.5,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
+    fontFamily: 'Nunito-Bold',
+    textAlign: 'center',
+    letterSpacing: 0.2,
   },
 });

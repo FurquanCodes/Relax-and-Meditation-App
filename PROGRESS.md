@@ -58,6 +58,18 @@
   - Released at root: `D:\Q9 Technologies\Calm App\Q9Relax-v0.1.0-release.apk` and inside `android/app/build/outputs/apk/release/app-release.apk`.
   - Comprehensive `README.md` and `PROGRESS.md` updated.
   - Git repository synced with private GitHub repo `FurquanCodes/Relax-and-Meditation-App`.
+- [x] **Milestone 8: Scenic Glassmorphic UI Upgrade (06_UI_UPGRADE.md)**
+  - Full-screen scenic nature environments (`ScenicBackground.tsx`) with gradient scrim overlays for perfect contrast.
+  - Installed and verified `react-native-linear-gradient` and `react-native-svg` on React Native 0.88 with Bridgeless New Architecture.
+  - Sourced 5 CC0/Unsplash landscape scenes under 250KB each (`meadow_sunrise.jpg`, `forest_mist.jpg`, `ocean_sunset.jpg`, `rain_drops.jpg`, `night_stars.jpg`) documented in `assets/images/SOURCES.md`.
+  - Bundled SIL OFL Google Fonts (Playfair Display for headings and Nunito for body text) in `android/app/src/main/assets/fonts/`.
+  - Glassmorphic practice cards with custom vector SVG icons (`BreatheIcon`, `MeditateIcon`, `SoundsIcon`, `LeafLogoIcon`).
+  - Staggered entrance animations on Home screen (400-600ms cubic easing).
+  - Glowing Orb Breathing screen with 3 faint expanding rings and dynamic phase lightness transitions.
+  - Large Ring SVG circular countdown on Meditation screen with live background soundscape and volume steppers.
+  - Themed gradients and atmosphere backgrounds per category on Sounds screen with docked player.
+  - Scene Picker in Settings screen with visual preview thumbnails (Time of day, Sunrise Meadow, Misty Forest, Sunset Coast, Rain Window, Starry Cosmos).
+  - Compiled and verified standalone release APK `Q9Relax-v0.2.0-release.apk` (150 MB) installed and running live on device `ZY22GF4LZ9`.
 
 ## In progress
 - None (All MVP requirements complete).
