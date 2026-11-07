@@ -5,7 +5,7 @@ import TrackPlayer, {
   Track,
 } from 'react-native-track-player';
 
-export type SoundCategoryId = 'rain' | 'ocean' | 'forest' | 'calm';
+export type SoundCategoryId = 'rain' | 'river' | 'forest' | 'ocean' | 'calm';
 
 export interface SoundCategory {
   id: SoundCategoryId;
@@ -30,34 +30,43 @@ export const SOUND_CATEGORIES: SoundCategory[] = [
   {
     id: 'rain',
     title: 'Rain',
-    subtitle: 'Falling rain & distant thunder',
+    subtitle: 'Falling rain & thunder',
     icon: '🌧️',
     pastelBg: '#E8F1F5',
     pastelBgDark: '#1E2D34',
     borderColor: '#7FA8BD',
   },
   {
-    id: 'ocean',
-    title: 'Ocean',
-    subtitle: 'Rolling surf & coastal tides',
-    icon: '🌊',
-    pastelBg: '#E4F3EE',
-    pastelBgDark: '#1B352E',
-    borderColor: '#6BAFA0',
+    id: 'river',
+    title: 'River',
+    subtitle: 'Babbling stream & water',
+    icon: '🏞️',
+    pastelBg: '#E2F3F5',
+    pastelBgDark: '#132C33',
+    borderColor: '#84C7D0',
   },
   {
     id: 'forest',
     title: 'Forest',
-    subtitle: 'Morning woodland & birds',
+    subtitle: 'Woodland breeze & birds',
     icon: '🌿',
     pastelBg: '#EAF3EB',
     pastelBgDark: '#203627',
     borderColor: '#7DAA83',
   },
   {
+    id: 'ocean',
+    title: 'Ocean',
+    subtitle: 'Coastal surf & tides',
+    icon: '🌊',
+    pastelBg: '#E4F3EE',
+    pastelBgDark: '#1B352E',
+    borderColor: '#6BAFA0',
+  },
+  {
     id: 'calm',
-    title: 'Calm & Meditate',
-    subtitle: 'Peaceful acoustic chords & zen',
+    title: 'Calm',
+    subtitle: 'Chords & white noise',
     icon: '🧘',
     pastelBg: '#EFEBF8',
     pastelBgDark: '#28243E',
@@ -118,6 +127,16 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     fileRequire: require('../../assets/audio/ambient/ocean_waves_music.mp3'),
   },
 
+  // 2. River Sounds
+  {
+    id: 'forest_river_birds',
+    title: 'Mountain River Stream',
+    subtitle: 'Babbling water stream with singing woodland birds',
+    categoryId: 'river',
+    artworkIcon: '🏞️',
+    fileRequire: require('../../assets/audio/ambient/forest_river_birds.mp3'),
+  },
+
   // 3. Forest Sounds
   {
     id: 'forest_ambience_birds',
@@ -126,14 +145,6 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     categoryId: 'forest',
     artworkIcon: '🍃',
     fileRequire: require('../../assets/audio/ambient/forest_ambience_birds.mp3'),
-  },
-  {
-    id: 'forest_river_birds',
-    title: 'Forest River Stream',
-    subtitle: 'Babbling water stream with singing woodland birds',
-    categoryId: 'forest',
-    artworkIcon: '🏞️',
-    fileRequire: require('../../assets/audio/ambient/forest_river_birds.mp3'),
   },
   {
     id: 'forest_bird_chirping',

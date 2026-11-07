@@ -25,41 +25,7 @@ import {
   AtmosphereThemeType,
 } from '../components/AtmosphereThemeView';
 
-const DURATION_OPTIONS_MINUTES = [1, 5, 10, 15, 20];
-
-interface MeditationIntention {
-  id: string;
-  label: string;
-  icon: string;
-  mantra: string;
-}
-
-const INTENTIONS: MeditationIntention[] = [
-  {
-    id: 'calm',
-    label: 'Peace & Calm',
-    icon: '🌿',
-    mantra: 'Allow all tension in your body to softly dissolve.',
-  },
-  {
-    id: 'stress',
-    label: 'Release Stress',
-    icon: '🍃',
-    mantra: 'With each slow exhale, let go of what you cannot control.',
-  },
-  {
-    id: 'sleep',
-    label: 'Deep Rest',
-    icon: '🌙',
-    mantra: 'Quiet the busy mind and welcome restorative stillness.',
-  },
-  {
-    id: 'focus',
-    label: 'Clarity & Focus',
-    icon: '☀️',
-    mantra: 'Gently guide wandering thoughts back to the present breath.',
-  },
-];
+const DURATION_OPTIONS = [1, 5, 10, 15, 20];
 
 interface MeditationSoundscape {
   id: string;
@@ -67,58 +33,15 @@ interface MeditationSoundscape {
   icon: string;
   trackId: string | null;
   theme: AtmosphereThemeType;
-  subtitle: string;
 }
 
 const SOUNDSCAPES: MeditationSoundscape[] = [
-  {
-    id: 'silence',
-    name: 'Quiet Silence',
-    icon: '🤫',
-    trackId: null,
-    theme: 'zen',
-    subtitle: 'Pure stillness with bell',
-  },
-  {
-    id: 'river',
-    name: 'River Stream',
-    icon: '🏞️',
-    trackId: 'forest_river_birds',
-    theme: 'river',
-    subtitle: 'Babbling brook & birds',
-  },
-  {
-    id: 'rain',
-    name: 'Gentle Rain',
-    icon: '🌧️',
-    trackId: 'gentle_night_rain',
-    theme: 'rain',
-    subtitle: 'Soft evening rainfall',
-  },
-  {
-    id: 'forest',
-    name: 'Forest Birds',
-    icon: '🌲',
-    trackId: 'forest_ambience_birds',
-    theme: 'forest',
-    subtitle: 'Woodland canopy breeze',
-  },
-  {
-    id: 'ocean',
-    name: 'Ocean Tide',
-    icon: '🌊',
-    trackId: 'ocean_waves',
-    theme: 'ocean',
-    subtitle: 'Rhythmic coastal surf',
-  },
-  {
-    id: 'zen',
-    name: 'Zen Harmony',
-    icon: '🧘',
-    trackId: 'meditation_audio',
-    theme: 'zen',
-    subtitle: 'Resonant soothing chords',
-  },
+  { id: 'river', name: 'River', icon: '🏞️', trackId: 'forest_river_birds', theme: 'river' },
+  { id: 'rain', name: 'Rain', icon: '🌧️', trackId: 'gentle_night_rain', theme: 'rain' },
+  { id: 'forest', name: 'Forest', icon: '🌿', trackId: 'forest_ambience_birds', theme: 'forest' },
+  { id: 'ocean', name: 'Ocean', icon: '🌊', trackId: 'ocean_waves', theme: 'ocean' },
+  { id: 'zen', name: 'Zen', icon: '🧘', trackId: 'meditation_audio', theme: 'zen' },
+  { id: 'silence', name: 'Silent', icon: '🤫', trackId: null, theme: 'zen' },
 ];
 
 const MINDFUL_QUOTES = [
@@ -126,7 +49,6 @@ const MINDFUL_QUOTES = [
   '“Quiet minds can hear the gentle wisdom of the world.”',
   '“In the midst of movement and noise, keep stillness inside of you.”',
   '“Feel the calm you cultivated and carry it softly into your day.”',
-  '“Surrender what was, release what will be, and rest in what is.”',
 ];
 
 export const MeditationScreen: React.FC = () => {
@@ -134,7 +56,6 @@ export const MeditationScreen: React.FC = () => {
   const navigation = useNavigation();
 
   const [selectedDurationMin, setSelectedDurationMin] = useState<number>(5);
-  const [selectedIntentionId, setSelectedIntentionId] = useState<string>('calm');
   const [selectedSoundscapeId, setSelectedSoundscapeId] = useState<string>('river');
   const [ambientVolume, setAmbientVolume] = useState<number>(0.6);
 
@@ -154,13 +75,13 @@ export const MeditationScreen: React.FC = () => {
       Animated.sequence([
         Animated.timing(haloAnim, {
           toValue: 1,
-          duration: 4500,
+          duration: 4000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
         Animated.timing(haloAnim, {
           toValue: 0,
-          duration: 4500,
+          duration: 4000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
@@ -196,7 +117,6 @@ export const MeditationScreen: React.FC = () => {
     isMountedRef.current = true;
     syncWithNativeTimer();
 
-    // Listen to native timer events
     const unsubTick = nativeTimer.onTick((secondsLeft) => {
       if (!isMountedRef.current) return;
       setIsRunning(true);
@@ -205,7 +125,6 @@ export const MeditationScreen: React.FC = () => {
 
     const unsubComplete = nativeTimer.onComplete(async (completedDuration) => {
       if (!isMountedRef.current) return;
-      // Stop ambient sound
       await audioService.stop();
       setIsRunning(false);
       setRemainingSeconds(0);
@@ -223,7 +142,6 @@ export const MeditationScreen: React.FC = () => {
       setRemainingSeconds(0);
     });
 
-    // Check on app state change (e.g. returning to foreground)
     const appStateSub = AppState.addEventListener(
       'change',
       (nextState: AppStateStatus) => {
@@ -244,8 +162,6 @@ export const MeditationScreen: React.FC = () => {
 
   const selectedSoundscape =
     SOUNDSCAPES.find((s) => s.id === selectedSoundscapeId) || SOUNDSCAPES[0];
-  const selectedIntention =
-    INTENTIONS.find((i) => i.id === selectedIntentionId) || INTENTIONS[0];
 
   const handleStartTimer = async () => {
     setIsCompleted(false);
@@ -256,14 +172,14 @@ export const MeditationScreen: React.FC = () => {
       await nativeTimer.playBell();
     }
 
-    // Start ambient background sound if selected
+    // Start background sound if selected
     if (selectedSoundscape.trackId) {
       await audioService.setupPlayerIfNeeded();
       await audioService.playTrack(selectedSoundscape.trackId);
       await audioService.setVolume(ambientVolume);
     }
 
-    // Start background foreground service timer
+    // Start background native timer
     await nativeTimer.startTimer(durationSeconds, bellEnabled);
     setIsRunning(true);
     setRemainingSeconds(durationSeconds);
@@ -283,6 +199,11 @@ export const MeditationScreen: React.FC = () => {
     }
   };
 
+  const handleVolumeStep = (delta: number) => {
+    const next = Math.max(0, Math.min(1, Math.round((ambientVolume + delta) * 10) / 10));
+    handleVolumeChange(next);
+  };
+
   return (
     <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
@@ -292,195 +213,38 @@ export const MeditationScreen: React.FC = () => {
       />
 
       <View style={[styles.container, { padding: spacing.lg }]}>
+        {/* 1. CLEAN, SIMPLE SETUP VIEW */}
         {!isRunning && !isCompleted && (
           <ScrollView
             style={styles.setupView}
-            contentContainerStyle={{ paddingBottom: 40 }}
             showsVerticalScrollIndicator={false}
           >
-            {/* Header intro */}
             <Text
               style={[
                 typography.body,
-                { color: colors.textSecondary, marginBottom: spacing.md },
+                { color: colors.textSecondary, marginBottom: spacing.lg },
               ]}
             >
-              Set your intention, choose an atmospheric backdrop, and settle into
-              serene stillness.
+              Choose your time and peaceful background sound to begin.
             </Text>
 
-            {/* 1. Intention Selector */}
+            {/* Duration Selector */}
             <Text
               style={[
                 typography.subheader,
-                { color: colors.textPrimary, marginBottom: spacing.xs },
-              ]}
-            >
-              Session Intention
-            </Text>
-            <View style={styles.intentionsGrid}>
-              {INTENTIONS.map((intention) => {
-                const isSelected = selectedIntentionId === intention.id;
-                return (
-                  <TouchableOpacity
-                    key={intention.id}
-                    style={[
-                      styles.intentionChip,
-                      {
-                        backgroundColor: isSelected
-                          ? isDark
-                            ? 'rgba(155, 187, 174, 0.22)'
-                            : colors.accentSage + '35'
-                          : colors.surface,
-                        borderColor: isSelected
-                          ? colors.accentSage
-                          : colors.surfaceBorder,
-                        borderWidth: isSelected ? 1.8 : 1,
-                      },
-                    ]}
-                    onPress={() => setSelectedIntentionId(intention.id)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={{ fontSize: 18, marginRight: 6 }}>
-                      {intention.icon}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.intentionLabel,
-                        {
-                          color: isSelected
-                            ? isDark
-                              ? '#FFFFFF'
-                              : '#1A2E22'
-                            : colors.textSecondary,
-                          fontWeight: isSelected ? '700' : '500',
-                        },
-                      ]}
-                    >
-                      {intention.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* Selected Intention Mantra banner */}
-            <View
-              style={[
-                styles.mantraBox,
-                {
-                  backgroundColor: isDark
-                    ? 'rgba(255, 255, 255, 0.05)'
-                    : 'rgba(0, 0, 0, 0.03)',
-                  borderColor: isDark
-                    ? 'rgba(255, 255, 255, 0.1)'
-                    : colors.surfaceBorder,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  typography.caption,
-                  {
-                    color: colors.textSecondary,
-                    fontStyle: 'italic',
-                    textAlign: 'center',
-                    lineHeight: 18,
-                  },
-                ]}
-              >
-                “{selectedIntention.mantra}”
-              </Text>
-            </View>
-
-            {/* 2. Atmospheric Soundscape Selector */}
-            <Text
-              style={[
-                typography.subheader,
-                {
-                  color: colors.textPrimary,
-                  marginTop: spacing.lg,
-                  marginBottom: spacing.xs,
-                },
-              ]}
-            >
-              Atmosphere & Soundscape
-            </Text>
-            <View style={styles.soundscapeGrid}>
-              {SOUNDSCAPES.map((soundscape) => {
-                const isSelected = selectedSoundscapeId === soundscape.id;
-                return (
-                  <TouchableOpacity
-                    key={soundscape.id}
-                    style={[
-                      styles.soundscapeCard,
-                      {
-                        backgroundColor: isSelected
-                          ? isDark
-                            ? 'rgba(212, 211, 248, 0.22)'
-                            : colors.accentLavender + '35'
-                          : colors.surface,
-                        borderColor: isSelected
-                          ? colors.accentLavender
-                          : colors.surfaceBorder,
-                        borderWidth: isSelected ? 1.8 : 1,
-                      },
-                    ]}
-                    onPress={() => setSelectedSoundscapeId(soundscape.id)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.soundscapeIcon}>{soundscape.icon}</Text>
-                    <Text
-                      style={[
-                        styles.soundscapeName,
-                        {
-                          color: isSelected
-                            ? isDark
-                              ? '#FFFFFF'
-                              : '#1E1B4B'
-                            : colors.textPrimary,
-                        },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {soundscape.name}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.soundscapeSub,
-                        { color: colors.textSecondary },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {soundscape.subtitle}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* 3. Duration Selector */}
-            <Text
-              style={[
-                typography.subheader,
-                {
-                  color: colors.textPrimary,
-                  marginTop: spacing.lg,
-                  marginBottom: spacing.xs,
-                },
+                { color: colors.textPrimary, marginBottom: spacing.sm },
               ]}
             >
               Duration
             </Text>
-
-            <View style={styles.chipsGrid}>
-              {DURATION_OPTIONS_MINUTES.map((min) => {
+            <View style={styles.durationRow}>
+              {DURATION_OPTIONS.map((min) => {
                 const isSelected = selectedDurationMin === min;
                 return (
                   <TouchableOpacity
                     key={min}
                     style={[
-                      styles.chip,
+                      styles.durationChip,
                       {
                         backgroundColor: isSelected
                           ? colors.accentLavender
@@ -491,11 +255,11 @@ export const MeditationScreen: React.FC = () => {
                       },
                     ]}
                     onPress={() => setSelectedDurationMin(min)}
-                    activeOpacity={0.8}
+                    activeOpacity={0.7}
                   >
                     <Text
                       style={[
-                        styles.chipNumber,
+                        styles.durationNumber,
                         {
                           color: isSelected
                             ? isDark
@@ -509,7 +273,7 @@ export const MeditationScreen: React.FC = () => {
                     </Text>
                     <Text
                       style={[
-                        styles.chipUnit,
+                        styles.durationUnit,
                         {
                           color: isSelected
                             ? isDark
@@ -526,69 +290,75 @@ export const MeditationScreen: React.FC = () => {
               })}
             </View>
 
-            {/* Bell notice */}
-            <View
+            {/* Background Sound Selector */}
+            <Text
               style={[
-                styles.bellStatusNotice,
+                typography.subheader,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(255,255,255,0.06)'
-                    : 'rgba(0,0,0,0.03)',
+                  color: colors.textPrimary,
+                  marginTop: spacing.xl,
+                  marginBottom: spacing.sm,
                 },
               ]}
             >
-              <Text style={{ fontSize: 18, marginRight: 8 }}>🔔</Text>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textSecondary, flex: 1 },
-                ]}
-              >
-                {settingsStore.isBellEnabled()
-                  ? 'Singing bowl bell will chime at start and finish.'
-                  : 'Start and end bells are muted in settings.'}
-              </Text>
+              Background Sound
+            </Text>
+            <View style={styles.soundscapeRow}>
+              {SOUNDSCAPES.map((s) => {
+                const isSelected = selectedSoundscapeId === s.id;
+                return (
+                  <TouchableOpacity
+                    key={s.id}
+                    style={[
+                      styles.soundscapePill,
+                      {
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? 'rgba(155, 187, 174, 0.25)'
+                            : colors.accentSage + '35'
+                          : colors.surface,
+                        borderColor: isSelected
+                          ? colors.accentSage
+                          : colors.surfaceBorder,
+                        borderWidth: isSelected ? 2 : 1,
+                      },
+                    ]}
+                    onPress={() => setSelectedSoundscapeId(s.id)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={{ fontSize: 18, marginRight: 6 }}>{s.icon}</Text>
+                    <Text
+                      style={[
+                        styles.soundscapeText,
+                        {
+                          color: isSelected
+                            ? isDark
+                              ? '#FFFFFF'
+                              : '#1A2E22'
+                            : colors.textPrimary,
+                          fontWeight: isSelected ? '700' : '500',
+                        },
+                      ]}
+                    >
+                      {s.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
+            {/* Start Button */}
             <PrimaryButton
               title="Begin Meditation"
               onPress={handleStartTimer}
-              style={{ marginTop: spacing.xl }}
+              style={{ marginTop: spacing.xxl }}
             />
           </ScrollView>
         )}
 
-        {/* ACTIVE MEDITATION VIEW WITH THEME BACKDROP */}
+        {/* 2. TRANQUIL ACTIVE MEDITATION VIEW */}
         {isRunning && (
           <View style={styles.runningView}>
-            {/* Top Intention Pill */}
-            <View
-              style={[
-                styles.activeIntentionBadge,
-                {
-                  backgroundColor: isDark
-                    ? 'rgba(255, 255, 255, 0.08)'
-                    : 'rgba(0, 0, 0, 0.05)',
-                },
-              ]}
-            >
-              <Text style={{ fontSize: 16, marginRight: 6 }}>
-                {selectedIntention.icon}
-              </Text>
-              <Text
-                style={[
-                  typography.caption,
-                  {
-                    color: colors.textPrimary,
-                    fontWeight: '700',
-                    letterSpacing: 0.5,
-                  },
-                ]}
-              >
-                {selectedIntention.label.toUpperCase()}
-              </Text>
-            </View>
-
             {/* Thematic Backdrop enclosing the Zen Breathing Ring */}
             <AtmosphereThemeView
               theme={selectedSoundscape.theme}
@@ -654,33 +424,17 @@ export const MeditationScreen: React.FC = () => {
                     },
                   ]}
                 >
-                  {selectedSoundscape.name}
+                  {selectedSoundscape.name} Sound
                 </Text>
               </Animated.View>
             </AtmosphereThemeView>
 
-            {/* Active Mantra Reminder */}
-            <Text
-              style={[
-                typography.caption,
-                {
-                  color: colors.textSecondary,
-                  fontStyle: 'italic',
-                  textAlign: 'center',
-                  paddingHorizontal: 20,
-                  marginTop: 10,
-                },
-              ]}
-            >
-              “{selectedIntention.mantra}”
-            </Text>
-
-            {/* Live Volume Slider with + and - if soundscape is playing */}
-            {selectedSoundscape.trackId && (
+            {/* Ambient Sound Volume Stepper (Only shown when sound is active) */}
+            {selectedSoundscape.trackId ? (
               <View style={styles.ambientVolumeContainer}>
                 <View style={styles.ambientVolumeHeader}>
                   <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                    SOUNDSCAPE VOLUME
+                    SOUND VOLUME
                   </Text>
                   <Text
                     style={[
@@ -705,17 +459,11 @@ export const MeditationScreen: React.FC = () => {
                           : 'rgba(0, 0, 0, 0.12)',
                       },
                     ]}
-                    onPress={() =>
-                      handleVolumeChange(
-                        Math.max(0, Math.round((ambientVolume - 0.1) * 10) / 10)
-                      )
-                    }
+                    onPress={() => handleVolumeStep(-0.1)}
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text
-                      style={[styles.volStepText, { color: colors.textPrimary }]}
-                    >
+                    <Text style={[styles.volStepText, { color: colors.textPrimary }]}>
                       −
                     </Text>
                   </TouchableOpacity>
@@ -745,34 +493,30 @@ export const MeditationScreen: React.FC = () => {
                           : 'rgba(0, 0, 0, 0.12)',
                       },
                     ]}
-                    onPress={() =>
-                      handleVolumeChange(
-                        Math.min(1, Math.round((ambientVolume + 0.1) * 10) / 10)
-                      )
-                    }
+                    onPress={() => handleVolumeStep(0.1)}
                     activeOpacity={0.7}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Text
-                      style={[styles.volStepText, { color: colors.textPrimary }]}
-                    >
+                    <Text style={[styles.volStepText, { color: colors.textPrimary }]}>
                       +
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
+            ) : (
+              <View style={{ height: 40 }} />
             )}
 
             <PrimaryButton
               title="End Session"
               onPress={handleStopTimer}
               variant="danger"
-              style={{ width: '100%', marginTop: 12 }}
+              style={{ width: '100%', marginTop: 8 }}
             />
           </View>
         )}
 
-        {/* COMPLETION VIEW */}
+        {/* 3. REWARDING COMPLETION VIEW */}
         {isCompleted && (
           <View style={styles.completedView}>
             <Text style={styles.completedEmoji}>🔔</Text>
@@ -797,20 +541,8 @@ export const MeditationScreen: React.FC = () => {
             >
               <Text
                 style={[
-                  typography.caption,
-                  {
-                    color: colors.accentSage,
-                    fontWeight: '700',
-                    letterSpacing: 1,
-                  },
-                ]}
-              >
-                MINDFUL PAUSE OBSERVED
-              </Text>
-              <Text
-                style={[
                   styles.completedTime,
-                  { color: colors.textPrimary, marginTop: 4 },
+                  { color: colors.textPrimary },
                 ]}
               >
                 {selectedDurationMin} Minutes of Stillness
@@ -822,7 +554,7 @@ export const MeditationScreen: React.FC = () => {
                     color: colors.textSecondary,
                     textAlign: 'center',
                     fontStyle: 'italic',
-                    marginTop: 12,
+                    marginTop: 10,
                     lineHeight: 22,
                   },
                 ]}
@@ -833,17 +565,11 @@ export const MeditationScreen: React.FC = () => {
 
             <View style={{ flex: 1 }} />
 
-            <View style={{ width: '100%', gap: 10, marginBottom: spacing.sm }}>
-              <PrimaryButton
-                title="Meditate Again"
-                onPress={() => setIsCompleted(false)}
-                variant="secondary"
-              />
-              <PrimaryButton
-                title="Return Home"
-                onPress={() => navigation.goBack()}
-              />
-            </View>
+            <PrimaryButton
+              title="Return Home"
+              onPress={() => navigation.goBack()}
+              style={{ width: '100%', marginBottom: spacing.md }}
+            />
           </View>
         )}
       </View>
@@ -861,87 +587,44 @@ const styles = StyleSheet.create({
   setupView: {
     flex: 1,
   },
-  intentionsGrid: {
+  durationRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 8,
-    marginTop: 6,
   },
-  intentionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 16,
-    flexBasis: '48%',
-  },
-  intentionLabel: {
-    fontSize: 13,
-  },
-  mantraBox: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 10,
-    marginTop: 10,
-  },
-  soundscapeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 6,
-  },
-  soundscapeCard: {
-    width: '31%',
+  durationChip: {
+    flex: 1,
+    height: 70,
     borderRadius: 18,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  soundscapeIcon: {
-    fontSize: 24,
-    marginBottom: 4,
-  },
-  soundscapeName: {
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  soundscapeSub: {
-    fontSize: 10,
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  chipsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 6,
-  },
-  chip: {
-    width: '30%',
-    height: 72,
-    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
   },
-  chipNumber: {
-    fontSize: 24,
+  durationNumber: {
+    fontSize: 22,
     fontWeight: '700',
     fontFamily: 'serif',
   },
-  chipUnit: {
+  durationUnit: {
     fontSize: 12,
     fontWeight: '600',
     marginTop: 1,
   },
-  bellStatusNotice: {
+  soundscapeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  soundscapePill: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderRadius: 16,
-    padding: 12,
-    marginTop: 16,
+    flexBasis: '31%',
+    justifyContent: 'center',
+  },
+  soundscapeText: {
+    fontSize: 13,
   },
   runningView: {
     flex: 1,
@@ -949,16 +632,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  activeIntentionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
   activeAtmosphereCard: {
     width: '100%',
-    marginTop: 8,
+    marginTop: 10,
   },
   auraRingOuter: {
     position: 'absolute',
@@ -977,11 +653,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   themeCenterIcon: {
-    fontSize: 26,
+    fontSize: 28,
     marginBottom: 2,
   },
   timerText: {
-    fontSize: 46,
+    fontSize: 48,
     fontWeight: '700',
     fontFamily: 'serif',
     fontVariant: ['tabular-nums'],
@@ -989,7 +665,6 @@ const styles = StyleSheet.create({
   ambientVolumeContainer: {
     width: '100%',
     paddingHorizontal: 8,
-    marginTop: 6,
   },
   ambientVolumeHeader: {
     flexDirection: 'row',

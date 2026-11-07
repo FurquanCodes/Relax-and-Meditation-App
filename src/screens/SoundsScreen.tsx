@@ -12,7 +12,6 @@ import { usePlaybackState, State } from 'react-native-track-player';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { Card } from '../components/Card';
-import { PrimaryButton } from '../components/PrimaryButton';
 import {
   audioService,
   AMBIENT_TRACKS,
@@ -27,14 +26,13 @@ import {
   ATMOSPHERE_THEMES,
 } from '../components/AtmosphereThemeView';
 
-const SLEEP_TIMER_OPTIONS = [0, 1, 15, 30, 60];
+const SLEEP_OPTIONS = [0, 15, 30, 60];
 
 export const SoundsScreen: React.FC = () => {
   const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation();
   const playbackState = usePlaybackState();
 
-  // Active Category state (Rain, Ocean, Forest, Calm)
   const [selectedCategory, setSelectedCategory] = useState<SoundCategoryId>('rain');
   const [activeTrackId, setActiveTrackId] = useState<string>(AMBIENT_TRACKS[0].id);
   const [volume, setVolume] = useState<number>(0.7);
@@ -60,22 +58,27 @@ export const SoundsScreen: React.FC = () => {
     };
   }, []);
 
-  // Compute theme for current track
-  const currentTheme: AtmosphereThemeType =
-    activeTrackId === 'forest_river_birds'
-      ? 'river'
-      : selectedCategory === 'rain'
-      ? 'rain'
-      : selectedCategory === 'forest'
-      ? 'forest'
-      : selectedCategory === 'ocean'
-      ? 'ocean'
-      : 'zen';
+  // Map category to matching atmosphere theme
+  const getThemeForCategory = (cat: SoundCategoryId): AtmosphereThemeType => {
+    switch (cat) {
+      case 'rain':
+        return 'rain';
+      case 'river':
+        return 'river';
+      case 'forest':
+        return 'forest';
+      case 'ocean':
+        return 'ocean';
+      case 'calm':
+      default:
+        return 'zen';
+    }
+  };
 
+  const currentTheme = getThemeForCategory(selectedCategory);
   const activeThemeMeta =
     ATMOSPHERE_THEMES.find((t) => t.id === currentTheme) || ATMOSPHERE_THEMES[0];
 
-  // Filter tracks by currently selected category
   const filteredTracks = AMBIENT_TRACKS.filter(
     (track) => track.categoryId === selectedCategory
   );
@@ -86,17 +89,9 @@ export const SoundsScreen: React.FC = () => {
 
   const handleSelectTrack = async (track: AmbientTrack) => {
     setActiveTrackId(track.id);
-    await audioService.playTrack(track.id);
-  };
-
-  const handleSelectThemePill = async (themeType: AtmosphereThemeType) => {
-    const meta = ATMOSPHERE_THEMES.find((t) => t.id === themeType);
-    if (!meta) return;
-
-    const track = AMBIENT_TRACKS.find((t) => t.id === meta.associatedTrackId);
-    if (track) {
-      setSelectedCategory(track.categoryId);
-      setActiveTrackId(track.id);
+    if (activeTrackId === track.id && isPlaying) {
+      await audioService.pause();
+    } else {
       await audioService.playTrack(track.id);
     }
   };
@@ -124,16 +119,21 @@ export const SoundsScreen: React.FC = () => {
     handleVolumeChange(next);
   };
 
-  const handleSelectSleepTimer = (minutes: number) => {
-    setSelectedSleepMin(minutes);
-    if (minutes === 0) {
+  // Cycle sleep timer: 0 -> 15m -> 30m -> 60m -> 0
+  const cycleSleepTimer = () => {
+    const currentIndex = SLEEP_OPTIONS.indexOf(selectedSleepMin);
+    const nextIndex = (currentIndex + 1) % SLEEP_OPTIONS.length;
+    const nextMin = SLEEP_OPTIONS[nextIndex];
+    setSelectedSleepMin(nextMin);
+    if (nextMin === 0) {
       audioService.cancelSleepTimer();
     } else {
-      audioService.startSleepTimer(minutes);
+      audioService.startSleepTimer(nextMin);
     }
   };
 
-  const currentTrack = AMBIENT_TRACKS.find((t) => t.id === activeTrackId);
+  const currentTrack =
+    AMBIENT_TRACKS.find((t) => t.id === activeTrackId) || AMBIENT_TRACKS[0];
 
   return (
     <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
@@ -143,331 +143,66 @@ export const SoundsScreen: React.FC = () => {
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.lg }]}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text
-          style={[
-            typography.body,
-            { color: colors.textSecondary, marginBottom: spacing.md },
-          ]}
-        >
-          Choose a soothing sound category or theme, then relax with live ambient
-          atmospheres.
-        </Text>
-
-        {/* 1. Quick Atmospheric Themes Bar */}
-        <Text
-          style={[
-            typography.subheader,
-            { color: colors.textPrimary, marginBottom: spacing.xs },
-          ]}
-        >
-          Atmosphere Themes
-        </Text>
+      {/* 1. Category Switcher (Horizontal scrollable pill tabs) */}
+      <View style={styles.categoryTabsContainer}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.themeChipsRow}
+          contentContainerStyle={styles.categoryTabsScroll}
         >
-          {ATMOSPHERE_THEMES.map((theme) => {
-            const isThemeActive = currentTheme === theme.id;
-            return (
-              <TouchableOpacity
-                key={theme.id}
-                style={[
-                  styles.themePill,
-                  {
-                    backgroundColor: isThemeActive
-                      ? isDark
-                        ? theme.darkBg
-                        : theme.lightBg
-                      : colors.surface,
-                    borderColor: isThemeActive
-                      ? theme.accent
-                      : colors.surfaceBorder,
-                    borderWidth: isThemeActive ? 1.8 : 1,
-                  },
-                ]}
-                onPress={() => handleSelectThemePill(theme.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={{ fontSize: 18, marginRight: 6 }}>{theme.icon}</Text>
-                <Text
-                  style={[
-                    styles.themePillText,
-                    {
-                      color: isThemeActive
-                        ? isDark
-                          ? '#FFFFFF'
-                          : '#1A2E22'
-                        : colors.textPrimary,
-                      fontWeight: isThemeActive ? '700' : '500',
-                    },
-                  ]}
-                >
-                  {theme.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-
-        {/* 2. LIVE THEMATIC BACKDROP BEHIND ACTIVE SOUND PLAYING */}
-        <AtmosphereThemeView
-          theme={currentTheme}
-          isActive={isPlaying}
-          height={260}
-          style={[styles.playerThematicCard, { marginTop: spacing.md }]}
-        >
-          <View
-            style={[
-              styles.playerInterior,
-              {
-                backgroundColor: isDark
-                  ? 'rgba(15, 27, 21, 0.82)'
-                  : 'rgba(255, 255, 255, 0.88)',
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(0, 0, 0, 0.06)',
-              },
-            ]}
-          >
-            {/* Header pill inside player */}
-            <View style={styles.thematicBadgeRow}>
-              <View
-                style={[
-                  styles.atmosphereTag,
-                  {
-                    backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : activeThemeMeta.lightBg,
-                    borderColor: activeThemeMeta.accent,
-                  },
-                ]}
-              >
-                <Text style={{ fontSize: 12, marginRight: 4 }}>
-                  {activeThemeMeta.icon}
-                </Text>
-                <Text
-                  style={[
-                    styles.atmosphereTagText,
-                    { color: isDark ? '#FFFFFF' : '#1A2E22' },
-                  ]}
-                >
-                  {activeThemeMeta.name.toUpperCase()} THEME
-                </Text>
-              </View>
-
-              <Text
-                style={[
-                  typography.caption,
-                  {
-                    color: isPlaying ? colors.accentTerracotta : colors.textMuted,
-                    fontWeight: '700',
-                    letterSpacing: 0.5,
-                  },
-                ]}
-              >
-                {isPlaying ? '● PLAYING' : 'PAUSED'}
-              </Text>
-            </View>
-
-            {/* Track Info */}
-            <View style={styles.thematicTrackInfo}>
-              <Text
-                style={[
-                  styles.nowPlayingTitle,
-                  { color: colors.textPrimary },
-                ]}
-                numberOfLines={1}
-              >
-                {currentTrack?.title}
-              </Text>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textSecondary, marginTop: 2 },
-                ]}
-                numberOfLines={1}
-              >
-                {currentTrack?.subtitle}
-              </Text>
-            </View>
-
-            {/* Volume Control with + and - buttons */}
-            <View style={styles.volumeContainer}>
-              <View style={styles.volumeHeaderRow}>
-                <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                  VOLUME
-                </Text>
-                <Text
-                  style={[
-                    typography.caption,
-                    { color: colors.textPrimary, fontWeight: '700' },
-                  ]}
-                >
-                  🔊 {Math.round(volume * 100)}%
-                </Text>
-              </View>
-
-              <View style={styles.volumeControlsRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.volStepBtn,
-                    {
-                      backgroundColor: isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : 'rgba(0, 0, 0, 0.06)',
-                      borderColor: isDark
-                        ? 'rgba(255, 255, 255, 0.2)'
-                        : 'rgba(0, 0, 0, 0.12)',
-                    },
-                  ]}
-                  onPress={() => handleVolumeStep(-0.1)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Text style={[styles.volStepText, { color: colors.textPrimary }]}>−</Text>
-                </TouchableOpacity>
-
-                <View style={styles.sliderWrapper}>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={0}
-                    maximumValue={1}
-                    value={volume}
-                    onValueChange={handleVolumeChange}
-                    minimumTrackTintColor={activeThemeMeta.accent}
-                    maximumTrackTintColor={colors.surfaceBorder}
-                    thumbTintColor={activeThemeMeta.accent}
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={[
-                    styles.volStepBtn,
-                    {
-                      backgroundColor: isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : 'rgba(0, 0, 0, 0.06)',
-                      borderColor: isDark
-                        ? 'rgba(255, 255, 255, 0.2)'
-                        : 'rgba(0, 0, 0, 0.12)',
-                    },
-                  ]}
-                  onPress={() => handleVolumeStep(0.1)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Text style={[styles.volStepText, { color: colors.textPrimary }]}>+</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Control Buttons */}
-            <View style={styles.playerButtonsRow}>
-              <PrimaryButton
-                title={isPlaying ? 'Pause' : 'Play'}
-                onPress={handleTogglePlayPause}
-                variant={isPlaying ? 'secondary' : 'primary'}
-                style={styles.halfBtn}
-              />
-              <PrimaryButton
-                title="Stop"
-                onPress={handleStop}
-                variant="danger"
-                style={styles.halfBtn}
-              />
-            </View>
-          </View>
-        </AtmosphereThemeView>
-
-        {/* 3. Category Selector Strip */}
-        <Text
-          style={[
-            typography.subheader,
-            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.xs },
-          ]}
-        >
-          Categories
-        </Text>
-
-        <View style={styles.categoryGrid}>
           {SOUND_CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.id;
-            const bg = isDark
-              ? isSelected
-                ? cat.pastelBgDark
-                : colors.surface
-              : isSelected
-              ? cat.pastelBg
-              : colors.surface;
-
             return (
               <TouchableOpacity
                 key={cat.id}
                 style={[
-                  styles.categoryCard,
+                  styles.categoryTab,
                   {
-                    backgroundColor: bg,
-                    borderColor: isSelected
-                      ? cat.borderColor
-                      : colors.surfaceBorder,
+                    backgroundColor: isSelected
+                      ? isDark
+                        ? cat.pastelBgDark
+                        : cat.pastelBg
+                      : colors.surface,
+                    borderColor: isSelected ? cat.borderColor : colors.surfaceBorder,
                     borderWidth: isSelected ? 2 : 1,
                   },
                 ]}
                 onPress={() => setSelectedCategory(cat.id)}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
               >
-                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <Text style={{ fontSize: 18, marginRight: 6 }}>{cat.icon}</Text>
                 <Text
                   style={[
-                    styles.categoryTitle,
+                    styles.categoryTabText,
                     {
                       color: isSelected
                         ? isDark
                           ? '#FFFFFF'
                           : '#1A2E22'
-                        : colors.textPrimary,
+                        : colors.textSecondary,
+                      fontWeight: isSelected ? '700' : '500',
                     },
                   ]}
                 >
                   {cat.title}
                 </Text>
-                <Text
-                  style={[
-                    styles.categorySubtitle,
-                    {
-                      color: isSelected
-                        ? isDark
-                          ? '#C5D8CF'
-                          : '#4A5D52'
-                        : colors.textSecondary,
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {cat.subtitle}
-                </Text>
               </TouchableOpacity>
             );
           })}
-        </View>
+        </ScrollView>
+      </View>
 
-        {/* 4. Audios in Selected Category */}
-        <View style={styles.trackSectionHeader}>
-          <Text
-            style={[
-              typography.subheader,
-              { color: colors.textPrimary },
-            ]}
-          >
+      {/* 2. Main Track List */}
+      <ScrollView
+        contentContainerStyle={[styles.trackListContainer, { padding: spacing.lg }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.categoryHeader}>
+          <Text style={[typography.subheader, { color: colors.textPrimary }]}>
             {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Sounds
           </Text>
           <Text style={[typography.caption, { color: colors.textSecondary }]}>
-            {filteredTracks.length} tracks
+            {filteredTracks.length} tracks • Tap to play
           </Text>
         </View>
 
@@ -481,15 +216,21 @@ export const SoundsScreen: React.FC = () => {
               style={[
                 styles.trackCard,
                 {
-                  backgroundColor: isSelected
+                  backgroundColor: isCurrentlyPlayingThis
                     ? isDark
                       ? 'rgba(224, 122, 95, 0.22)'
-                      : colors.cardSoundsBg + '25'
+                      : colors.cardSoundsBg + '30'
+                    : isSelected
+                    ? isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : colors.surfaceElevated
                     : colors.surface,
-                  borderColor: isSelected
+                  borderColor: isCurrentlyPlayingThis
                     ? colors.accentTerracotta
+                    : isSelected
+                    ? colors.primaryLight
                     : colors.surfaceBorder,
-                  borderWidth: isSelected ? 1.8 : 1,
+                  borderWidth: isCurrentlyPlayingThis ? 2 : 1,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
@@ -499,7 +240,7 @@ export const SoundsScreen: React.FC = () => {
                   style={[
                     styles.trackIconBubble,
                     {
-                      backgroundColor: isSelected
+                      backgroundColor: isCurrentlyPlayingThis
                         ? colors.accentTerracotta + '35'
                         : isDark
                         ? 'rgba(255, 255, 255, 0.08)'
@@ -528,18 +269,30 @@ export const SoundsScreen: React.FC = () => {
                       typography.caption,
                       { color: colors.textSecondary, marginTop: 2 },
                     ]}
+                    numberOfLines={1}
                   >
                     {track.subtitle}
                   </Text>
                 </View>
 
-                <View style={styles.statusIndicator}>
+                <View style={styles.playStateBtn}>
                   {isCurrentlyPlayingThis ? (
-                    <Text style={{ fontSize: 20 }}>🔊</Text>
-                  ) : isSelected ? (
-                    <Text style={{ fontSize: 18, color: colors.accentTerracotta }}>✓</Text>
+                    <View style={[styles.playingBadge, { backgroundColor: colors.accentTerracotta }]}>
+                      <Text style={styles.playingBadgeText}>❚❚ Pause</Text>
+                    </View>
                   ) : (
-                    <Text style={[styles.playArrow, { color: colors.textSecondary }]}>▶</Text>
+                    <View
+                      style={[
+                        styles.playCircle,
+                        {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 255, 255, 0.12)'
+                            : colors.surfaceBorder,
+                        },
+                      ]}
+                    >
+                      <Text style={{ fontSize: 13, color: colors.textPrimary, marginLeft: 2 }}>▶</Text>
+                    </View>
                   )}
                 </View>
               </View>
@@ -547,82 +300,211 @@ export const SoundsScreen: React.FC = () => {
           );
         })}
 
-        {/* 5. Sleep Timer Section */}
-        <Text
-          style={[
-            typography.subheader,
-            { color: colors.textPrimary, marginTop: spacing.xl, marginBottom: spacing.xs },
-          ]}
+        <View style={{ height: 260 }} />
+      </ScrollView>
+
+      {/* 3. DOCKED BOTTOM PLAYER (With Live Animated Atmosphere Theme Behind It!) */}
+      <View style={styles.dockedPlayerWrapper}>
+        <AtmosphereThemeView
+          theme={currentTheme}
+          isActive={isPlaying}
+          height={210}
+          style={styles.dockedPlayerCard}
         >
-          Sleep Timer
-        </Text>
-        <Text
-          style={[
-            typography.caption,
-            { color: colors.textSecondary, marginBottom: spacing.md },
-          ]}
-        >
-          Automatically stop sound playback after chosen duration
-        </Text>
-
-        <View style={styles.sleepChipsRow}>
-          {SLEEP_TIMER_OPTIONS.map((min) => {
-            const isSelected = selectedSleepMin === min;
-            const label = min === 0 ? 'Off' : `${min}m`;
-
-            return (
-              <TouchableOpacity
-                key={min}
-                style={[
-                  styles.sleepChip,
-                  {
-                    backgroundColor: isSelected ? colors.accentTerracotta : colors.surface,
-                    borderColor: isSelected ? colors.accentTerracotta : colors.surfaceBorder,
-                    borderRadius: 24,
-                  },
-                ]}
-                onPress={() => handleSelectSleepTimer(min)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    typography.bodyBold,
-                    { color: isSelected ? '#FFFFFF' : colors.textPrimary },
-                  ]}
-                >
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Active Sleep Timer Countdown */}
-        {sleepRemainingSeconds !== null && sleepRemainingSeconds > 0 && (
           <View
             style={[
-              styles.sleepTimerActiveBanner,
+              styles.playerInterior,
               {
                 backgroundColor: isDark
-                  ? 'rgba(224, 122, 95, 0.2)'
-                  : colors.accentPeach,
-                borderColor: isDark ? 'rgba(224, 122, 95, 0.35)' : 'transparent',
-                borderWidth: isDark ? 1 : 0,
-                borderRadius: 20,
+                  ? 'rgba(15, 27, 21, 0.88)'
+                  : 'rgba(255, 255, 255, 0.92)',
+                borderColor: isDark
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : 'rgba(0, 0, 0, 0.08)',
               },
             ]}
           >
-            <Text
-              style={[
-                typography.bodyBold,
-                { color: isDark ? '#FFD4C4' : '#4A2616' },
-              ]}
-            >
-              ⏳ Stops in: {formatTimeMMSS(sleepRemainingSeconds)}
-            </Text>
+            {/* Top row: Track Title & Sleep Timer Pill */}
+            <View style={styles.playerTopRow}>
+              <View style={styles.playerTrackTitleBox}>
+                <Text
+                  style={[
+                    styles.playerTrackTitle,
+                    { color: colors.textPrimary },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {currentTrack.title}
+                </Text>
+                <Text
+                  style={[
+                    typography.caption,
+                    { color: colors.textSecondary },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {activeThemeMeta.name} • {isPlaying ? 'Playing' : 'Paused'}
+                </Text>
+              </View>
+
+              {/* Sleep timer button */}
+              <TouchableOpacity
+                style={[
+                  styles.sleepBtn,
+                  {
+                    backgroundColor: selectedSleepMin > 0
+                      ? colors.accentTerracotta + '30'
+                      : isDark
+                      ? 'rgba(255, 255, 255, 0.08)'
+                      : 'rgba(0, 0, 0, 0.05)',
+                    borderColor: selectedSleepMin > 0
+                      ? colors.accentTerracotta
+                      : colors.surfaceBorder,
+                  },
+                ]}
+                onPress={cycleSleepTimer}
+                activeOpacity={0.7}
+              >
+                <Text style={{ fontSize: 13 }}>🌙</Text>
+                <Text
+                  style={[
+                    styles.sleepBtnText,
+                    {
+                      color: selectedSleepMin > 0
+                        ? colors.accentTerracotta
+                        : colors.textSecondary,
+                    },
+                  ]}
+                >
+                  {sleepRemainingSeconds !== null && sleepRemainingSeconds > 0
+                    ? formatTimeMMSS(sleepRemainingSeconds)
+                    : selectedSleepMin > 0
+                    ? `${selectedSleepMin}m`
+                    : 'Sleep'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Middle row: Clean Volume Stepper */}
+            <View style={styles.volumeStepperRow}>
+              <TouchableOpacity
+                style={[
+                  styles.stepBtn,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(255, 255, 255, 0.12)'
+                      : 'rgba(0, 0, 0, 0.06)',
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.18)'
+                      : 'rgba(0, 0, 0, 0.12)',
+                  },
+                ]}
+                onPress={() => handleVolumeStep(-0.1)}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={[styles.stepBtnText, { color: colors.textPrimary }]}>−</Text>
+              </TouchableOpacity>
+
+              <View style={styles.sliderContainer}>
+                <Slider
+                  style={{ width: '100%', height: 32 }}
+                  minimumValue={0}
+                  maximumValue={1}
+                  value={volume}
+                  onValueChange={handleVolumeChange}
+                  minimumTrackTintColor={activeThemeMeta.accent}
+                  maximumTrackTintColor={colors.surfaceBorder}
+                  thumbTintColor={activeThemeMeta.accent}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.stepBtn,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(255, 255, 255, 0.12)'
+                      : 'rgba(0, 0, 0, 0.06)',
+                    borderColor: isDark
+                      ? 'rgba(255, 255, 255, 0.18)'
+                      : 'rgba(0, 0, 0, 0.12)',
+                  },
+                ]}
+                onPress={() => handleVolumeStep(0.1)}
+                activeOpacity={0.7}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={[styles.stepBtnText, { color: colors.textPrimary }]}>+</Text>
+              </TouchableOpacity>
+
+              <Text
+                style={[
+                  typography.caption,
+                  {
+                    color: colors.textSecondary,
+                    width: 38,
+                    textAlign: 'right',
+                    fontWeight: '700',
+                  },
+                ]}
+              >
+                {Math.round(volume * 100)}%
+              </Text>
+            </View>
+
+            {/* Bottom row: Play/Pause and Stop buttons */}
+            <View style={styles.playerButtonsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.mainPlayBtn,
+                  {
+                    backgroundColor: isPlaying
+                      ? isDark
+                        ? 'rgba(255, 255, 255, 0.15)'
+                        : 'rgba(0, 0, 0, 0.08)'
+                      : colors.accentTerracotta,
+                  },
+                ]}
+                onPress={handleTogglePlayPause}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.mainPlayBtnText,
+                    {
+                      color: isPlaying
+                        ? colors.textPrimary
+                        : '#FFFFFF',
+                    },
+                  ]}
+                >
+                  {isPlaying ? '❚❚ Pause' : '▶ Play'}
+                </Text>
+              </TouchableOpacity>
+
+              {isPlaying && (
+                <TouchableOpacity
+                  style={[
+                    styles.stopBtn,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(222, 119, 91, 0.2)'
+                        : 'rgba(222, 119, 91, 0.15)',
+                    },
+                  ]}
+                  onPress={handleStop}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.stopBtnText, { color: colors.accentTerracotta }]}>
+                    ◼ Stop
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        )}
-      </ScrollView>
+        </AtmosphereThemeView>
+      </View>
     </View>
   );
 };
@@ -631,128 +513,29 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 40,
+  categoryTabsContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
-  themeChipsRow: {
-    flexDirection: 'row',
+  categoryTabsScroll: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     gap: 8,
-    paddingVertical: 6,
   },
-  themePill: {
+  categoryTab: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 9,
+    paddingVertical: 8,
     borderRadius: 20,
   },
-  themePillText: {
-    fontSize: 13,
+  categoryTabText: {
+    fontSize: 14,
   },
-  playerThematicCard: {
-    width: '100%',
-    borderRadius: 24,
+  trackListContainer: {
+    paddingBottom: 20,
   },
-  playerInterior: {
-    width: '92%',
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 16,
-    alignSelf: 'center',
-  },
-  thematicBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  atmosphereTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-    borderWidth: 1,
-  },
-  atmosphereTagText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  thematicTrackInfo: {
-    marginBottom: 10,
-  },
-  nowPlayingTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    fontFamily: 'serif',
-  },
-  volumeContainer: {
-    marginBottom: 12,
-  },
-  volumeHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  volumeControlsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  volStepBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  volStepText: {
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  sliderWrapper: {
-    flex: 1,
-    marginHorizontal: 8,
-  },
-  slider: {
-    width: '100%',
-    height: 36,
-  },
-  playerButtonsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  halfBtn: {
-    flex: 1,
-  },
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 20,
-  },
-  categoryCard: {
-    width: '48%',
-    borderRadius: 18,
-    padding: 14,
-  },
-  categoryIcon: {
-    fontSize: 26,
-    marginBottom: 6,
-  },
-  categoryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    fontFamily: 'serif',
-  },
-  categorySubtitle: {
-    fontSize: 11,
-    marginTop: 2,
-  },
-  trackSectionHeader: {
+  categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -780,28 +563,124 @@ const styles = StyleSheet.create({
   },
   trackInfo: {
     flex: 1,
+    marginRight: 8,
   },
-  statusIndicator: {
-    paddingLeft: 8,
-  },
-  playArrow: {
-    fontSize: 16,
-  },
-  sleepChipsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 8,
-  },
-  sleepChip: {
-    flex: 1,
-    height: 44,
+  playStateBtn: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  playingBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 14,
+  },
+  playingBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  playCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dockedPlayerWrapper: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  dockedPlayerCard: {
+    borderRadius: 24,
+  },
+  playerInterior: {
+    width: '94%',
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 12,
+    alignSelf: 'center',
+  },
+  playerTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  playerTrackTitleBox: {
+    flex: 1,
+    marginRight: 8,
+  },
+  playerTrackTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  sleepBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
     borderWidth: 1,
   },
-  sleepTimerActiveBanner: {
-    marginTop: 14,
-    padding: 12,
+  sleepBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 4,
+  },
+  volumeStepperRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 8,
+  },
+  stepBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepBtnText: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 20,
+  },
+  sliderContainer: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  playerButtonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  mainPlayBtn: {
+    flex: 1,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mainPlayBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  stopBtn: {
+    width: 75,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stopBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
