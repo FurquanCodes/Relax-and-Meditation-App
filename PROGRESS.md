@@ -25,25 +25,32 @@
   - Background foreground service with live countdown notification and "Stop" action.
   - Screen-off execution guaranteed with wake lock and wall-clock time math.
   - Automatic progress recording on completion.
-- [x] **Milestone 4: Ambient Sounds and Sleep Timer**
-  - 4 seamless looping CC0 ambient sounds: Soothing White Noise, Gentle Rain, Ocean Waves, Forest Breeze.
-  - Play/pause and smooth volume slider (`@react-native-community/slider`).
+- [x] **Milestone 4: Categorized Ambient Sounds and Sleep Timer**
+  - 12 real, high-quality CC0 ambient tracks organized into 4 distinct categories:
+    - 🌧️ Rain (Gentle Night Rain, Sleepy Rain Music, Rain & Thunder)
+    - 🌊 Ocean (Ocean Waves, Ocean Vibes, Ocean Waves Music)
+    - 🌲 Forest (Forest Ambience & Birds, Forest River & Birds, Forest Bird Chirping)
+    - 🧘 Calm & Meditate (Meditation Calm, Calm Atmosphere, White Noise Relax)
+  - Interactive category selector grid filtering tracks on demand.
+  - Play/pause indicators, track card feedback, and smooth volume slider (`@react-native-community/slider`).
   - Background playback with Android media controls notification widget.
   - Sleep timer: Off, 1m test, 15m, 30m, 60m with live countdown display and wall-clock accuracy.
-- [x] **Milestone 5: Polish & UX Safety**
+- [x] **Milestone 5: Polish, UX Safety & Visual Redesign**
+  - Complete UI overhaul with organic pastel linen aesthetic (`#FAF7F0`) and high-contrast radiant dark mode (`#0D1712`).
+  - Custom serene sunrise & nature illustration, split stat cards, and color-coded practice cards.
   - Strictly compliant with text rules: zero medical/health claims.
   - Soft, uncluttered design with accessible touch targets (> 48dp).
   - Settings screen: Follow device / Light / Dark theme selector, Bell sound toggle, About section.
   - Audio sources catalog documented in `assets/audio/SOURCES.md`.
 - [x] **Milestone 6: Testing**
   - Verified on physical phone (`ZY22GF4LZ9`) and Android Emulator (`Medium_Phone_API_37.0`).
-  - Verified dark theme and light theme.
+  - Verified dark theme and light theme readability and contrast.
   - Verified portrait orientation locking.
 - [x] **Milestone 7: Release & Submission**
-  - Standalone offline Release APK compiled (77 MB, includes Hermes JS bundle and all audio assets).
-  - Location: `Q9Relax/android/app/build/outputs/apk/release/app-release.apk`.
+  - Standalone offline Release APK compiled (149 MB, includes Hermes JS bundle and all 12 real audio assets).
+  - Released at root: `D:\Q9 Technologies\Calm App\Q9Relax-v0.1.0-release.apk` and inside `android/app/build/outputs/apk/release/app-release.apk`.
   - Comprehensive `README.md` and `PROGRESS.md` updated.
-  - Git repository committed with clean commit history.
+  - Git repository synced with private GitHub repo `FurquanCodes/Relax-and-Meditation-App`.
 
 ## In progress
 - None (All MVP requirements complete).
