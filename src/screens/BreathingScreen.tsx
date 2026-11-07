@@ -186,7 +186,7 @@ export const BreathingScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
         title="Guided Breathing"
         showBack={screenState === 'setup'}
@@ -393,7 +393,7 @@ export const BreathingScreen: React.FC = () => {
           />
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

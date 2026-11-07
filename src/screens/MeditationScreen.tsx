@@ -112,7 +112,7 @@ export const MeditationScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
         title="Meditation Timer"
         showBack={!isRunning}
@@ -258,7 +258,7 @@ export const MeditationScreen: React.FC = () => {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

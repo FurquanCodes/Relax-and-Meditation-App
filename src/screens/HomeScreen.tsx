@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { Card } from '../components/Card';
 import { getDaytimeGreeting } from '../logic/formatters';
@@ -33,10 +34,11 @@ export const HomeScreen: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  const insets = useSafeAreaInsets();
   const { greeting, subtitle } = getDaytimeGreeting();
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       {/* Header with App Title & Settings Icon */}
       <View
         style={[
@@ -44,6 +46,8 @@ export const HomeScreen: React.FC = () => {
           {
             paddingHorizontal: spacing.xl,
             borderBottomColor: colors.surfaceBorder,
+            paddingTop: insets.top,
+            height: 60 + insets.top,
           },
         ]}
       >
@@ -231,7 +235,7 @@ export const HomeScreen: React.FC = () => {
           </View>
         </Card>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

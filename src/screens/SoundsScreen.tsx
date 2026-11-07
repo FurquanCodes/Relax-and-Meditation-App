@@ -81,7 +81,7 @@ export const SoundsScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
         title="Calming Sounds"
         showBack={true}
@@ -291,7 +291,7 @@ export const SoundsScreen: React.FC = () => {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

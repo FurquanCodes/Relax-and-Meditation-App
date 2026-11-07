@@ -39,7 +39,7 @@ export const SettingsScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <Header
         title="Settings"
         showBack={true}
@@ -173,7 +173,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </Card>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

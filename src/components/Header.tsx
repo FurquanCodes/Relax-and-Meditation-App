@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   rightAction,
 }) => {
   const { colors, typography, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <View
@@ -25,6 +27,8 @@ export const Header: React.FC<HeaderProps> = ({
           backgroundColor: colors.background,
           borderBottomColor: colors.surfaceBorder,
           paddingHorizontal: spacing.lg,
+          paddingTop: insets.top,
+          height: 60 + insets.top,
         },
       ]}
     >
