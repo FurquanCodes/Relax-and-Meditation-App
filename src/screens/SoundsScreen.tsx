@@ -13,16 +13,24 @@ import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { Card } from '../components/Card';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { audioService, AMBIENT_TRACKS, AmbientTrack } from '../services/audioService';
+import {
+  audioService,
+  AMBIENT_TRACKS,
+  SOUND_CATEGORIES,
+  SoundCategoryId,
+  AmbientTrack,
+} from '../services/audioService';
 import { formatTimeMMSS } from '../logic/formatters';
 
-const SLEEP_TIMER_OPTIONS = [0, 1, 15, 30, 60]; // 0 = off, 1 = 1m test, 15, 30, 60
+const SLEEP_TIMER_OPTIONS = [0, 1, 15, 30, 60];
 
 export const SoundsScreen: React.FC = () => {
   const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation();
   const playbackState = usePlaybackState();
 
+  // Active Category state (Rain, Ocean, Forest, Calm)
+  const [selectedCategory, setSelectedCategory] = useState<SoundCategoryId>('rain');
   const [activeTrackId, setActiveTrackId] = useState<string>(AMBIENT_TRACKS[0].id);
   const [volume, setVolume] = useState<number>(0.7);
   const [selectedSleepMin, setSelectedSleepMin] = useState<number>(0);
@@ -46,6 +54,15 @@ export const SoundsScreen: React.FC = () => {
       unsubSleep();
     };
   }, []);
+
+  // Filter tracks by currently selected category
+  const filteredTracks = AMBIENT_TRACKS.filter(
+    (track) => track.categoryId === selectedCategory
+  );
+
+  const activeCategoryMeta = SOUND_CATEGORIES.find(
+    (cat) => cat.id === selectedCategory
+  );
 
   const handleSelectTrack = async (track: AmbientTrack) => {
     setActiveTrackId(track.id);
@@ -94,23 +111,100 @@ export const SoundsScreen: React.FC = () => {
         <Text
           style={[
             typography.body,
-            { color: colors.textSecondary, marginBottom: spacing.lg },
+            { color: colors.textSecondary, marginBottom: spacing.md },
           ]}
         >
-          Continuous background sounds to relax, focus, or sleep.
+          Choose a soothing sound category, then select your ambience.
         </Text>
 
-        {/* Ambient Track Selection Cards */}
+        {/* 1. Category Selector Strip */}
         <Text
           style={[
             typography.subheader,
             { color: colors.textPrimary, marginBottom: spacing.sm },
           ]}
         >
-          Select Sound
+          Categories
         </Text>
 
-        {AMBIENT_TRACKS.map((track) => {
+        <View style={styles.categoryGrid}>
+          {SOUND_CATEGORIES.map((cat) => {
+            const isSelected = selectedCategory === cat.id;
+            const bg = isDark
+              ? isSelected
+                ? cat.pastelBgDark
+                : colors.surface
+              : isSelected
+              ? cat.pastelBg
+              : colors.surface;
+
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                style={[
+                  styles.categoryCard,
+                  {
+                    backgroundColor: bg,
+                    borderColor: isSelected
+                      ? cat.borderColor
+                      : colors.surfaceBorder,
+                    borderWidth: isSelected ? 2 : 1,
+                  },
+                ]}
+                onPress={() => setSelectedCategory(cat.id)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.categoryIcon}>{cat.icon}</Text>
+                <Text
+                  style={[
+                    styles.categoryTitle,
+                    {
+                      color: isSelected
+                        ? isDark
+                          ? '#FFFFFF'
+                          : '#1A2E22'
+                        : colors.textPrimary,
+                    },
+                  ]}
+                >
+                  {cat.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.categorySubtitle,
+                    {
+                      color: isSelected
+                        ? isDark
+                          ? '#C5D8CF'
+                          : '#4A5D52'
+                        : colors.textSecondary,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {cat.subtitle}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* 2. Audios in Selected Category */}
+        <View style={styles.trackSectionHeader}>
+          <Text
+            style={[
+              typography.subheader,
+              { color: colors.textPrimary },
+            ]}
+          >
+            {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Sounds
+          </Text>
+          <Text style={[typography.caption, { color: colors.textSecondary }]}>
+            {filteredTracks.length} tracks
+          </Text>
+        </View>
+
+        {filteredTracks.map((track) => {
           const isSelected = activeTrackId === track.id;
           const isCurrentlyPlayingThis = isSelected && isPlaying;
 
@@ -177,14 +271,16 @@ export const SoundsScreen: React.FC = () => {
                     <Text style={{ fontSize: 20 }}>🔊</Text>
                   ) : isSelected ? (
                     <Text style={{ fontSize: 18, color: colors.accentTerracotta }}>✓</Text>
-                  ) : null}
+                  ) : (
+                    <Text style={[styles.playArrow, { color: colors.textSecondary }]}>▶</Text>
+                  )}
                 </View>
               </View>
             </Card>
           );
         })}
 
-        {/* Active Player Card with Play/Pause & Volume */}
+        {/* 3. Now Playing Card */}
         <Card
           style={[
             styles.playerCard,
@@ -243,7 +339,7 @@ export const SoundsScreen: React.FC = () => {
           </View>
         </Card>
 
-        {/* Sleep Timer Section */}
+        {/* 4. Sleep Timer Section */}
         <Text
           style={[
             typography.subheader,
@@ -330,6 +426,36 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
   },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 20,
+  },
+  categoryCard: {
+    width: '48%',
+    borderRadius: 18,
+    padding: 14,
+  },
+  categoryIcon: {
+    fontSize: 26,
+    marginBottom: 6,
+  },
+  categoryTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  categorySubtitle: {
+    fontSize: 11,
+    marginTop: 2,
+  },
+  trackSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   trackCard: {
     marginVertical: 5,
     borderRadius: 20,
@@ -354,6 +480,11 @@ const styles = StyleSheet.create({
   },
   statusIndicator: {
     marginLeft: 8,
+    paddingRight: 4,
+  },
+  playArrow: {
+    fontSize: 14,
+    opacity: 0.6,
   },
   playerCard: {
     paddingVertical: 20,
