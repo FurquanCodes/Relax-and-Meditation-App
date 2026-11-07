@@ -35,20 +35,20 @@ adb install -r android/app/build/outputs/apk/release/app-release.apk
 ```
 
 ## What is Done (MVP Features)
-- [x] **Redesigned Relaxing UI:** Warm pastel linen theme (`#FAF7F0`) and high-contrast radiant dark mode (`#0D1712`) with botanical green tones, serene sunrise nature illustration, split session/minutes stat cards, and color-coded practice cards.
+- [x] **Redesigned Relaxing UI & Floating Island Navigation:** Modern Floating Island Animated Bottom Navigation Bar with glowing active capsule pill, bouncy touch scale, and indicator dot; living hero banner with floating glowing sun and gently swaying leaves; large tactile buttons (`PrimaryButton` 56dp height with spring scale, 46x46 circular arrows, 44x44 volume steppers).
 - [x] **Home Screen:** Dynamic daytime greeting ("Good morning", "Good afternoon", "Good evening"), stored progress display (sessions and total minutes), three distinct navigation entry points, and settings shortcut.
 - [x] **Guided Breathing:** Data-driven breathing patterns (Box breathing 4-4-4-4, 4-7-8 relaxing breath, 4-6 steady breath) with 1, 3, 5 minute session choices; animated expanding/contracting circle using React Native `Animated` native driver; synchronized live visual cues ("Inhale", "Hold", "Exhale") with countdown timer; Pause/Resume/Stop; records progress on completion.
-- [x] **Enhanced Meditation Experience:** Session Intentions (Peace & Calm, Release Stress, Deep Rest, Clarity & Focus) with guiding mantras; optional Ambient Soundscape companions (River Stream, Gentle Rain, Forest Birds, Ocean Waves, Zen Harmony, or Pure Silence); pulsing Zen breathing halo around countdown timer; live soundscape volume stepper (+ / −); native screen-off foreground service with singing bowl bells.
-- [x] **Live Animated Atmosphere Themes:** Dynamic 60fps animations (Mountain River with flowing currents, Gentle Rain with falling droplets, Deep Forest with swaying leaves & fireflies, Ocean Tide with rhythmic swells, Zen Twilight with radiant breathing auras) rendered live behind sound playback and active meditation.
-- [x] **Smart Audio Controls & Precise Volume Steppers:** Play after pause resumes seamlessly from the exact paused timestamp; dedicated `+` and `−` stepper buttons for 10% volume increments alongside the smooth slider.
-- [x] **12 Categorized Calming Sounds:** 4 distinct sound categories with real, high-quality relaxing audio tracks:
-  - 🌧️ **Rain:** Gentle Night Rain, Sleepy Rain Music, Rain & Thunder
-  - 🌊 **Ocean:** Ocean Waves, Ocean Vibes, Ocean Waves Music
-  - 🌲 **Forest:** Forest Ambience & Birds, Forest River & Birds, Forest Bird Chirping
-  - 🧘 **Calm & Meditate:** Meditation Calm, Calm Atmosphere, White Noise Relax
-- [x] **Interactive Sound Browser:** Category-first selection grid letting users filter sounds by category, one-tap playback, and active now-playing card with smooth volume slider.
+- [x] **Enhanced Meditation Experience:** Clean 2-step setup: Duration selector (1, 5, 10, 15, 20m) & optional Ambient Soundscape companion (Forest, Rain, Ocean, Calm, or Pure Silence); pulsing Zen breathing halo around countdown timer; live soundscape volume stepper (+ / −); native screen-off foreground service with singing bowl bells.
+- [x] **Live Animated Atmosphere Themes:** Dynamic animations (Gentle Rain with falling droplets, Deep Forest with swaying leaves & fireflies, Ocean Tide with rhythmic swells, Zen Twilight with radiant breathing auras) rendered live behind sound playback and active meditation.
+- [x] **Smart Audio Controls & Precise Volume Steppers:** Play after pause resumes seamlessly from the exact paused timestamp; dedicated `+` and `−` stepper buttons for 10% volume increments alongside the smooth slider; animated dancing equalizer soundwaves.
+- [x] **12 Categorized Calming Sounds:** 4 distinct sound categories (3 tracks each) with real, high-quality relaxing audio tracks:
+  - 🌧️ **Rain:** Gentle Night Rain, Sleepy Rain Melody, Rain & Thunder
+  - 🌿 **Forest:** Forest Ambience, Forest River & Birds, Morning Songbirds
+  - 🌊 **Ocean:** Ocean Waves, Ocean Coastal Breeze, Ocean Waves Melody
+  - 🧘 **Calm:** Deep Meditation, Calm Acoustic Melody, Soothing White Noise
+- [x] **Docked Floating Sound Player:** Bottom-anchored player card with animated atmosphere theme, volume steppers, large play/pause button, and cycle sleep timer.
 - [x] **Background Playback & Lockscreen Controls:** Android media notification widget with play/pause and track controls; audio focus ducking/pausing for phone calls and headphone unplugging.
-- [x] **Sleep Timer for Ambient Sounds:** Automatically stops playback after Off, 1m, 15m, 30m, or 60m with live countdown display and wall-clock accuracy.
+- [x] **Sleep Timer for Ambient Sounds:** Automatically stops playback after Off, 15m, 30m, or 60m with live countdown display and wall-clock accuracy.
 - [x] **Local Progress Tracking:** Locally stored session count and cumulative minutes via `@react-native-async-storage/async-storage`; survives app restarts.
 - [x] **Settings:** Light / Dark / Follow Device theme switching (loaded before first screen render to prevent theme flashing); Bell sound toggle; About info with version 1.0.0 and offline notice.
 - [x] **100% Offline:** Zero network requests, zero remote dependencies, all audio and bundles packaged directly inside the standalone APK.

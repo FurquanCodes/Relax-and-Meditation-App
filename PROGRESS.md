@@ -20,31 +20,33 @@
   - Pause/Resume and Stop controls.
   - Automatic progress recording on completion.
 - [x] **Milestone 3: Enhanced Meditation Experience**
-  - Session Intentions selector (Peace & Calm, Release Stress, Deep Rest, Clarity & Focus) with guiding mantras.
-  - Ambient Soundscape Companion during meditation (River Stream, Gentle Rain, Forest Birds, Ocean Waves, Zen Harmony, or Pure Silence).
+  - Intuitive, frictionless 2-step setup: Duration selector (1, 5, 10, 15, 20m) & Background Sound selector.
+  - Ambient Soundscape Companion during meditation (Forest, Rain, Ocean, Calm, or Pure Silence).
   - Animated pulsing Zen breathing aura / halo around the countdown timer.
   - Live soundscape volume stepper (+ / − buttons) directly on the active meditation view.
-  - Configurable durations (1m test, 5, 10, 15, 20 minutes) with singing bowl bell at start and completion.
+  - Configurable durations with singing bowl bell at start and completion.
   - Native Android Foreground Service with ongoing notification and screen-off guarantee.
   - Mindful reflection quote completion screen with saved progress.
 - [x] **Milestone 4: Categorized Ambient Sounds, Atmosphere Themes & Controls**
-  - 12 real, high-quality CC0 ambient tracks organized into 4 distinct categories:
-    - 🌧️ Rain (Gentle Night Rain, Sleepy Rain Music, Rain & Thunder)
-    - 🌊 Ocean (Ocean Waves, Ocean Vibes, Ocean Waves Music)
-    - 🌲 Forest (Forest Ambience & Birds, Forest River & Birds, Forest Bird Chirping)
-    - 🧘 Calm & Meditate (Meditation Calm, Calm Atmosphere, White Noise Relax)
-  - Animated 60fps Atmosphere Themes (Mountain River, Gentle Rain, Deep Forest, Ocean Tide, Zen Twilight) rendered live behind sound playback.
-  - Quick theme selector bar with one-tap atmospheric switches.
+  - 12 real, high-quality CC0 ambient tracks organized into 4 distinct categories (3 tracks each):
+    - 🌧️ Rain (Gentle Night Rain, Sleepy Rain Melody, Rain & Thunder)
+    - 🌿 Forest (Forest Ambience, Forest River & Birds, Morning Songbirds)
+    - 🌊 Ocean (Ocean Waves, Ocean Coastal Breeze, Ocean Waves Melody)
+    - 🧘 Calm (Deep Meditation, Calm Acoustic Melody, Soothing White Noise)
+  - Animated Atmosphere Themes rendered live behind sound playback and active meditation.
+  - Animated dancing soundwave equalizer bars next to playing track.
   - Resume from paused timestamp (playing after pause resumes exactly where left off).
   - Dedicated + / − volume stepper buttons (10% increments) with smooth slider.
-  - Interactive category selector grid filtering tracks on demand.
+  - Tap-to-play track cards with live playing badges.
+  - Docked floating bottom player with sleep timer, volume, and playback controls.
   - Background playback with Android media controls notification widget.
-  - Sleep timer: Off, 1m test, 15m, 30m, 60m with live countdown display and wall-clock accuracy.
-- [x] **Milestone 5: Polish, UX Safety & Visual Redesign**
+  - Sleep timer: Off, 15m, 30m, 60m with live countdown display and wall-clock accuracy.
+- [x] **Milestone 5: Polish, UX Safety & Floating Island Navigation**
+  - Modern Floating Island Animated Bottom Navigation Bar with glowing active capsule pill, bouncy touch scale, and indicator dot.
+  - Living Hero Banner with animated floating glowing sun and gently swaying leaves.
+  - Large, juicy, tactile buttons (`PrimaryButton` 56dp height with spring scale, 46x46 circular arrows, 44x44 volume steppers).
   - Complete UI overhaul with organic pastel linen aesthetic (`#FAF7F0`) and high-contrast radiant dark mode (`#0D1712`).
-  - Custom serene sunrise & nature illustration, split stat cards, and color-coded practice cards.
   - Strictly compliant with text rules: zero medical/health claims.
-  - Soft, uncluttered design with accessible touch targets (> 48dp).
   - Settings screen: Follow device / Light / Dark theme selector, Bell sound toggle, About section.
   - Audio sources catalog documented in `assets/audio/SOURCES.md`.
 - [x] **Milestone 6: Testing**
