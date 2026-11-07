@@ -6,8 +6,7 @@ import {
   Animated,
   Easing,
   TouchableOpacity,
-  SafeAreaView,
-  Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
@@ -42,7 +41,7 @@ export const BreathingScreen: React.FC = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState<number>(0);
   const [phaseSecondsLeft, setPhaseSecondsLeft] = useState<number>(0);
 
-  // Animation scale: 1.0 (min / exhaled) to 1.6 (max / inhaled)
+  // Animation scale: 1.0 (min / exhaled) to 1.55 (max / inhaled)
   const circleScale = useRef(new Animated.Value(1.0)).current;
   const currentAnimation = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -74,7 +73,7 @@ export const BreathingScreen: React.FC = () => {
 
     if (phase.type === 'inhale') {
       currentAnimation.current = Animated.timing(circleScale, {
-        toValue: 1.6,
+        toValue: 1.55,
         duration: phase.durationSeconds * 1000,
         easing: Easing.inOut(Easing.quad),
         useNativeDriver: true,
@@ -106,38 +105,34 @@ export const BreathingScreen: React.FC = () => {
 
     timerIntervalRef.current = setInterval(() => {
       const now = Date.now();
-      const remainingTotal = Math.max(
+      const remaining = Math.max(
         0,
-        Math.ceil((sessionEndTimeRef.current - now) / 1000)
+        Math.round((sessionEndTimeRef.current - now) / 1000)
       );
-      setSessionSecondsLeft(remainingTotal);
 
-      if (remainingTotal <= 0) {
-        // Session complete!
+      setSessionSecondsLeft(remaining);
+
+      if (remaining <= 0) {
         handleSessionCompleted();
         return;
       }
 
-      setPhaseSecondsLeft((prevPhaseSec) => {
-        if (prevPhaseSec <= 1) {
-          // Advance to next phase
-          setCurrentPhaseIndex((prevIdx) => {
-            const nextIdx = (prevIdx + 1) % selectedPattern.phases.length;
-            const nextPhase = selectedPattern.phases[nextIdx];
-            animatePhase(nextPhase);
-            return nextIdx;
-          });
-          const nextPhaseIdx =
-            (currentPhaseIndex + 1) % selectedPattern.phases.length;
-          return selectedPattern.phases[nextPhaseIdx].durationSeconds;
+      setPhaseSecondsLeft((prev) => {
+        if (prev <= 1) {
+          const nextIndex = (currentPhaseIndex + 1) % selectedPattern.phases.length;
+          setCurrentPhaseIndex(nextIndex);
+          const nextPhase = selectedPattern.phases[nextIndex];
+          animatePhase(nextPhase);
+          return nextPhase.durationSeconds;
         }
-        return prevPhaseSec - 1;
+        return prev - 1;
       });
     }, 1000);
 
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
       }
     };
   }, [screenState, isPaused, currentPhaseIndex, selectedPattern]);
@@ -194,13 +189,27 @@ export const BreathingScreen: React.FC = () => {
       />
 
       {screenState === 'setup' && (
-        <View style={[styles.contentContainer, { padding: spacing.xl }]}>
-          <Text style={[typography.body, { color: colors.textSecondary, marginBottom: spacing.lg }]}>
+        <ScrollView
+          style={styles.contentContainer}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text
+            style={[
+              typography.body,
+              { color: colors.textSecondary, marginBottom: spacing.lg },
+            ]}
+          >
             Select a breathing rhythm and session duration.
           </Text>
 
           {/* Pattern Options */}
-          <Text style={[typography.subheader, { color: colors.textPrimary, marginBottom: spacing.sm }]}>
+          <Text
+            style={[
+              typography.subheader,
+              { color: colors.textPrimary, marginBottom: spacing.sm },
+            ]}
+          >
             Breathing Pattern
           </Text>
           {BREATHING_PATTERNS.map((pattern) => {
@@ -210,10 +219,13 @@ export const BreathingScreen: React.FC = () => {
                 key={pattern.id}
                 style={[
                   styles.optionCard,
-                  isSelected && {
-                    borderColor: colors.primary,
-                    borderWidth: 2,
-                    backgroundColor: colors.surfaceElevated,
+                  {
+                    backgroundColor: isSelected
+                      ? colors.accentSage + '30'
+                      : colors.surface,
+                    borderColor: isSelected
+                      ? colors.accentSage
+                      : colors.surfaceBorder,
                   },
                 ]}
                 onPress={() => setSelectedPattern(pattern)}
@@ -223,7 +235,11 @@ export const BreathingScreen: React.FC = () => {
                     <Text
                       style={[
                         typography.bodyBold,
-                        { color: isSelected ? colors.primary : colors.textPrimary },
+                        {
+                          color: colors.textPrimary,
+                          fontFamily: 'serif',
+                          fontSize: 16,
+                        },
                       ]}
                     >
                       {pattern.name}
@@ -240,14 +256,18 @@ export const BreathingScreen: React.FC = () => {
                   <View
                     style={[
                       styles.radioCircle,
-                      { borderColor: isSelected ? colors.primary : colors.surfaceBorder },
+                      {
+                        borderColor: isSelected
+                          ? colors.accentSage
+                          : colors.surfaceBorder,
+                      },
                     ]}
                   >
                     {isSelected && (
                       <View
                         style={[
                           styles.radioDot,
-                          { backgroundColor: colors.primary },
+                          { backgroundColor: colors.accentSage },
                         ]}
                       />
                     )}
@@ -257,11 +277,15 @@ export const BreathingScreen: React.FC = () => {
             );
           })}
 
-          {/* Duration Options */}
+          {/* Duration Chips */}
           <Text
             style={[
               typography.subheader,
-              { color: colors.textPrimary, marginTop: spacing.lg, marginBottom: spacing.sm },
+              {
+                color: colors.textPrimary,
+                marginTop: spacing.xl,
+                marginBottom: spacing.sm,
+              },
             ]}
           >
             Duration
@@ -275,18 +299,24 @@ export const BreathingScreen: React.FC = () => {
                   style={[
                     styles.durationChip,
                     {
-                      backgroundColor: isSelected ? colors.primary : colors.surface,
-                      borderColor: isSelected ? colors.primary : colors.surfaceBorder,
-                      borderRadius: borderRadius.md,
+                      backgroundColor: isSelected
+                        ? colors.accentSage
+                        : colors.surface,
+                      borderColor: isSelected
+                        ? colors.accentSage
+                        : colors.surfaceBorder,
                     },
                   ]}
                   onPress={() => setSelectedDurationMin(min)}
-                  activeOpacity={0.7}
+                  activeOpacity={0.8}
                 >
                   <Text
                     style={[
                       typography.bodyBold,
-                      { color: isSelected ? '#FFFFFF' : colors.textPrimary },
+                      {
+                        color: isSelected ? '#FFFFFF' : colors.textPrimary,
+                        fontSize: 15,
+                      },
                     ]}
                   >
                     {min} min
@@ -296,54 +326,59 @@ export const BreathingScreen: React.FC = () => {
             })}
           </View>
 
-          <View style={{ flex: 1 }} />
-
           <PrimaryButton
             title="Start Breathing"
             onPress={handleStartSession}
-            style={{ marginBottom: spacing.md }}
+            style={{ marginTop: spacing.xxl }}
           />
-        </View>
+        </ScrollView>
       )}
 
       {screenState === 'active' && (
         <View style={[styles.activeContainer, { padding: spacing.xl }]}>
-          {/* Header indicator */}
+          {/* Header Progress */}
           <View style={styles.activeHeader}>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
+            <Text style={[typography.caption, { color: colors.textSecondary }]}>
               {selectedPattern.name.toUpperCase()}
             </Text>
-            <Text style={[typography.header, { color: colors.textPrimary, marginTop: 2 }]}>
+            <Text
+              style={[
+                styles.remainingTimeText,
+                { color: colors.textPrimary },
+              ]}
+            >
               {formatTimeMMSS(sessionSecondsLeft)}
             </Text>
           </View>
 
-          {/* Central Breathing Circle Animation */}
+          {/* Animated Breathing Circle */}
           <View style={styles.circleWrapper}>
+            {/* Outer halo */}
             <Animated.View
               style={[
                 styles.breathingCircle,
                 {
-                  backgroundColor: colors.primaryMuted,
-                  borderColor: colors.primary,
+                  backgroundColor: colors.accentSage + '35',
+                  borderColor: colors.accentSage,
                   transform: [{ scale: circleScale }],
                 },
               ]}
             />
-            {/* Visual Text Overlay */}
+
+            {/* Inner text cue */}
             <View style={styles.cueOverlay}>
               <Text
                 style={[
-                  typography.hero,
-                  { color: colors.primary, fontWeight: '700' },
+                  styles.cueTitle,
+                  { color: colors.textPrimary },
                 ]}
               >
                 {activePhase.label}
               </Text>
               <Text
                 style={[
-                  typography.bodyBold,
-                  { color: colors.textSecondary, marginTop: 4 },
+                  styles.cueSeconds,
+                  { color: colors.accentTerracotta },
                 ]}
               >
                 {phaseSecondsLeft}s
@@ -372,16 +407,26 @@ export const BreathingScreen: React.FC = () => {
       {screenState === 'completed' && (
         <View style={[styles.completedContainer, { padding: spacing.xl }]}>
           <Text style={styles.completedEmoji}>🌿</Text>
-          <Text style={[typography.hero, { color: colors.textPrimary, marginTop: spacing.md }]}>
+          <Text
+            style={[
+              typography.hero,
+              { color: colors.textPrimary, marginTop: spacing.md },
+            ]}
+          >
             Well done.
           </Text>
           <Text
             style={[
               typography.body,
-              { color: colors.textSecondary, textAlign: 'center', marginTop: spacing.sm },
+              {
+                color: colors.textSecondary,
+                textAlign: 'center',
+                marginTop: spacing.sm,
+              },
             ]}
           >
-            You completed {selectedDurationMin} minute of {selectedPattern.name.toLowerCase()}.
+            You completed {selectedDurationMin} minute of{' '}
+            {selectedPattern.name.toLowerCase()}.
           </Text>
 
           <View style={{ flex: 1 }} />
@@ -405,8 +450,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionCard: {
-    marginVertical: 4,
-    minHeight: 64,
+    marginVertical: 5,
+    minHeight: 68,
+    borderRadius: 20,
     justifyContent: 'center',
   },
   optionRow: {
@@ -432,11 +478,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 8,
+    gap: 8,
   },
   durationChip: {
     flex: 1,
     height: 50,
-    marginHorizontal: 4,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -450,23 +497,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
+  remainingTimeText: {
+    fontSize: 28,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    marginTop: 4,
+  },
   circleWrapper: {
-    width: 260,
-    height: 260,
+    width: 270,
+    height: 270,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   breathingCircle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    borderWidth: 3,
+    width: 175,
+    height: 175,
+    borderRadius: 88,
+    borderWidth: 2.5,
     position: 'absolute',
   },
   cueOverlay: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cueTitle: {
+    fontSize: 30,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  cueSeconds: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: 6,
   },
   controlsRow: {
     flexDirection: 'row',
@@ -486,4 +549,3 @@ const styles = StyleSheet.create({
     fontSize: 64,
   },
 });
-

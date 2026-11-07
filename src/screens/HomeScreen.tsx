@@ -5,19 +5,91 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
-import { Card } from '../components/Card';
 import { getDaytimeGreeting } from '../logic/formatters';
 import { progressStore } from '../data/progressStore';
 import { NavigationProp } from '../navigation/types';
 
+// Custom clean vector icons matching high-end design
+const VectorAvatarIcon: React.FC<{ color: string }> = ({ color }) => (
+  <View style={styles.vectorAvatarWrap}>
+    <View style={[styles.vectorAvatarHead, { backgroundColor: color }]} />
+    <View style={[styles.vectorAvatarBody, { backgroundColor: color }]} />
+  </View>
+);
+
+const VectorClockIcon: React.FC<{ color: string }> = ({ color }) => (
+  <View style={[styles.vectorClockCircle, { borderColor: color }]}>
+    <View style={[styles.vectorClockHandH, { backgroundColor: color }]} />
+    <View style={[styles.vectorClockHandV, { backgroundColor: color }]} />
+  </View>
+);
+
+const VectorHomeIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
+  <View style={styles.navIconContainer}>
+    {/* Roof */}
+    <View style={[styles.homeRoof, { borderBottomColor: color }]} />
+    {/* Base */}
+    <View style={[styles.homeBase, { backgroundColor: active ? color : 'transparent', borderColor: color, borderWidth: active ? 0 : 1.8 }]}>
+      {!active && <View style={[styles.homeDoor, { backgroundColor: color }]} />}
+    </View>
+  </View>
+);
+
+const VectorPracticeIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
+  <View style={[styles.navPracticeOuter, { borderColor: color }]}>
+    <View style={[styles.navPracticeInner, { backgroundColor: active ? color : 'transparent', borderColor: color }]} />
+  </View>
+);
+
+const VectorSoundIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
+  <View style={styles.navSoundWrap}>
+    <View style={[styles.soundSpeakerBack, { backgroundColor: color }]} />
+    <View style={[styles.soundSpeakerCone, { borderRightColor: color }]} />
+    <View style={[styles.soundWaveArc1, { borderColor: color }]} />
+    <View style={[styles.soundWaveArc2, { borderColor: color }]} />
+  </View>
+);
+
+const VectorProfileIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
+  <View style={styles.navProfileWrap}>
+    <View style={[styles.profileHead, { borderColor: color, backgroundColor: active ? color : 'transparent' }]} />
+    <View style={[styles.profileShoulders, { borderColor: color, backgroundColor: active ? color : 'transparent' }]} />
+  </View>
+);
+
+// Serene nature landscape illustration matching the reference design
+const HeroIllustration: React.FC = () => {
+  return (
+    <View style={styles.heroGraphicContainer}>
+      {/* Sun rays & Morning Sun */}
+      <View style={styles.sunWrapper}>
+        <View style={[styles.sunRay, { transform: [{ rotate: '-45deg' }] }]} />
+        <View style={[styles.sunRay, { transform: [{ rotate: '0deg' }] }]} />
+        <View style={[styles.sunRay, { transform: [{ rotate: '45deg' }] }]} />
+        <View style={styles.sunCircle} />
+      </View>
+
+      {/* Floating leaves */}
+      <View style={[styles.floatingLeaf, styles.leaf1]} />
+      <View style={[styles.floatingLeaf, styles.leaf2]} />
+      <View style={[styles.floatingLeaf, styles.leaf3]} />
+
+      {/* Layered Rolling Hills with organic outlines */}
+      <View style={styles.backHill} />
+      <View style={styles.midHill} />
+      <View style={styles.frontHill} />
+    </View>
+  );
+};
+
 export const HomeScreen: React.FC = () => {
   const { colors, typography, spacing, borderRadius } = useTheme();
   const navigation = useNavigation<NavigationProp>();
+  const insets = useSafeAreaInsets();
 
   const [completedSessions, setCompletedSessions] = useState(
     progressStore.getCompletedSessions()
@@ -34,207 +106,266 @@ export const HomeScreen: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  const insets = useSafeAreaInsets();
   const { greeting, subtitle } = getDaytimeGreeting();
 
   return (
     <View style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      {/* Header with App Title & Settings Icon */}
+      {/* 1. Header Bar: Leaf Brand Title + Outlined Settings Gear */}
       <View
         style={[
           styles.headerBar,
           {
             paddingHorizontal: spacing.xl,
-            borderBottomColor: colors.surfaceBorder,
-            paddingTop: insets.top,
-            height: 60 + insets.top,
+            paddingTop: insets.top + 8,
+            height: 64 + insets.top,
           },
         ]}
       >
-        <Text style={[typography.header, { color: colors.textPrimary }]}>
-          Q9 Relax
-        </Text>
+        <View style={styles.brandContainer}>
+          <Text style={styles.brandLeaf}>🌿</Text>
+          <Text style={[styles.brandTitle, { color: colors.textPrimary }]}>
+            Q9 Relax
+          </Text>
+        </View>
+
         <TouchableOpacity
-          style={styles.settingsIconButton}
+          style={[
+            styles.settingsCircleBtn,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.surfaceBorder,
+            },
+          ]}
           onPress={() => navigation.navigate('Settings')}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={[styles.gearIcon, { color: colors.textSecondary }]}>⚙️</Text>
+          <Text style={[styles.settingsGear, { color: colors.textPrimary }]}>⚙</Text>
         </TouchableOpacity>
       </View>
 
+      {/* 2. Main Scroll Content */}
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.xl }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingHorizontal: spacing.xl,
+            paddingBottom: insets.bottom + 85, // Space for bottom tab bar
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Daytime Greeting */}
         <View style={styles.greetingSection}>
-          <Text style={[typography.hero, { color: colors.textPrimary }]}>
+          <Text style={[styles.heroGreeting, { color: colors.textPrimary }]}>
             {greeting}
           </Text>
-          <Text
-            style={[
-              typography.body,
-              { color: colors.textSecondary, marginTop: spacing.xs },
-            ]}
-          >
+          <Text style={[styles.heroSubtitle, { color: colors.textSecondary }]}>
             {subtitle}
           </Text>
         </View>
 
-        {/* Progress Strip */}
-        <Card
-          style={[
-            styles.progressCard,
-            { backgroundColor: colors.surfaceElevated },
-          ]}
+        {/* Hero Featured Card: "Start your day with calm" */}
+        <TouchableOpacity
+          style={[styles.heroCard, { backgroundColor: colors.cardHeroBg }]}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Breathing')}
         >
-          <View style={styles.progressRow}>
-            <View style={styles.progressItem}>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
-                SESSIONS
-              </Text>
-              <Text
-                style={[
-                  typography.header,
-                  { color: colors.primary, marginTop: 2 },
-                ]}
-              >
+          <View style={styles.heroLeftContent}>
+            <Text style={[styles.heroCardTitle, { color: colors.textPrimary }]}>
+              Start your day{'\n'}with calm
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.heroPillBtn,
+                { backgroundColor: colors.cardHeroBtn },
+              ]}
+              onPress={() => navigation.navigate('Breathing')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.heroPillBtnText}>Begin breathing</Text>
+            </TouchableOpacity>
+          </View>
+
+          <HeroIllustration />
+        </TouchableOpacity>
+
+        {/* Progress Stats Split Cards (Sessions & Minutes) */}
+        <View style={styles.statsRow}>
+          {/* Sessions Card */}
+          <View
+            style={[
+              styles.statsCard,
+              { backgroundColor: colors.statsSessionsBg },
+            ]}
+          >
+            <View style={styles.statsHeaderRow}>
+              <View style={[styles.statsIconBadge, { backgroundColor: colors.surface + '60' }]}>
+                <VectorAvatarIcon color={colors.statsSessionsIcon} />
+              </View>
+              <Text style={[styles.statsNumber, { color: colors.statsSessionsText }]}>
                 {completedSessions}
               </Text>
             </View>
+            <Text style={[styles.statsLabel, { color: colors.statsSessionsText, opacity: 0.85 }]}>
+              Sessions
+            </Text>
+          </View>
 
-            <View
-              style={[
-                styles.progressDivider,
-                { backgroundColor: colors.surfaceBorder },
-              ]}
-            />
-
-            <View style={styles.progressItem}>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
-                MINUTES
-              </Text>
-              <Text
-                style={[
-                  typography.header,
-                  { color: colors.primary, marginTop: 2 },
-                ]}
-              >
+          {/* Minutes Card */}
+          <View
+            style={[
+              styles.statsCard,
+              { backgroundColor: colors.statsMinutesBg },
+            ]}
+          >
+            <View style={styles.statsHeaderRow}>
+              <View style={[styles.statsIconBadge, { backgroundColor: colors.surface + '60' }]}>
+                <VectorClockIcon color={colors.statsMinutesIcon} />
+              </View>
+              <Text style={[styles.statsNumber, { color: colors.statsMinutesText }]}>
                 {totalMinutes}
               </Text>
             </View>
+            <Text style={[styles.statsLabel, { color: colors.statsMinutesText, opacity: 0.85 }]}>
+              Minutes
+            </Text>
           </View>
-        </Card>
+        </View>
 
-        {/* Action Entry Cards */}
-        <Text
-          style={[
-            typography.subheader,
-            {
-              color: colors.textPrimary,
-              marginTop: spacing.xl,
-              marginBottom: spacing.sm,
-            },
-          ]}
-        >
+        {/* Section Title */}
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
           Choose a practice
         </Text>
 
-        {/* 1. Breathe */}
-        <Card
-          style={styles.actionCard}
+        {/* Practice Card 1: Breathe */}
+        <TouchableOpacity
+          style={[styles.practiceCard, { backgroundColor: colors.cardBreatheBg }]}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('Breathing')}
         >
-          <View style={styles.cardHeaderRow}>
-            <View
-              style={[
-                styles.iconBubble,
-                { backgroundColor: colors.primaryMuted },
-              ]}
-            >
-              <Text style={styles.cardIcon}>🫧</Text>
+          <View style={styles.practiceLeft}>
+            <View style={styles.practiceIconBadge}>
+              <Text style={styles.practiceBadgeIcon}>🫧</Text>
             </View>
-            <View style={styles.cardTextContainer}>
-              <Text style={[typography.subheader, { color: colors.textPrimary }]}>
+            <View style={styles.practiceTextWrap}>
+              <Text style={[styles.practiceTitle, { color: colors.textPrimary }]}>
                 Breathe
               </Text>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textSecondary, marginTop: 2 },
-                ]}
-              >
+              <Text style={[styles.practiceSubtitle, { color: colors.textSecondary }]}>
                 Guided rhythmic breathing with visual cues
               </Text>
             </View>
-            <Text style={[styles.arrowIcon, { color: colors.primary }]}>›</Text>
           </View>
-        </Card>
+          <View style={styles.whiteArrowCircle}>
+            <Text style={[styles.whiteArrowText, { color: colors.textPrimary }]}>›</Text>
+          </View>
+        </TouchableOpacity>
 
-        {/* 2. Meditate */}
-        <Card
-          style={styles.actionCard}
+        {/* Practice Card 2: Meditate */}
+        <TouchableOpacity
+          style={[styles.practiceCard, { backgroundColor: colors.cardMeditateBg }]}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('Meditation')}
         >
-          <View style={styles.cardHeaderRow}>
-            <View
-              style={[
-                styles.iconBubble,
-                { backgroundColor: colors.primaryMuted },
-              ]}
-            >
-              <Text style={styles.cardIcon}>🧘</Text>
+          <View style={styles.practiceLeft}>
+            <View style={[styles.practiceIconBadge, { backgroundColor: 'rgba(255,255,255,0.45)' }]}>
+              <Text style={styles.practiceBadgeIcon}>🧘</Text>
             </View>
-            <View style={styles.cardTextContainer}>
-              <Text style={[typography.subheader, { color: colors.textPrimary }]}>
+            <View style={styles.practiceTextWrap}>
+              <Text style={[styles.practiceTitle, { color: colors.textPrimary }]}>
                 Meditate
               </Text>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textSecondary, marginTop: 2 },
-                ]}
-              >
+              <Text style={[styles.practiceSubtitle, { color: colors.textSecondary }]}>
                 Quiet timer with soft starting and ending bells
               </Text>
             </View>
-            <Text style={[styles.arrowIcon, { color: colors.primary }]}>›</Text>
           </View>
-        </Card>
+          <View style={styles.whiteArrowCircle}>
+            <Text style={[styles.whiteArrowText, { color: colors.textPrimary }]}>›</Text>
+          </View>
+        </TouchableOpacity>
 
-        {/* 3. Sounds */}
-        <Card
-          style={styles.actionCard}
+        {/* Practice Card 3: Sounds */}
+        <TouchableOpacity
+          style={[styles.practiceCard, { backgroundColor: colors.cardSoundsBg }]}
+          activeOpacity={0.85}
           onPress={() => navigation.navigate('Sounds')}
         >
-          <View style={styles.cardHeaderRow}>
-            <View
-              style={[
-                styles.iconBubble,
-                { backgroundColor: colors.primaryMuted },
-              ]}
-            >
-              <Text style={styles.cardIcon}>🎧</Text>
+          <View style={styles.practiceLeft}>
+            <View style={[styles.practiceIconBadge, { backgroundColor: 'rgba(255,255,255,0.45)' }]}>
+              <Text style={styles.practiceBadgeIcon}>🎧</Text>
             </View>
-            <View style={styles.cardTextContainer}>
-              <Text style={[typography.subheader, { color: colors.textPrimary }]}>
+            <View style={styles.practiceTextWrap}>
+              <Text style={[styles.practiceTitle, { color: '#FFFFFF' }]}>
                 Sounds
               </Text>
-              <Text
-                style={[
-                  typography.caption,
-                  { color: colors.textSecondary, marginTop: 2 },
-                ]}
-              >
+              <Text style={[styles.practiceSubtitle, { color: '#FFEBE4' }]}>
                 Calming ambient loops with sleep timer
               </Text>
             </View>
-            <Text style={[styles.arrowIcon, { color: colors.primary }]}>›</Text>
           </View>
-        </Card>
+          <View style={styles.whiteArrowCircle}>
+            <Text style={[styles.whiteArrowText, { color: colors.cardSoundsBg }]}>›</Text>
+          </View>
+        </TouchableOpacity>
       </ScrollView>
+
+      {/* 3. Bottom Navigation Bar with Minimal Vector Icons matching screenshot */}
+      <View
+        style={[
+          styles.bottomNavBar,
+          {
+            backgroundColor: colors.navBackground,
+            borderTopColor: colors.navBorder,
+            paddingBottom: Math.max(insets.bottom, 10),
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.navItem}
+          activeOpacity={0.7}
+        >
+          <VectorHomeIcon active={true} color={colors.navActive} />
+          <Text style={[styles.navLabel, { color: colors.navActive, fontWeight: '700' }]}>
+            Home
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Breathing')}
+          activeOpacity={0.7}
+        >
+          <VectorPracticeIcon active={false} color={colors.navInactive} />
+          <Text style={[styles.navLabel, { color: colors.navInactive }]}>
+            Practice
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Sounds')}
+          activeOpacity={0.7}
+        >
+          <VectorSoundIcon active={false} color={colors.navInactive} />
+          <Text style={[styles.navLabel, { color: colors.navInactive }]}>
+            Sounds
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
+        >
+          <VectorProfileIcon active={false} color={colors.navInactive} />
+          <Text style={[styles.navLabel, { color: colors.navInactive }]}>
+            Profile
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -244,68 +375,456 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerBar: {
-    height: 60,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  settingsIconButton: {
-    width: 44,
-    height: 44,
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandLeaf: {
+    fontSize: 22,
+    marginRight: 8,
+  },
+  brandTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    letterSpacing: 0.2,
+  },
+  settingsCircleBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  gearIcon: {
-    fontSize: 22,
+  settingsGear: {
+    fontSize: 18,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingTop: 10,
   },
   greetingSection: {
-    marginVertical: 12,
+    marginTop: 6,
+    marginBottom: 16,
   },
-  progressCard: {
-    marginTop: 12,
+  heroGreeting: {
+    fontSize: 32,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    lineHeight: 38,
   },
-  progressRow: {
+  heroSubtitle: {
+    fontSize: 16,
+    fontWeight: '400',
+    marginTop: 4,
+  },
+
+  // Hero Card
+  heroCard: {
+    borderRadius: 24,
+    minHeight: 148,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+    paddingLeft: 20,
+    marginBottom: 16,
+  },
+  heroLeftContent: {
+    flex: 1,
+    paddingVertical: 18,
+    justifyContent: 'center',
+  },
+  heroCardTitle: {
+    fontSize: 21,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    lineHeight: 27,
+    marginBottom: 14,
+  },
+  heroPillBtn: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+  },
+  heroPillBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+
+  // Hero Illustration
+  heroGraphicContainer: {
+    width: 150,
+    height: 148,
+    position: 'relative',
+    overflow: 'hidden',
+    borderTopRightRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+  sunWrapper: {
+    position: 'absolute',
+    top: 22,
+    right: 36,
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sunCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EE886B',
+  },
+  sunRay: {
+    position: 'absolute',
+    width: 2,
+    height: 48,
+    backgroundColor: '#EE886B',
+    opacity: 0.6,
+  },
+  backHill: {
+    position: 'absolute',
+    bottom: -15,
+    right: 25,
+    width: 110,
+    height: 75,
+    borderRadius: 55,
+    backgroundColor: '#7FA293',
+    borderWidth: 1.5,
+    borderColor: '#4A6C5C',
+    transform: [{ scaleX: 1.3 }],
+  },
+  midHill: {
+    position: 'absolute',
+    bottom: -20,
+    right: -20,
+    width: 130,
+    height: 85,
+    borderRadius: 65,
+    backgroundColor: '#6A9081',
+    borderWidth: 1.5,
+    borderColor: '#3D5C4E',
+    transform: [{ scaleX: 1.4 }],
+  },
+  frontHill: {
+    position: 'absolute',
+    bottom: -32,
+    right: 15,
+    width: 135,
+    height: 80,
+    borderRadius: 67,
+    backgroundColor: '#567A6B',
+    borderWidth: 1.5,
+    borderColor: '#2F483C',
+    transform: [{ scaleX: 1.3 }],
+  },
+  floatingLeaf: {
+    position: 'absolute',
+    width: 18,
+    height: 10,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#2F483C',
+    backgroundColor: '#7FA293',
+  },
+  leaf1: {
+    top: 26,
+    right: 12,
+    transform: [{ rotate: '-25deg' }],
+  },
+  leaf2: {
+    top: 48,
+    right: 18,
+    transform: [{ rotate: '15deg' }],
+  },
+  leaf3: {
+    top: 72,
+    right: 8,
+    width: 22,
+    height: 12,
+    borderRadius: 7,
+    transform: [{ rotate: '-10deg' }],
+  },
+
+  // Stats Row
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 22,
+  },
+  statsCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 16,
+  },
+  statsHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  statsIconBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vectorAvatarWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 16,
+    height: 16,
+  },
+  vectorAvatarHead: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginBottom: 1,
+  },
+  vectorAvatarBody: {
+    width: 12,
+    height: 6,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+  },
+  vectorClockCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vectorClockHandH: {
+    position: 'absolute',
+    width: 4,
+    height: 1.5,
+    left: 7,
+    top: 6,
+  },
+  vectorClockHandV: {
+    position: 'absolute',
+    width: 1.5,
+    height: 4,
+    top: 3,
+  },
+  statsNumber: {
+    fontSize: 26,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  statsLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+
+  // Section
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    marginBottom: 12,
+  },
+
+  // Practice Cards
+  practiceCard: {
+    borderRadius: 22,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  practiceLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 10,
+  },
+  practiceIconBadge: {
+    width: 50,
+    height: 50,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  practiceBadgeIcon: {
+    fontSize: 24,
+  },
+  practiceTextWrap: {
+    flex: 1,
+  },
+  practiceTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'serif',
+    marginBottom: 3,
+  },
+  practiceSubtitle: {
+    fontSize: 13,
+    fontWeight: '400',
+    lineHeight: 17,
+  },
+  whiteArrowCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  whiteArrowText: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: -2,
+    marginLeft: 2,
+  },
+
+  // Bottom Navigation Bar
+  bottomNavBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingVertical: 4,
+    borderTopWidth: 1,
+    paddingTop: 8,
   },
-  progressItem: {
-    alignItems: 'center',
-  },
-  progressDivider: {
-    width: 1,
-    height: 36,
-  },
-  actionCard: {
-    marginVertical: 8,
-  },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconBubble: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  navItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    paddingVertical: 4,
+    minWidth: 60,
   },
-  cardIcon: {
-    fontSize: 26,
+  navLabel: {
+    fontSize: 11,
+    marginTop: 3,
   },
-  cardTextContainer: {
-    flex: 1,
+
+  // Minimal Vector Nav Icons
+  navIconContainer: {
+    width: 22,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  arrowIcon: {
-    fontSize: 28,
-    fontWeight: '300',
-    paddingLeft: 8,
+  homeRoof: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 7,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    marginBottom: -1,
+  },
+  homeBase: {
+    width: 14,
+    height: 11,
+    borderBottomLeftRadius: 2,
+    borderBottomRightRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  homeDoor: {
+    width: 4,
+    height: 5,
+  },
+  navPracticeOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1.8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navPracticeInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.5,
+  },
+  navSoundWrap: {
+    width: 22,
+    height: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  soundSpeakerBack: {
+    width: 5,
+    height: 7,
+    borderTopLeftRadius: 1.5,
+    borderBottomLeftRadius: 1.5,
+  },
+  soundSpeakerCone: {
+    width: 0,
+    height: 0,
+    borderTopWidth: 6,
+    borderBottomWidth: 6,
+    borderRightWidth: 6,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    marginLeft: -1,
+  },
+  soundWaveArc1: {
+    width: 7,
+    height: 12,
+    borderRightWidth: 1.8,
+    borderTopRightRadius: 6,
+    borderBottomRightRadius: 6,
+    marginLeft: 2,
+  },
+  soundWaveArc2: {
+    width: 5,
+    height: 18,
+    borderRightWidth: 1.8,
+    borderTopRightRadius: 9,
+    borderBottomRightRadius: 9,
+    marginLeft: 1,
+  },
+  navProfileWrap: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileHead: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1.8,
+    marginBottom: 1,
+  },
+  profileShoulders: {
+    width: 16,
+    height: 7,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderWidth: 1.8,
+    borderBottomWidth: 0,
   },
 });
-

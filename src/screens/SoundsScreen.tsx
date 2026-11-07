@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useNavigation } from '@react-navigation/native';
@@ -98,7 +97,7 @@ export const SoundsScreen: React.FC = () => {
             { color: colors.textSecondary, marginBottom: spacing.lg },
           ]}
         >
-          Continuous background sounds to relax or focus.
+          Continuous background sounds to relax, focus, or sleep.
         </Text>
 
         {/* Ambient Track Selection Cards */}
@@ -120,10 +119,13 @@ export const SoundsScreen: React.FC = () => {
               key={track.id}
               style={[
                 styles.trackCard,
-                isSelected && {
-                  borderColor: colors.primary,
-                  borderWidth: 2,
-                  backgroundColor: colors.surfaceElevated,
+                {
+                  backgroundColor: isSelected
+                    ? colors.cardSoundsBg + '25'
+                    : colors.surface,
+                  borderColor: isSelected
+                    ? colors.cardSoundsBg
+                    : colors.surfaceBorder,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
@@ -134,7 +136,7 @@ export const SoundsScreen: React.FC = () => {
                     styles.trackIconBubble,
                     {
                       backgroundColor: isSelected
-                        ? colors.primaryMuted
+                        ? colors.cardSoundsBg + '40'
                         : colors.surfaceBorder,
                     },
                   ]}
@@ -146,7 +148,11 @@ export const SoundsScreen: React.FC = () => {
                   <Text
                     style={[
                       typography.bodyBold,
-                      { color: isSelected ? colors.primary : colors.textPrimary },
+                      {
+                        color: colors.textPrimary,
+                        fontFamily: 'serif',
+                        fontSize: 16,
+                      },
                     ]}
                   >
                     {track.title}
@@ -163,9 +169,9 @@ export const SoundsScreen: React.FC = () => {
 
                 <View style={styles.statusIndicator}>
                   {isCurrentlyPlayingThis ? (
-                    <Text style={{ fontSize: 18 }}>🔊</Text>
+                    <Text style={{ fontSize: 20 }}>🔊</Text>
                   ) : isSelected ? (
-                    <Text style={{ fontSize: 16, color: colors.primary }}>✓</Text>
+                    <Text style={{ fontSize: 18, color: colors.cardSoundsBg }}>✓</Text>
                   ) : null}
                 </View>
               </View>
@@ -179,7 +185,7 @@ export const SoundsScreen: React.FC = () => {
             styles.playerCard,
             {
               backgroundColor: colors.surfaceElevated,
-              borderColor: colors.primary,
+              borderColor: colors.surfaceBorder,
               marginTop: spacing.xl,
             },
           ]}
@@ -188,14 +194,19 @@ export const SoundsScreen: React.FC = () => {
             <Text style={[typography.caption, { color: colors.textMuted }]}>
               {isPlaying ? 'NOW PLAYING' : 'PAUSED'}
             </Text>
-            <Text style={[typography.subheader, { color: colors.textPrimary, marginTop: 2 }]}>
+            <Text
+              style={[
+                styles.nowPlayingTitle,
+                { color: colors.textPrimary, marginTop: 2 },
+              ]}
+            >
               {AMBIENT_TRACKS.find((t) => t.id === activeTrackId)?.title}
             </Text>
           </View>
 
           {/* Volume Control */}
           <View style={styles.volumeContainer}>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
+            <Text style={[typography.caption, { color: colors.textSecondary }]}>
               VOLUME: {Math.round(volume * 100)}%
             </Text>
             <Slider
@@ -204,9 +215,9 @@ export const SoundsScreen: React.FC = () => {
               maximumValue={1}
               value={volume}
               onValueChange={handleVolumeChange}
-              minimumTrackTintColor={colors.primary}
+              minimumTrackTintColor={colors.accentTerracotta}
               maximumTrackTintColor={colors.surfaceBorder}
-              thumbTintColor={colors.primary}
+              thumbTintColor={colors.accentTerracotta}
             />
           </View>
 
@@ -256,9 +267,9 @@ export const SoundsScreen: React.FC = () => {
                 style={[
                   styles.sleepChip,
                   {
-                    backgroundColor: isSelected ? colors.primary : colors.surface,
-                    borderColor: isSelected ? colors.primary : colors.surfaceBorder,
-                    borderRadius: borderRadius.md,
+                    backgroundColor: isSelected ? colors.accentTerracotta : colors.surface,
+                    borderColor: isSelected ? colors.accentTerracotta : colors.surfaceBorder,
+                    borderRadius: 24,
                   },
                 ]}
                 onPress={() => handleSelectSleepTimer(min)}
@@ -282,10 +293,10 @@ export const SoundsScreen: React.FC = () => {
           <View
             style={[
               styles.sleepTimerActiveBanner,
-              { backgroundColor: colors.primaryMuted, borderRadius: borderRadius.md },
+              { backgroundColor: colors.accentPeach, borderRadius: 20 },
             ]}
           >
-            <Text style={[typography.bodyBold, { color: colors.primary }]}>
+            <Text style={[typography.bodyBold, { color: '#4A2616' }]}>
               ⏳ Stops in: {formatTimeMMSS(sleepRemainingSeconds)}
             </Text>
           </View>
@@ -303,16 +314,18 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   trackCard: {
-    marginVertical: 4,
+    marginVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1.5,
   },
   trackRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   trackIconBubble: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -328,11 +341,17 @@ const styles = StyleSheet.create({
   },
   playerCard: {
     paddingVertical: 20,
-    borderWidth: 1.5,
+    borderRadius: 24,
+    borderWidth: 1,
   },
   playerCardHeader: {
     alignItems: 'center',
     marginBottom: 16,
+  },
+  nowPlayingTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    fontFamily: 'serif',
   },
   volumeContainer: {
     marginVertical: 8,
@@ -352,11 +371,11 @@ const styles = StyleSheet.create({
   sleepChipsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: 6,
   },
   sleepChip: {
     flex: 1,
     height: 48,
-    marginHorizontal: 3,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -368,4 +387,3 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
 });
-

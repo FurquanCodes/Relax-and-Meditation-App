@@ -6,7 +6,6 @@ import {
   Switch,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
@@ -75,13 +74,19 @@ export const SettingsScreen: React.FC = () => {
                 <Text
                   style={[
                     typography.body,
-                    { flex: 1, color: isSelected ? colors.primary : colors.textPrimary },
+                    {
+                      flex: 1,
+                      color: isSelected ? colors.primary : colors.textPrimary,
+                      fontWeight: isSelected ? '700' : '400',
+                    },
                   ]}
                 >
                   {opt.label}
                 </Text>
                 {isSelected && (
-                  <Text style={[styles.checkmark, { color: colors.primary }]}>✓</Text>
+                  <View style={[styles.checkCircle, { backgroundColor: colors.accentSage }]}>
+                    <Text style={styles.checkmarkText}>✓</Text>
+                  </View>
                 )}
               </TouchableOpacity>
             );
@@ -99,8 +104,8 @@ export const SettingsScreen: React.FC = () => {
         </Text>
 
         <Card style={styles.sectionCard}>
-          <View style={styles.switchRow}>
-            <View style={{ flex: 1, paddingRight: spacing.md }}>
+          <View style={styles.settingRow}>
+            <View style={{ flex: 1, paddingRight: 12 }}>
               <Text style={[typography.bodyBold, { color: colors.textPrimary }]}>
                 Singing Bowl Bell
               </Text>
@@ -110,14 +115,15 @@ export const SettingsScreen: React.FC = () => {
                   { color: colors.textSecondary, marginTop: 2 },
                 ]}
               >
-                Chime soft 528Hz bell at start and end of meditation
+                Chime at the start and end of each meditation session
               </Text>
             </View>
+
             <Switch
               value={bellEnabled}
               onValueChange={handleToggleBell}
-              trackColor={{ false: colors.surfaceBorder, true: colors.primary }}
-              thumbColor="#FFFFFF"
+              trackColor={{ false: colors.surfaceBorder, true: colors.accentSage }}
+              thumbColor={bellEnabled ? colors.accentTerracotta : '#F4F3F4'}
             />
           </View>
         </Card>
@@ -134,43 +140,40 @@ export const SettingsScreen: React.FC = () => {
 
         <Card style={styles.sectionCard}>
           <View style={styles.aboutRow}>
+            <Text style={[typography.body, { color: colors.textSecondary }]}>
+              Application
+            </Text>
             <Text style={[typography.bodyBold, { color: colors.textPrimary }]}>
               Q9 Relax
             </Text>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
-              Version 1.0.0
+          </View>
+
+          <View style={[styles.aboutRow, { marginTop: 12 }]}>
+            <Text style={[typography.body, { color: colors.textSecondary }]}>
+              Version
+            </Text>
+            <Text style={[typography.body, { color: colors.textPrimary }]}>
+              1.0.0 (Offline)
+            </Text>
+          </View>
+
+          <View style={[styles.aboutRow, { marginTop: 12 }]}>
+            <Text style={[typography.body, { color: colors.textSecondary }]}>
+              Network Status
+            </Text>
+            <Text style={[typography.caption, { color: colors.accentGreen, fontWeight: '700' }]}>
+              ● 100% Offline
             </Text>
           </View>
 
           <Text
             style={[
               typography.caption,
-              { color: colors.textSecondary, marginTop: spacing.sm, lineHeight: 18 },
+              { color: colors.textMuted, marginTop: 16, lineHeight: 18 },
             ]}
           >
-            A calm, distraction-free relaxation companion built for offline daily breaks.
+            A calm, quiet companion designed for mindful breathing, restful meditation, and ambient relaxation. No accounts, no data collection.
           </Text>
-
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: colors.surfaceBorder, marginVertical: spacing.md },
-            ]}
-          />
-
-          <View style={styles.infoBadge}>
-            <Text style={styles.badgeIcon}>🔒</Text>
-            <Text style={[typography.caption, { color: colors.textSecondary, flex: 1 }]}>
-              100% Offline • Zero data collection • No sign-in required
-            </Text>
-          </View>
-
-          <View style={[styles.infoBadge, { marginTop: spacing.sm }]}>
-            <Text style={styles.badgeIcon}>🎵</Text>
-            <Text style={[typography.caption, { color: colors.textSecondary, flex: 1 }]}>
-              All audio assets are CC0 Public Domain, created by Q9 Technologies
-            </Text>
-          </View>
         </Card>
       </ScrollView>
     </View>
@@ -186,22 +189,31 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     paddingVertical: 4,
+    borderRadius: 22,
   },
   themeOptionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
   },
   themeIcon: {
     fontSize: 20,
     marginRight: 14,
   },
-  checkmark: {
-    fontSize: 18,
+  checkCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkmarkText: {
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '700',
   },
-  switchRow: {
+  settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -210,22 +222,8 @@ const styles = StyleSheet.create({
   },
   aboutRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 8,
-    paddingTop: 8,
-  },
-  divider: {
-    height: 1,
-  },
-  infoBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  badgeIcon: {
-    fontSize: 16,
-    marginRight: 10,
   },
 });
-

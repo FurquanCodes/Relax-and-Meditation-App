@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
+  ScrollView,
   AppState,
   AppStateStatus,
 } from 'react-native';
@@ -98,11 +98,10 @@ export const MeditationScreen: React.FC = () => {
       await nativeTimer.playBell();
     }
 
-    setRemainingSeconds(durationSeconds);
-    setIsRunning(true);
-
-    // Start background foreground service with wake lock
+    // Start background foreground service timer
     await nativeTimer.startTimer(durationSeconds, bellEnabled);
+    setIsRunning(true);
+    setRemainingSeconds(durationSeconds);
   };
 
   const handleStopTimer = async () => {
@@ -121,26 +120,30 @@ export const MeditationScreen: React.FC = () => {
 
       <View style={[styles.container, { padding: spacing.xl }]}>
         {!isRunning && !isCompleted && (
-          <View style={styles.setupView}>
+          <ScrollView
+            style={styles.setupView}
+            showsVerticalScrollIndicator={false}
+          >
             <Text
               style={[
                 typography.body,
-                { color: colors.textSecondary, marginBottom: spacing.xl, textAlign: 'center' },
+                { color: colors.textSecondary, marginBottom: spacing.lg },
               ]}
             >
-              Set your timer. The end bell will chime even with your screen turned off.
+              Choose a peaceful duration. The bell will chime when you begin and
+              end.
             </Text>
 
-            {/* Duration Selector */}
             <Text
               style={[
                 typography.subheader,
                 { color: colors.textPrimary, marginBottom: spacing.md },
               ]}
             >
-              Session Duration
+              Duration
             </Text>
 
+            {/* Duration Option Grid */}
             <View style={styles.chipsGrid}>
               {DURATION_OPTIONS_MINUTES.map((min) => {
                 const isSelected = selectedDurationMin === min;
@@ -150,56 +153,81 @@ export const MeditationScreen: React.FC = () => {
                     style={[
                       styles.chip,
                       {
-                        backgroundColor: isSelected ? colors.primary : colors.surface,
-                        borderColor: isSelected ? colors.primary : colors.surfaceBorder,
-                        borderRadius: borderRadius.lg,
+                        backgroundColor: isSelected
+                          ? colors.accentLavender
+                          : colors.surface,
+                        borderColor: isSelected
+                          ? '#A7A4E8'
+                          : colors.surfaceBorder,
                       },
                     ]}
                     onPress={() => setSelectedDurationMin(min)}
-                    activeOpacity={0.7}
+                    activeOpacity={0.8}
                   >
                     <Text
                       style={[
-                        typography.header,
-                        { color: isSelected ? '#FFFFFF' : colors.textPrimary },
+                        styles.chipNumber,
+                        {
+                          color: isSelected ? '#1E1B4B' : colors.textPrimary,
+                        },
                       ]}
                     >
                       {min}
                     </Text>
                     <Text
                       style={[
-                        typography.caption,
-                        { color: isSelected ? '#E6FFFA' : colors.textSecondary, marginTop: 2 },
+                        styles.chipUnit,
+                        {
+                          color: isSelected ? '#3E3A70' : colors.textSecondary,
+                        },
                       ]}
                     >
-                      minutes
+                      min
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
 
-            <View style={{ flex: 1 }} />
+            <View style={styles.bellStatusNotice}>
+              <Text style={{ fontSize: 18, marginRight: 8 }}>🔔</Text>
+              <Text style={[typography.caption, { color: colors.textSecondary, flex: 1 }]}>
+                {settingsStore.isBellEnabled()
+                  ? 'Start and end bells are enabled.'
+                  : 'Start and end bells are silent.'}
+              </Text>
+            </View>
 
             <PrimaryButton
               title="Start Meditation"
               onPress={handleStartTimer}
-              style={{ width: '100%', marginBottom: spacing.md }}
+              style={{ marginTop: spacing.xxl }}
             />
-          </View>
+          </ScrollView>
         )}
 
         {isRunning && (
           <View style={styles.runningView}>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
-              MEDITATING IN QUIET
-            </Text>
+            <View style={styles.activeTopText}>
+              <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                STILLNESS IN PROGRESS
+              </Text>
+            </View>
 
-            <View style={styles.timerDisplayContainer}>
+            {/* Tranquil Meditation Circular Ring */}
+            <View
+              style={[
+                styles.timerRing,
+                {
+                  borderColor: colors.accentLavender,
+                  backgroundColor: colors.accentLavender + '25',
+                },
+              ]}
+            >
               <Text
                 style={[
                   styles.timerText,
-                  { color: colors.primary, fontWeight: '300' },
+                  { color: colors.textPrimary },
                 ]}
               >
                 {formatTimeMMSS(remainingSeconds)}
@@ -210,7 +238,7 @@ export const MeditationScreen: React.FC = () => {
                   { color: colors.textSecondary, marginTop: spacing.xs },
                 ]}
               >
-                Background service active with screen off
+                Screen-off timer active
               </Text>
             </View>
 
@@ -245,7 +273,8 @@ export const MeditationScreen: React.FC = () => {
                 },
               ]}
             >
-              You rested in stillness for {selectedDurationMin} minutes. Take a soft breath before continuing your day.
+              You rested in stillness for {selectedDurationMin} minutes. Take a soft
+              breath before continuing your day.
             </Text>
 
             <View style={{ flex: 1 }} />
@@ -275,15 +304,33 @@ const styles = StyleSheet.create({
   chipsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    gap: 12,
   },
   chip: {
-    width: '31%',
-    height: 90,
-    marginVertical: 6,
+    width: '30%',
+    height: 85,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
+  },
+  chipNumber: {
+    fontSize: 26,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  chipUnit: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  bellStatusNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderRadius: 16,
+    padding: 14,
+    marginTop: 20,
   },
   runningView: {
     flex: 1,
@@ -291,12 +338,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 20,
   },
-  timerDisplayContainer: {
+  activeTopText: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  timerRing: {
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    borderWidth: 3.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   timerText: {
-    fontSize: 68,
+    fontSize: 60,
+    fontWeight: '700',
+    fontFamily: 'serif',
     fontVariant: ['tabular-nums'],
   },
   completedView: {
@@ -308,4 +365,3 @@ const styles = StyleSheet.create({
     fontSize: 64,
   },
 });
-

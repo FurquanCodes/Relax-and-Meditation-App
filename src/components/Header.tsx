@@ -35,12 +35,18 @@ export const Header: React.FC<HeaderProps> = ({
       <View style={styles.leftContainer}>
         {showBack && (
           <TouchableOpacity
-            style={styles.backButton}
+            style={[
+              styles.circleBackBtn,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.surfaceBorder,
+              },
+            ]}
             onPress={onBackPress}
             activeOpacity={0.7}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Text style={[styles.backArrow, { color: colors.primary }]}>←</Text>
+            <Text style={[styles.backArrow, { color: colors.textPrimary }]}>‹</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -70,28 +76,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   leftContainer: {
-    width: 48,
+    width: 44,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
-  backButton: {
-    width: 48,
-    height: 48,
+  circleBackBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   backArrow: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: '600',
+    marginTop: -2,
   },
   title: {
     flex: 1,
     textAlign: 'center',
+    fontFamily: 'serif',
   },
   rightContainer: {
-    width: 48,
+    width: 44,
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
 });
-

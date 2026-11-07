@@ -19,16 +19,16 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   textStyle,
   disabled = false,
 }) => {
-  const { colors, borderRadius, typography } = useTheme();
+  const { colors, typography } = useTheme();
 
-  let bgColor = colors.primary;
+  let bgColor = colors.accentTerracotta;
   let textColor = '#FFFFFF';
 
   if (variant === 'secondary') {
-    bgColor = colors.surfaceElevated;
+    bgColor = colors.surface;
     textColor = colors.textPrimary;
   } else if (variant === 'danger') {
-    bgColor = colors.accentRed;
+    bgColor = '#C7513B';
     textColor = '#FFFFFF';
   }
 
@@ -38,7 +38,11 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
         styles.button,
         {
           backgroundColor: disabled ? colors.surfaceBorder : bgColor,
-          borderRadius: borderRadius.md,
+          borderRadius: 26,
+        },
+        variant === 'secondary' && {
+          borderWidth: 1,
+          borderColor: colors.surfaceBorder,
         },
         style,
       ]}
@@ -63,14 +67,20 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     minHeight: 52, // Large touch target > 48dp
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
   },
   text: {
     textAlign: 'center',
     letterSpacing: 0.3,
+    fontSize: 16,
+    fontWeight: '700',
   },
 });
-
