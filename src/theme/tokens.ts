@@ -38,6 +38,9 @@ export interface ThemeColors {
   statsMinutesBg: string;
   statsMinutesText: string;
   statsMinutesIcon: string;
+
+  iconBtnBg: string;
+  iconBtnBorder: string;
 }
 
 export const lightColors: ThemeColors = {
@@ -45,16 +48,16 @@ export const lightColors: ThemeColors = {
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
   surfaceBorder: '#EAE4D8',
-  primary: '#1C2E24', // Deep elegant forest green / charcoal
+  primary: '#1A2E22', // Deep forest charcoal
   primaryLight: '#8FB4A4',
   primaryMuted: '#EBF2EE',
-  secondary: '#5C6E63',
-  textPrimary: '#1C2E24', // Deep forest charcoal
-  textSecondary: '#5C6E63', // Soft slate moss
-  textMuted: '#8E9E95',
-  accentGreen: '#3C7359',
+  secondary: '#4A5D52',
+  textPrimary: '#1A2E22', // Deep forest charcoal
+  textSecondary: '#4A5D52', // Slate moss
+  textMuted: '#7B8F84',
+  accentGreen: '#2E684C',
   accentRed: '#DE775B',
-  cardShadow: 'rgba(28, 46, 36, 0.06)',
+  cardShadow: 'rgba(26, 46, 34, 0.08)',
 
   accentTerracotta: '#DE775B', // Warm terracotta / coral
   accentSage: '#9BBBAE', // Soothing sage green
@@ -68,7 +71,7 @@ export const lightColors: ThemeColors = {
   cardMeditateBg: '#D4D3F8',
   cardSoundsBg: '#E28168',
 
-  navActive: '#1C2E24',
+  navActive: '#1A2E22',
   navInactive: '#8E9E95',
   navBackground: '#FFFFFF',
   navBorder: '#EAE4D8',
@@ -79,47 +82,54 @@ export const lightColors: ThemeColors = {
   statsMinutesBg: '#FAD5C0',
   statsMinutesText: '#3A1E11',
   statsMinutesIcon: '#B06540',
+
+  iconBtnBg: '#FFFFFF',
+  iconBtnBorder: '#EAE4D8',
 };
 
 export const darkColors: ThemeColors = {
-  background: '#121A16', // Deep forest slate night
-  surface: '#1A2520',
-  surfaceElevated: '#212F29',
-  surfaceBorder: '#2B3D35',
-  primary: '#C4E1D4', // Luminous soft sage
-  primaryLight: '#8FB4A4',
-  primaryMuted: '#1E3228',
-  secondary: '#A5B9AE',
-  textPrimary: '#F2F7F4',
-  textSecondary: '#B2C4BC',
-  textMuted: '#7A9185',
-  accentGreen: '#4FA47D',
-  accentRed: '#E58A72',
-  cardShadow: 'rgba(0, 0, 0, 0.35)',
+  background: '#0D1712', // Deep Midnight Botanical Forest
+  surface: '#15241C',
+  surfaceElevated: '#1B2E24',
+  surfaceBorder: '#263D31',
+  primary: '#FFFFFF', // Pure luminous white
+  primaryLight: '#8FD0B2',
+  primaryMuted: '#1A3326',
+  secondary: '#A3C2B3',
+  textPrimary: '#FFFFFF', // Ultra crisp white
+  textSecondary: '#C5D8CF', // Highly legible soft mint-slate
+  textMuted: '#7E9C8E',
+  accentGreen: '#4ADE80',
+  accentRed: '#F87171',
+  cardShadow: 'rgba(0, 0, 0, 0.45)',
 
-  accentTerracotta: '#E58A72',
-  accentSage: '#587A6C',
-  accentLavender: '#5A5885',
-  accentPeach: '#613E30',
-  accentButter: '#574B2A',
+  accentTerracotta: '#E07A5F', // Glowing coral terracotta
+  accentSage: '#76A691',
+  accentLavender: '#8582C4',
+  accentPeach: '#E29775',
+  accentButter: '#E6C665',
 
-  cardHeroBg: '#263D33',
+  // Cards in Dark Mode: Rich jewel tones with ambient glow
+  cardHeroBg: '#193327',
   cardHeroBtn: '#DE775B',
-  cardBreatheBg: '#263D33',
-  cardMeditateBg: '#322F50',
-  cardSoundsBg: '#593429',
+  cardBreatheBg: '#1B372B', // Enchanted Pine
+  cardMeditateBg: '#252147', // Twilight Violet
+  cardSoundsBg: '#442118', // Warm Sunset Ember
 
-  navActive: '#F2F7F4',
-  navInactive: '#71877C',
-  navBackground: '#18231E',
-  navBorder: '#26372F',
+  navActive: '#FFFFFF',
+  navInactive: '#769485',
+  navBackground: '#111F18',
+  navBorder: '#1F3429',
 
-  statsSessionsBg: '#443A1F',
-  statsSessionsText: '#F7E5A9',
-  statsSessionsIcon: '#E2C96C',
-  statsMinutesBg: '#4D3125',
-  statsMinutesText: '#FAD5C0',
-  statsMinutesIcon: '#E8A687',
+  statsSessionsBg: '#262112',
+  statsSessionsText: '#FDE68A',
+  statsSessionsIcon: '#F59E0B',
+  statsMinutesBg: '#2D1B15',
+  statsMinutesText: '#FFEDD5',
+  statsMinutesIcon: '#F97316',
+
+  iconBtnBg: 'rgba(255, 255, 255, 0.1)',
+  iconBtnBorder: 'rgba(255, 255, 255, 0.18)',
 };
 
 export const spacing = {

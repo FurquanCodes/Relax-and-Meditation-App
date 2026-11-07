@@ -19,7 +19,7 @@ import { formatTimeMMSS } from '../logic/formatters';
 const SLEEP_TIMER_OPTIONS = [0, 1, 15, 30, 60]; // 0 = off, 1 = 1m test, 15, 30, 60
 
 export const SoundsScreen: React.FC = () => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation();
   const playbackState = usePlaybackState();
 
@@ -121,11 +121,14 @@ export const SoundsScreen: React.FC = () => {
                 styles.trackCard,
                 {
                   backgroundColor: isSelected
-                    ? colors.cardSoundsBg + '25'
+                    ? isDark
+                      ? 'rgba(224, 122, 95, 0.22)'
+                      : colors.cardSoundsBg + '25'
                     : colors.surface,
                   borderColor: isSelected
-                    ? colors.cardSoundsBg
+                    ? colors.accentTerracotta
                     : colors.surfaceBorder,
+                  borderWidth: isSelected ? 1.8 : 1,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
@@ -136,7 +139,9 @@ export const SoundsScreen: React.FC = () => {
                     styles.trackIconBubble,
                     {
                       backgroundColor: isSelected
-                        ? colors.cardSoundsBg + '40'
+                        ? colors.accentTerracotta + '35'
+                        : isDark
+                        ? 'rgba(255, 255, 255, 0.08)'
                         : colors.surfaceBorder,
                     },
                   ]}
@@ -171,7 +176,7 @@ export const SoundsScreen: React.FC = () => {
                   {isCurrentlyPlayingThis ? (
                     <Text style={{ fontSize: 20 }}>🔊</Text>
                   ) : isSelected ? (
-                    <Text style={{ fontSize: 18, color: colors.cardSoundsBg }}>✓</Text>
+                    <Text style={{ fontSize: 18, color: colors.accentTerracotta }}>✓</Text>
                   ) : null}
                 </View>
               </View>
@@ -191,7 +196,7 @@ export const SoundsScreen: React.FC = () => {
           ]}
         >
           <View style={styles.playerCardHeader}>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
+            <Text style={[typography.caption, { color: colors.textMuted, letterSpacing: 1 }]}>
               {isPlaying ? 'NOW PLAYING' : 'PAUSED'}
             </Text>
             <Text
@@ -293,10 +298,22 @@ export const SoundsScreen: React.FC = () => {
           <View
             style={[
               styles.sleepTimerActiveBanner,
-              { backgroundColor: colors.accentPeach, borderRadius: 20 },
+              {
+                backgroundColor: isDark
+                  ? 'rgba(224, 122, 95, 0.2)'
+                  : colors.accentPeach,
+                borderColor: isDark ? 'rgba(224, 122, 95, 0.35)' : 'transparent',
+                borderWidth: isDark ? 1 : 0,
+                borderRadius: 20,
+              },
             ]}
           >
-            <Text style={[typography.bodyBold, { color: '#4A2616' }]}>
+            <Text
+              style={[
+                typography.bodyBold,
+                { color: isDark ? '#FFD4C4' : '#4A2616' },
+              ]}
+            >
               ⏳ Stops in: {formatTimeMMSS(sleepRemainingSeconds)}
             </Text>
           </View>
@@ -316,7 +333,6 @@ const styles = StyleSheet.create({
   trackCard: {
     marginVertical: 5,
     borderRadius: 20,
-    borderWidth: 1.5,
   },
   trackRow: {
     flexDirection: 'row',

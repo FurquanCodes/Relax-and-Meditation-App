@@ -20,7 +20,7 @@ import { formatTimeMMSS } from '../logic/formatters';
 const DURATION_OPTIONS_MINUTES = [1, 5, 10, 15, 20];
 
 export const MeditationScreen: React.FC = () => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation();
 
   const [selectedDurationMin, setSelectedDurationMin] = useState<number>(5);
@@ -157,7 +157,7 @@ export const MeditationScreen: React.FC = () => {
                           ? colors.accentLavender
                           : colors.surface,
                         borderColor: isSelected
-                          ? '#A7A4E8'
+                          ? colors.accentLavender
                           : colors.surfaceBorder,
                       },
                     ]}
@@ -168,7 +168,11 @@ export const MeditationScreen: React.FC = () => {
                       style={[
                         styles.chipNumber,
                         {
-                          color: isSelected ? '#1E1B4B' : colors.textPrimary,
+                          color: isSelected
+                            ? isDark
+                              ? '#FFFFFF'
+                              : '#1E1B4B'
+                            : colors.textPrimary,
                         },
                       ]}
                     >
@@ -178,7 +182,11 @@ export const MeditationScreen: React.FC = () => {
                       style={[
                         styles.chipUnit,
                         {
-                          color: isSelected ? '#3E3A70' : colors.textSecondary,
+                          color: isSelected
+                            ? isDark
+                              ? '#E2E0FD'
+                              : '#3E3A70'
+                            : colors.textSecondary,
                         },
                       ]}
                     >
@@ -189,7 +197,12 @@ export const MeditationScreen: React.FC = () => {
               })}
             </View>
 
-            <View style={styles.bellStatusNotice}>
+            <View
+              style={[
+                styles.bellStatusNotice,
+                { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)' },
+              ]}
+            >
               <Text style={{ fontSize: 18, marginRight: 8 }}>🔔</Text>
               <Text style={[typography.caption, { color: colors.textSecondary, flex: 1 }]}>
                 {settingsStore.isBellEnabled()
@@ -209,7 +222,7 @@ export const MeditationScreen: React.FC = () => {
         {isRunning && (
           <View style={styles.runningView}>
             <View style={styles.activeTopText}>
-              <Text style={[typography.caption, { color: colors.textSecondary }]}>
+              <Text style={[typography.caption, { color: colors.textSecondary, letterSpacing: 1 }]}>
                 STILLNESS IN PROGRESS
               </Text>
             </View>
@@ -220,7 +233,9 @@ export const MeditationScreen: React.FC = () => {
                 styles.timerRing,
                 {
                   borderColor: colors.accentLavender,
-                  backgroundColor: colors.accentLavender + '25',
+                  backgroundColor: isDark
+                    ? 'rgba(133, 130, 196, 0.18)'
+                    : colors.accentLavender + '25',
                 },
               ]}
             >
@@ -321,13 +336,12 @@ const styles = StyleSheet.create({
   },
   chipUnit: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     marginTop: 2,
   },
   bellStatusNotice: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.03)',
     borderRadius: 16,
     padding: 14,
     marginTop: 20,

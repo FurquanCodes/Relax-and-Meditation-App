@@ -25,7 +25,7 @@ import { progressStore } from '../data/progressStore';
 type ScreenState = 'setup' | 'active' | 'completed';
 
 export const BreathingScreen: React.FC = () => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation();
 
   // Setup state
@@ -221,11 +221,14 @@ export const BreathingScreen: React.FC = () => {
                   styles.optionCard,
                   {
                     backgroundColor: isSelected
-                      ? colors.accentSage + '30'
+                      ? isDark
+                        ? 'rgba(118, 166, 145, 0.22)'
+                        : colors.accentSage + '30'
                       : colors.surface,
                     borderColor: isSelected
                       ? colors.accentSage
                       : colors.surfaceBorder,
+                    borderWidth: isSelected ? 1.8 : 1,
                   },
                 ]}
                 onPress={() => setSelectedPattern(pattern)}
@@ -338,7 +341,7 @@ export const BreathingScreen: React.FC = () => {
         <View style={[styles.activeContainer, { padding: spacing.xl }]}>
           {/* Header Progress */}
           <View style={styles.activeHeader}>
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>
+            <Text style={[typography.caption, { color: colors.textSecondary, letterSpacing: 1 }]}>
               {selectedPattern.name.toUpperCase()}
             </Text>
             <Text
@@ -358,7 +361,9 @@ export const BreathingScreen: React.FC = () => {
               style={[
                 styles.breathingCircle,
                 {
-                  backgroundColor: colors.accentSage + '35',
+                  backgroundColor: isDark
+                    ? 'rgba(118, 166, 145, 0.2)'
+                    : colors.accentSage + '35',
                   borderColor: colors.accentSage,
                   transform: [{ scale: circleScale }],
                 },
@@ -528,7 +533,7 @@ const styles = StyleSheet.create({
   },
   cueSeconds: {
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: '700',
     marginTop: 6,
   },
   controlsRow: {

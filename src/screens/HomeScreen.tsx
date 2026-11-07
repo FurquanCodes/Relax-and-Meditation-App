@@ -33,7 +33,16 @@ const VectorHomeIcon: React.FC<{ active: boolean; color: string }> = ({ active, 
     {/* Roof */}
     <View style={[styles.homeRoof, { borderBottomColor: color }]} />
     {/* Base */}
-    <View style={[styles.homeBase, { backgroundColor: active ? color : 'transparent', borderColor: color, borderWidth: active ? 0 : 1.8 }]}>
+    <View
+      style={[
+        styles.homeBase,
+        {
+          backgroundColor: active ? color : 'transparent',
+          borderColor: color,
+          borderWidth: active ? 0 : 1.8,
+        },
+      ]}
+    >
       {!active && <View style={[styles.homeDoor, { backgroundColor: color }]} />}
     </View>
   </View>
@@ -41,7 +50,12 @@ const VectorHomeIcon: React.FC<{ active: boolean; color: string }> = ({ active, 
 
 const VectorPracticeIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
   <View style={[styles.navPracticeOuter, { borderColor: color }]}>
-    <View style={[styles.navPracticeInner, { backgroundColor: active ? color : 'transparent', borderColor: color }]} />
+    <View
+      style={[
+        styles.navPracticeInner,
+        { backgroundColor: active ? color : 'transparent', borderColor: color },
+      ]}
+    />
   </View>
 );
 
@@ -56,38 +70,54 @@ const VectorSoundIcon: React.FC<{ active: boolean; color: string }> = ({ active,
 
 const VectorProfileIcon: React.FC<{ active: boolean; color: string }> = ({ active, color }) => (
   <View style={styles.navProfileWrap}>
-    <View style={[styles.profileHead, { borderColor: color, backgroundColor: active ? color : 'transparent' }]} />
-    <View style={[styles.profileShoulders, { borderColor: color, backgroundColor: active ? color : 'transparent' }]} />
+    <View
+      style={[
+        styles.profileHead,
+        { borderColor: color, backgroundColor: active ? color : 'transparent' },
+      ]}
+    />
+    <View
+      style={[
+        styles.profileShoulders,
+        { borderColor: color, backgroundColor: active ? color : 'transparent' },
+      ]}
+    />
   </View>
 );
 
 // Serene nature landscape illustration matching the reference design
-const HeroIllustration: React.FC = () => {
+const HeroIllustration: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+  const sunColor = isDark ? '#F59E0B' : '#EE886B';
+  const hill1Color = isDark ? '#2E5743' : '#7FA293';
+  const hill2Color = isDark ? '#244736' : '#6A9081';
+  const hill3Color = isDark ? '#1B3629' : '#567A6B';
+  const outlineColor = isDark ? 'rgba(255,255,255,0.18)' : '#334D40';
+
   return (
     <View style={styles.heroGraphicContainer}>
-      {/* Sun rays & Morning Sun */}
+      {/* Sun rays & Morning/Evening Sun */}
       <View style={styles.sunWrapper}>
-        <View style={[styles.sunRay, { transform: [{ rotate: '-45deg' }] }]} />
-        <View style={[styles.sunRay, { transform: [{ rotate: '0deg' }] }]} />
-        <View style={[styles.sunRay, { transform: [{ rotate: '45deg' }] }]} />
-        <View style={styles.sunCircle} />
+        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '-45deg' }] }]} />
+        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '0deg' }] }]} />
+        <View style={[styles.sunRay, { backgroundColor: sunColor, transform: [{ rotate: '45deg' }] }]} />
+        <View style={[styles.sunCircle, { backgroundColor: sunColor }]} />
       </View>
 
       {/* Floating leaves */}
-      <View style={[styles.floatingLeaf, styles.leaf1]} />
-      <View style={[styles.floatingLeaf, styles.leaf2]} />
-      <View style={[styles.floatingLeaf, styles.leaf3]} />
+      <View style={[styles.floatingLeaf, styles.leaf1, { borderColor: outlineColor, backgroundColor: hill1Color }]} />
+      <View style={[styles.floatingLeaf, styles.leaf2, { borderColor: outlineColor, backgroundColor: hill2Color }]} />
+      <View style={[styles.floatingLeaf, styles.leaf3, { borderColor: outlineColor, backgroundColor: hill3Color }]} />
 
       {/* Layered Rolling Hills with organic outlines */}
-      <View style={styles.backHill} />
-      <View style={styles.midHill} />
-      <View style={styles.frontHill} />
+      <View style={[styles.backHill, { backgroundColor: hill1Color, borderColor: outlineColor }]} />
+      <View style={[styles.midHill, { backgroundColor: hill2Color, borderColor: outlineColor }]} />
+      <View style={[styles.frontHill, { backgroundColor: hill3Color, borderColor: outlineColor }]} />
     </View>
   );
 };
 
 export const HomeScreen: React.FC = () => {
-  const { colors, typography, spacing, borderRadius } = useTheme();
+  const { colors, typography, spacing, isDark } = useTheme();
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
 
@@ -132,8 +162,8 @@ export const HomeScreen: React.FC = () => {
           style={[
             styles.settingsCircleBtn,
             {
-              backgroundColor: colors.surface,
-              borderColor: colors.surfaceBorder,
+              backgroundColor: colors.iconBtnBg,
+              borderColor: colors.iconBtnBorder,
             },
           ]}
           onPress={() => navigation.navigate('Settings')}
@@ -150,7 +180,7 @@ export const HomeScreen: React.FC = () => {
           styles.scrollContent,
           {
             paddingHorizontal: spacing.xl,
-            paddingBottom: insets.bottom + 85, // Space for bottom tab bar
+            paddingBottom: insets.bottom + 90, // Space for bottom tab bar
           },
         ]}
         showsVerticalScrollIndicator={false}
@@ -167,7 +197,14 @@ export const HomeScreen: React.FC = () => {
 
         {/* Hero Featured Card: "Start your day with calm" */}
         <TouchableOpacity
-          style={[styles.heroCard, { backgroundColor: colors.cardHeroBg }]}
+          style={[
+            styles.heroCard,
+            {
+              backgroundColor: colors.cardHeroBg,
+              borderColor: isDark ? 'rgba(155, 187, 174, 0.25)' : 'transparent',
+              borderWidth: isDark ? 1.5 : 0,
+            },
+          ]}
           activeOpacity={0.9}
           onPress={() => navigation.navigate('Breathing')}
         >
@@ -188,7 +225,7 @@ export const HomeScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
-          <HeroIllustration />
+          <HeroIllustration isDark={isDark} />
         </TouchableOpacity>
 
         {/* Progress Stats Split Cards (Sessions & Minutes) */}
@@ -197,18 +234,31 @@ export const HomeScreen: React.FC = () => {
           <View
             style={[
               styles.statsCard,
-              { backgroundColor: colors.statsSessionsBg },
+              {
+                backgroundColor: colors.statsSessionsBg,
+                borderColor: isDark ? 'rgba(253, 230, 138, 0.25)' : 'transparent',
+                borderWidth: isDark ? 1.5 : 0,
+              },
             ]}
           >
             <View style={styles.statsHeaderRow}>
-              <View style={[styles.statsIconBadge, { backgroundColor: colors.surface + '60' }]}>
+              <View
+                style={[
+                  styles.statsIconBadge,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(245, 158, 11, 0.2)'
+                      : '#F0DD9E',
+                  },
+                ]}
+              >
                 <VectorAvatarIcon color={colors.statsSessionsIcon} />
               </View>
               <Text style={[styles.statsNumber, { color: colors.statsSessionsText }]}>
                 {completedSessions}
               </Text>
             </View>
-            <Text style={[styles.statsLabel, { color: colors.statsSessionsText, opacity: 0.85 }]}>
+            <Text style={[styles.statsLabel, { color: colors.statsSessionsText, opacity: 0.9 }]}>
               Sessions
             </Text>
           </View>
@@ -217,18 +267,31 @@ export const HomeScreen: React.FC = () => {
           <View
             style={[
               styles.statsCard,
-              { backgroundColor: colors.statsMinutesBg },
+              {
+                backgroundColor: colors.statsMinutesBg,
+                borderColor: isDark ? 'rgba(255, 237, 213, 0.25)' : 'transparent',
+                borderWidth: isDark ? 1.5 : 0,
+              },
             ]}
           >
             <View style={styles.statsHeaderRow}>
-              <View style={[styles.statsIconBadge, { backgroundColor: colors.surface + '60' }]}>
+              <View
+                style={[
+                  styles.statsIconBadge,
+                  {
+                    backgroundColor: isDark
+                      ? 'rgba(249, 115, 22, 0.2)'
+                      : '#F3CBB5',
+                  },
+                ]}
+              >
                 <VectorClockIcon color={colors.statsMinutesIcon} />
               </View>
               <Text style={[styles.statsNumber, { color: colors.statsMinutesText }]}>
                 {totalMinutes}
               </Text>
             </View>
-            <Text style={[styles.statsLabel, { color: colors.statsMinutesText, opacity: 0.85 }]}>
+            <Text style={[styles.statsLabel, { color: colors.statsMinutesText, opacity: 0.9 }]}>
               Minutes
             </Text>
           </View>
@@ -241,60 +304,144 @@ export const HomeScreen: React.FC = () => {
 
         {/* Practice Card 1: Breathe */}
         <TouchableOpacity
-          style={[styles.practiceCard, { backgroundColor: colors.cardBreatheBg }]}
+          style={[
+            styles.practiceCard,
+            {
+              backgroundColor: colors.cardBreatheBg,
+              borderColor: isDark ? 'rgba(155, 187, 174, 0.3)' : 'transparent',
+              borderWidth: isDark ? 1.5 : 0,
+            },
+          ]}
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Breathing')}
         >
           <View style={styles.practiceLeft}>
-            <View style={styles.practiceIconBadge}>
+            <View
+              style={[
+                styles.practiceIconBadge,
+                { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.45)' },
+              ]}
+            >
               <Text style={styles.practiceBadgeIcon}>🫧</Text>
             </View>
             <View style={styles.practiceTextWrap}>
-              <Text style={[styles.practiceTitle, { color: colors.textPrimary }]}>
+              <Text
+                style={[
+                  styles.practiceTitle,
+                  { color: isDark ? '#FFFFFF' : '#1A2E22' },
+                ]}
+              >
                 Breathe
               </Text>
-              <Text style={[styles.practiceSubtitle, { color: colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.practiceSubtitle,
+                  { color: isDark ? '#D1E6DC' : '#2A4337' },
+                ]}
+              >
                 Guided rhythmic breathing with visual cues
               </Text>
             </View>
           </View>
-          <View style={styles.whiteArrowCircle}>
-            <Text style={[styles.whiteArrowText, { color: colors.textPrimary }]}>›</Text>
+          <View
+            style={[
+              styles.whiteArrowCircle,
+              {
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.18)' : '#FFFFFF',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.whiteArrowText,
+                { color: isDark ? '#FFFFFF' : '#1A2E22' },
+              ]}
+            >
+              ›
+            </Text>
           </View>
         </TouchableOpacity>
 
         {/* Practice Card 2: Meditate */}
         <TouchableOpacity
-          style={[styles.practiceCard, { backgroundColor: colors.cardMeditateBg }]}
+          style={[
+            styles.practiceCard,
+            {
+              backgroundColor: colors.cardMeditateBg,
+              borderColor: isDark ? 'rgba(212, 211, 248, 0.3)' : 'transparent',
+              borderWidth: isDark ? 1.5 : 0,
+            },
+          ]}
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Meditation')}
         >
           <View style={styles.practiceLeft}>
-            <View style={[styles.practiceIconBadge, { backgroundColor: 'rgba(255,255,255,0.45)' }]}>
+            <View
+              style={[
+                styles.practiceIconBadge,
+                { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.5)' },
+              ]}
+            >
               <Text style={styles.practiceBadgeIcon}>🧘</Text>
             </View>
             <View style={styles.practiceTextWrap}>
-              <Text style={[styles.practiceTitle, { color: colors.textPrimary }]}>
+              <Text
+                style={[
+                  styles.practiceTitle,
+                  { color: isDark ? '#FFFFFF' : '#1E1B4B' },
+                ]}
+              >
                 Meditate
               </Text>
-              <Text style={[styles.practiceSubtitle, { color: colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.practiceSubtitle,
+                  { color: isDark ? '#E2E0FD' : '#3E3A6D' },
+                ]}
+              >
                 Quiet timer with soft starting and ending bells
               </Text>
             </View>
           </View>
-          <View style={styles.whiteArrowCircle}>
-            <Text style={[styles.whiteArrowText, { color: colors.textPrimary }]}>›</Text>
+          <View
+            style={[
+              styles.whiteArrowCircle,
+              {
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.18)' : '#FFFFFF',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.whiteArrowText,
+                { color: isDark ? '#FFFFFF' : '#1E1B4B' },
+              ]}
+            >
+              ›
+            </Text>
           </View>
         </TouchableOpacity>
 
         {/* Practice Card 3: Sounds */}
         <TouchableOpacity
-          style={[styles.practiceCard, { backgroundColor: colors.cardSoundsBg }]}
+          style={[
+            styles.practiceCard,
+            {
+              backgroundColor: colors.cardSoundsBg,
+              borderColor: isDark ? 'rgba(226, 129, 104, 0.3)' : 'transparent',
+              borderWidth: isDark ? 1.5 : 0,
+            },
+          ]}
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Sounds')}
         >
           <View style={styles.practiceLeft}>
-            <View style={[styles.practiceIconBadge, { backgroundColor: 'rgba(255,255,255,0.45)' }]}>
+            <View
+              style={[
+                styles.practiceIconBadge,
+                { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.45)' },
+              ]}
+            >
               <Text style={styles.practiceBadgeIcon}>🎧</Text>
             </View>
             <View style={styles.practiceTextWrap}>
@@ -306,8 +453,22 @@ export const HomeScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-          <View style={styles.whiteArrowCircle}>
-            <Text style={[styles.whiteArrowText, { color: colors.cardSoundsBg }]}>›</Text>
+          <View
+            style={[
+              styles.whiteArrowCircle,
+              {
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.18)' : '#FFFFFF',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.whiteArrowText,
+                { color: isDark ? '#FFFFFF' : colors.cardSoundsBg },
+              ]}
+            >
+              ›
+            </Text>
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -328,7 +489,12 @@ export const HomeScreen: React.FC = () => {
           activeOpacity={0.7}
         >
           <VectorHomeIcon active={true} color={colors.navActive} />
-          <Text style={[styles.navLabel, { color: colors.navActive, fontWeight: '700' }]}>
+          <Text
+            style={[
+              styles.navLabel,
+              { color: colors.navActive, fontWeight: '700' },
+            ]}
+          >
             Home
           </Text>
         </TouchableOpacity>
@@ -419,7 +585,7 @@ const styles = StyleSheet.create({
   },
   heroSubtitle: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '500',
     marginTop: 4,
   },
 
@@ -486,13 +652,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#EE886B',
   },
   sunRay: {
     position: 'absolute',
     width: 2,
     height: 48,
-    backgroundColor: '#EE886B',
     opacity: 0.6,
   },
   backHill: {
@@ -502,9 +666,7 @@ const styles = StyleSheet.create({
     width: 110,
     height: 75,
     borderRadius: 55,
-    backgroundColor: '#7FA293',
     borderWidth: 1.5,
-    borderColor: '#4A6C5C',
     transform: [{ scaleX: 1.3 }],
   },
   midHill: {
@@ -514,9 +676,7 @@ const styles = StyleSheet.create({
     width: 130,
     height: 85,
     borderRadius: 65,
-    backgroundColor: '#6A9081',
     borderWidth: 1.5,
-    borderColor: '#3D5C4E',
     transform: [{ scaleX: 1.4 }],
   },
   frontHill: {
@@ -526,9 +686,7 @@ const styles = StyleSheet.create({
     width: 135,
     height: 80,
     borderRadius: 67,
-    backgroundColor: '#567A6B',
     borderWidth: 1.5,
-    borderColor: '#2F483C',
     transform: [{ scaleX: 1.3 }],
   },
   floatingLeaf: {
@@ -537,8 +695,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 6,
     borderWidth: 1.5,
-    borderColor: '#2F483C',
-    backgroundColor: '#7FA293',
   },
   leaf1: {
     top: 26,
@@ -576,9 +732,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statsIconBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -622,7 +778,7 @@ const styles = StyleSheet.create({
     top: 3,
   },
   statsNumber: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '700',
     fontFamily: 'serif',
   },
@@ -659,7 +815,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -678,14 +833,13 @@ const styles = StyleSheet.create({
   },
   practiceSubtitle: {
     fontSize: 13,
-    fontWeight: '400',
+    fontWeight: '500',
     lineHeight: 17,
   },
   whiteArrowCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
