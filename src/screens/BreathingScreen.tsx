@@ -50,7 +50,7 @@ export const BreathingScreen: React.FC = () => {
   const ring1Scale = useRef(new Animated.Value(1.0)).current;
   const ring2Scale = useRef(new Animated.Value(1.0)).current;
   const ring3Scale = useRef(new Animated.Value(1.0)).current;
-  const bgPhaseAnim = useRef(new Animated.Value(0)).current; // 0 = neutral, 1 = light (inhale), 0.5 = hold, 0 = deep (exhale)
+  const bgPhaseAnim = useRef(new Animated.Value(0)).current;
 
   const currentAnimation = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -148,7 +148,6 @@ export const BreathingScreen: React.FC = () => {
         }),
       ]);
     } else {
-      // Hold stays at current scale
       currentAnimation.current = null;
     }
 
@@ -244,7 +243,7 @@ export const BreathingScreen: React.FC = () => {
 
   const bgInhaleOpacity = bgPhaseAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 0.40],
+    outputRange: [0, 0.35],
   });
 
   return (
@@ -261,13 +260,13 @@ export const BreathingScreen: React.FC = () => {
       {screenState === 'setup' && (
         <ScrollView
           style={styles.contentContainer}
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
           <Text
             style={[
               styles.screenSubtitle,
-              { color: isDark ? '#D0E3D9' : '#4B5F54' },
+              { color: isDark ? '#D8E8E0' : '#2E4638' },
             ]}
           >
             Select a soothing rhythm and session duration.
@@ -288,22 +287,22 @@ export const BreathingScreen: React.FC = () => {
               <Pressable
                 key={pattern.id}
                 style={[
-                  styles.glassPatternCard,
+                  styles.patternCard,
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? 'rgba(140, 213, 180, 0.25)'
-                        : 'rgba(38, 92, 67, 0.15)'
+                        ? '#162E23'
+                        : '#E4F0E9'
                       : isDark
-                      ? 'rgba(17, 29, 37, 0.65)'
-                      : 'rgba(255, 255, 255, 0.72)',
+                      ? '#13221B'
+                      : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
                         ? '#8CD5B4'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.14)'
-                      : 'rgba(255, 255, 255, 0.85)',
+                      ? 'rgba(255, 255, 255, 0.12)'
+                      : '#E0D8CB',
                     borderWidth: isSelected ? 2 : 1.5,
                   },
                 ]}
@@ -316,8 +315,8 @@ export const BreathingScreen: React.FC = () => {
                       {
                         backgroundColor: isSelected
                           ? isDark
-                            ? 'rgba(140, 213, 180, 0.35)'
-                            : 'rgba(38, 92, 67, 0.22)'
+                            ? 'rgba(140, 213, 180, 0.25)'
+                            : 'rgba(38, 92, 67, 0.15)'
                           : isDark
                           ? 'rgba(255, 255, 255, 0.10)'
                           : 'rgba(0, 0, 0, 0.05)',
@@ -332,8 +331,8 @@ export const BreathingScreen: React.FC = () => {
                             ? '#8CD5B4'
                             : '#265C43'
                           : isDark
-                          ? '#D0E3D9'
-                          : '#4B5F54'
+                          ? '#D8E8E0'
+                          : '#2E4638'
                       }
                     />
                   </View>
@@ -349,7 +348,7 @@ export const BreathingScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.patternDesc,
-                        { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                        { color: isDark ? '#D8E8E0' : '#2E4638' },
                       ]}
                     >
                       {pattern.subtitle}
@@ -390,7 +389,7 @@ export const BreathingScreen: React.FC = () => {
           <Text
             style={[
               styles.sectionTitle,
-              { color: colors.textPrimary, marginTop: 24 },
+              { color: colors.textPrimary, marginTop: 22 },
             ]}
           >
             Duration
@@ -409,15 +408,15 @@ export const BreathingScreen: React.FC = () => {
                           ? '#8CD5B4'
                           : '#265C43'
                         : isDark
-                        ? 'rgba(17, 29, 37, 0.65)'
-                        : 'rgba(255, 255, 255, 0.72)',
+                        ? '#13221B'
+                        : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
                           ? '#8CD5B4'
                           : '#265C43'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.16)'
-                        : 'rgba(255, 255, 255, 0.85)',
+                        ? 'rgba(255, 255, 255, 0.14)'
+                        : '#E0D8CB',
                     },
                   ]}
                   onPress={() => setSelectedDurationMin(min)}
@@ -445,7 +444,7 @@ export const BreathingScreen: React.FC = () => {
           <PrimaryButton
             title="Start Breathing"
             onPress={handleStartSession}
-            style={{ marginTop: 32 }}
+            style={{ marginTop: 28 }}
           />
         </ScrollView>
       )}
@@ -453,7 +452,6 @@ export const BreathingScreen: React.FC = () => {
       {/* Screen 2: ACTIVE SESSION */}
       {screenState === 'active' && (
         <View style={styles.activeContainer}>
-          {/* Dynamic background color shift for inhalation lightness */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -494,8 +492,8 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring3,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.18)'
-                    : 'rgba(38, 92, 67, 0.14)',
+                    ? 'rgba(140, 213, 180, 0.20)'
+                    : 'rgba(38, 92, 67, 0.18)',
                   transform: [{ scale: ring3Scale }],
                 },
               ]}
@@ -508,8 +506,8 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring2,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.28)'
-                    : 'rgba(38, 92, 67, 0.22)',
+                    ? 'rgba(140, 213, 180, 0.32)'
+                    : 'rgba(38, 92, 67, 0.28)',
                   transform: [{ scale: ring2Scale }],
                 },
               ]}
@@ -522,8 +520,8 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring1,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.40)'
-                    : 'rgba(38, 92, 67, 0.32)',
+                    ? 'rgba(140, 213, 180, 0.45)'
+                    : 'rgba(38, 92, 67, 0.38)',
                   transform: [{ scale: ring1Scale }],
                 },
               ]}
@@ -535,27 +533,27 @@ export const BreathingScreen: React.FC = () => {
                 styles.mainGlowingOrb,
                 {
                   transform: [{ scale: orbScale }],
-                  shadowColor: isDark ? '#8CD5B4' : '#265C43',
+                  borderColor: isDark ? '#8CD5B4' : '#265C43',
                 },
               ]}
             >
               <LinearGradient
                 colors={
                   isDark
-                    ? ['rgba(140, 213, 180, 0.45)', 'rgba(38, 92, 67, 0.65)']
-                    : ['rgba(174, 216, 196, 0.70)', 'rgba(118, 175, 150, 0.85)']
+                    ? ['#1C372D', '#132820']
+                    : ['#8EAFA1', '#6B9483']
                 }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
+                style={[StyleSheet.absoluteFill, { borderRadius: 88 }]}
               />
               <View
                 style={[
                   styles.orbInnerGlow,
                   {
                     backgroundColor: isDark
-                      ? 'rgba(255, 255, 255, 0.20)'
-                      : 'rgba(255, 255, 255, 0.45)',
+                      ? 'rgba(255, 255, 255, 0.18)'
+                      : 'rgba(255, 255, 255, 0.35)',
                   },
                 ]}
               />
@@ -565,7 +563,7 @@ export const BreathingScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.cueTitle,
-                    { color: isDark ? '#FFFFFF' : '#14221A' },
+                    { color: '#FFFFFF' },
                   ]}
                 >
                   {activePhase.label}
@@ -573,7 +571,7 @@ export const BreathingScreen: React.FC = () => {
                 <Text
                   style={[
                     styles.cueSeconds,
-                    { color: isDark ? '#FDE68A' : '#D66D52' },
+                    { color: isDark ? '#FDE68A' : '#FCD8C4' },
                   ]}
                 >
                   {phaseSecondsLeft}s
@@ -582,7 +580,7 @@ export const BreathingScreen: React.FC = () => {
             </Animated.View>
           </View>
 
-          {/* Bottom Tactile Controls */}
+          {/* Bottom Controls */}
           <View style={styles.controlsRow}>
             <PrimaryButton
               title={isPaused ? 'Resume' : 'Pause'}
@@ -609,7 +607,7 @@ export const BreathingScreen: React.FC = () => {
               {
                 backgroundColor: isDark
                   ? 'rgba(140, 213, 180, 0.20)'
-                  : 'rgba(38, 92, 67, 0.12)',
+                  : 'rgba(38, 92, 67, 0.14)',
               },
             ]}
           >
@@ -627,7 +625,7 @@ export const BreathingScreen: React.FC = () => {
           <Text
             style={[
               styles.completedSubtitle,
-              { color: isDark ? '#D0E3D9' : '#4B5F54' },
+              { color: isDark ? '#D8E8E0' : '#2E4638' },
             ]}
           >
             Take a quiet moment for yourself. You finished {selectedDurationMin} minute of{' '}
@@ -656,27 +654,23 @@ const styles = StyleSheet.create({
   },
   screenSubtitle: {
     fontSize: 15,
-    fontFamily: 'Nunito-Regular',
-    marginBottom: 20,
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
+    marginBottom: 18,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 10,
   },
-  glassPatternCard: {
-    borderRadius: 22,
+  patternCard: {
+    borderRadius: 20,
     padding: 16,
     marginVertical: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
   },
   patternLeft: {
     flexDirection: 'row',
@@ -694,12 +688,13 @@ const styles = StyleSheet.create({
   patternTitle: {
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 2,
   },
   patternDesc: {
     fontSize: 13,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
   },
   radioCircle: {
     width: 22,
@@ -723,21 +718,16 @@ const styles = StyleSheet.create({
   },
   durationChip: {
     flex: 1,
-    height: 56,
-    borderRadius: 28,
+    height: 54,
+    borderRadius: 27,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
   },
   durationChipText: {
     fontSize: 15,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   activeContainer: {
     flex: 1,
@@ -752,13 +742,13 @@ const styles = StyleSheet.create({
   patternBadgeText: {
     fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     letterSpacing: 1.5,
   },
   remainingTimeDigits: {
     fontSize: 36,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginTop: 4,
   },
   orbSceneWrapper: {
@@ -789,13 +779,10 @@ const styles = StyleSheet.create({
     width: 175,
     height: 175,
     borderRadius: 88,
+    borderWidth: 2,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 18,
-    elevation: 8,
   },
   orbInnerGlow: {
     position: 'absolute',
@@ -811,12 +798,12 @@ const styles = StyleSheet.create({
   cueTitle: {
     fontSize: 28,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
   },
   cueSeconds: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     marginTop: 4,
   },
   controlsRow: {
@@ -836,25 +823,26 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   completedAuraWrap: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
+    marginBottom: 16,
   },
   completedEmoji: {
-    fontSize: 52,
+    fontSize: 50,
   },
   completedTitle: {
     fontSize: 34,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 8,
   },
   completedSubtitle: {
     fontSize: 16,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,

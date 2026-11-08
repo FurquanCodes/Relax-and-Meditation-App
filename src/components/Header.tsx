@@ -36,12 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
             style={[
               styles.circleBackBtn,
               {
-                backgroundColor: isDark
-                  ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(255, 255, 255, 0.75)',
-                borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.20)'
-                  : 'rgba(255, 255, 255, 0.90)',
+                backgroundColor: isDark ? '#162820' : '#FFFFFF',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.16)' : '#D0E2D7',
               },
             ]}
             onPress={onBackPress}
@@ -89,9 +85,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 2,
   },
   backArrow: {
     fontSize: 28,

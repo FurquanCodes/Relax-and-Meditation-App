@@ -10,7 +10,6 @@ import {
   StatusBar,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { usePlaybackState, State } from 'react-native-track-player';
 import { useTheme } from '../theme/ThemeContext';
@@ -158,27 +157,7 @@ export const SoundsScreen: React.FC = () => {
     }
   };
 
-  const getGradientForCategory = (cat: SoundCategoryId): [string, string] => {
-    switch (cat) {
-      case 'rain':
-        return isDark
-          ? ['rgba(44, 62, 80, 0.45)', 'rgba(25, 38, 50, 0.45)']
-          : ['rgba(176, 196, 214, 0.35)', 'rgba(142, 166, 189, 0.35)'];
-      case 'forest':
-        return isDark
-          ? ['rgba(29, 66, 48, 0.45)', 'rgba(16, 42, 30, 0.45)']
-          : ['rgba(168, 206, 185, 0.35)', 'rgba(132, 178, 153, 0.35)'];
-      case 'ocean':
-        return isDark
-          ? ['rgba(20, 68, 84, 0.45)', 'rgba(11, 44, 55, 0.45)']
-          : ['rgba(165, 209, 222, 0.35)', 'rgba(128, 183, 199, 0.35)'];
-      case 'calm':
-      default:
-        return isDark
-          ? ['rgba(54, 42, 82, 0.45)', 'rgba(34, 25, 54, 0.45)']
-          : ['rgba(203, 194, 235, 0.35)', 'rgba(172, 160, 214, 0.35)'];
-    }
-  };
+
 
   const filteredTracks = AMBIENT_TRACKS.filter(
     (track) => track.categoryId === selectedCategory
@@ -258,15 +237,15 @@ export const SoundsScreen: React.FC = () => {
                         ? '#8CD5B4'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(17, 29, 37, 0.65)'
-                      : 'rgba(255, 255, 255, 0.75)',
+                      ? '#13221B'
+                      : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
                         ? '#8CD5B4'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.16)'
-                      : 'rgba(255, 255, 255, 0.90)',
+                      ? 'rgba(255, 255, 255, 0.14)'
+                      : '#CDE2D6',
                   },
                 ]}
                 onPress={() => setSelectedCategory(cat.id)}
@@ -309,7 +288,6 @@ export const SoundsScreen: React.FC = () => {
         {filteredTracks.map((track) => {
           const isThisActive = activeTrackId === track.id;
           const isThisPlaying = isThisActive && isPlaying;
-          const categoryGradient = getGradientForCategory(track.categoryId);
 
           return (
             <TouchableOpacity
@@ -319,31 +297,24 @@ export const SoundsScreen: React.FC = () => {
                 {
                   backgroundColor: isThisActive
                     ? isDark
-                      ? 'rgba(140, 213, 180, 0.22)'
-                      : 'rgba(38, 92, 67, 0.14)'
+                      ? '#162E23'
+                      : '#E4F0E9'
                     : isDark
-                    ? 'rgba(17, 29, 37, 0.65)'
-                    : 'rgba(255, 255, 255, 0.75)',
+                    ? '#13221B'
+                    : '#FFFFFF',
                   borderColor: isThisActive
                     ? isDark
                       ? '#8CD5B4'
                       : '#265C43'
                     : isDark
-                    ? 'rgba(255, 255, 255, 0.14)'
-                    : 'rgba(255, 255, 255, 0.88)',
+                    ? 'rgba(255, 255, 255, 0.12)'
+                    : '#D6E4DC',
                   borderWidth: isThisActive ? 2 : 1.5,
                 },
               ]}
               onPress={() => handleSelectTrack(track)}
               activeOpacity={0.88}
             >
-              <LinearGradient
-                colors={categoryGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={StyleSheet.absoluteFill}
-              />
-
               <View style={styles.trackCardLeft}>
                 <View
                   style={[
@@ -354,8 +325,8 @@ export const SoundsScreen: React.FC = () => {
                           ? '#8CD5B4'
                           : '#265C43'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : 'rgba(0, 0, 0, 0.05)',
+                        ? '#1C3127'
+                        : '#EAF2ED',
                     },
                   ]}
                 >
@@ -378,7 +349,7 @@ export const SoundsScreen: React.FC = () => {
                   <Text style={[styles.trackTitle, { color: colors.textPrimary }]}>
                     {track.title}
                   </Text>
-                  <Text style={[styles.trackDesc, { color: isDark ? '#D8E8E0' : '#2C4235' }]}>
+                  <Text style={[styles.trackDesc, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
                     {track.subtitle}
                   </Text>
                 </View>
@@ -400,12 +371,10 @@ export const SoundsScreen: React.FC = () => {
         style={[
           styles.dockedPlayer,
           {
-            backgroundColor: isDark
-              ? 'rgba(15, 26, 34, 0.92)'
-              : 'rgba(255, 255, 255, 0.92)',
+            backgroundColor: isDark ? '#112019' : '#FFFFFF',
             borderColor: isDark
               ? 'rgba(255, 255, 255, 0.16)'
-              : 'rgba(255, 255, 255, 0.95)',
+              : '#CDE2D6',
           },
         ]}
       >
@@ -414,7 +383,7 @@ export const SoundsScreen: React.FC = () => {
             <Text style={[styles.dockedTrackTitle, { color: colors.textPrimary }]} numberOfLines={1}>
               {activeTrack.title}
             </Text>
-            <Text style={[styles.dockedTrackSubtitle, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+            <Text style={[styles.dockedTrackSubtitle, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
               {isPlaying ? 'Now Playing Loop' : 'Paused'}
               {sleepRemainingSeconds !== null && ` • 🌙 ${formatTimeMMSS(sleepRemainingSeconds)}`}
             </Text>
@@ -443,7 +412,7 @@ export const SoundsScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.volStepBtn,
-              { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' },
+              { backgroundColor: isDark ? '#1C3127' : '#EAF2ED' },
             ]}
             onPress={() => handleVolumeStep(-0.1)}
           >
@@ -465,7 +434,7 @@ export const SoundsScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.volStepBtn,
-              { backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.06)' },
+              { backgroundColor: isDark ? '#1C3127' : '#EAF2ED' },
             ]}
             onPress={() => handleVolumeStep(0.1)}
           >
@@ -479,7 +448,7 @@ export const SoundsScreen: React.FC = () => {
 
         {/* Sleep Timer Pills */}
         <View style={styles.sleepRow}>
-          <Text style={[styles.sleepLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+          <Text style={[styles.sleepLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
             🌙 Timer:
           </Text>
           <View style={styles.sleepChips}>
@@ -496,8 +465,8 @@ export const SoundsScreen: React.FC = () => {
                           ? '#8CD5B4'
                           : '#265C43'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.10)'
-                        : 'rgba(0, 0, 0, 0.05)',
+                        ? '#1C3127'
+                        : '#EAF2ED',
                     },
                   ]}
                   onPress={() => handleSelectSleep(min)}
@@ -549,7 +518,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
-    elevation: 2,
   },
   categoryPillIcon: {
     fontSize: 18,
@@ -593,7 +561,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    elevation: 2,
   },
   trackCardLeft: {
     flexDirection: 'row',
@@ -645,7 +612,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.25,
     shadowRadius: 16,
-    elevation: 10,
   },
   dockedMainRow: {
     flexDirection: 'row',
@@ -676,7 +642,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
-    elevation: 4,
   },
   largePlayPauseGlyph: {
     fontSize: 20,

@@ -35,9 +35,9 @@ export const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   let borderWidth = 0;
 
   if (variant === 'secondary') {
-    bgColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.80)';
-    textColor = colors.textPrimary;
-    borderColor = isDark ? 'rgba(255, 255, 255, 0.22)' : 'rgba(255, 255, 255, 0.95)';
+    bgColor = isDark ? '#162820' : '#FFFFFF';
+    textColor = isDark ? '#FFFFFF' : '#111F18';
+    borderColor = isDark ? 'rgba(255, 255, 255, 0.20)' : '#265C43';
     borderWidth = 1.5;
   } else if (variant === 'danger') {
     bgColor = '#C7513B';
@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 3,
   },
   text: {
     fontSize: 16,

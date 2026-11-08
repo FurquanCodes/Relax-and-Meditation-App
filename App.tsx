@@ -3,8 +3,6 @@ import {
   Platform,
   PermissionsAndroid,
   StatusBar,
-  View,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
@@ -52,21 +50,6 @@ export default function App() {
 
     bootstrap();
   }, []);
-
-  if (!isInitialized) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: '#0D141C',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <ActivityIndicator size="large" color="#38B2AC" />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaProvider>

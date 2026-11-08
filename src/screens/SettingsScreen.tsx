@@ -116,7 +116,7 @@ export const SettingsScreen: React.FC = () => {
         <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
           Background Scene
         </Text>
-        <Text style={[styles.sectionDesc, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+        <Text style={[styles.sectionDesc, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
           Choose your favorite scenic environment for Home and rest screens
         </Text>
 
@@ -129,16 +129,20 @@ export const SettingsScreen: React.FC = () => {
                 style={[
                   styles.sceneCard,
                   {
-                    backgroundColor: isDark
-                      ? 'rgba(17, 29, 37, 0.70)'
-                      : 'rgba(255, 255, 255, 0.75)',
+                    backgroundColor: isSelected
+                      ? isDark
+                        ? '#162E23'
+                        : '#E4F0E9'
+                      : isDark
+                      ? '#13221B'
+                      : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
                         ? '#8CD5B4'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.14)'
-                      : 'rgba(255, 255, 255, 0.88)',
+                      ? 'rgba(255, 255, 255, 0.12)'
+                      : '#D6E4DC',
                     borderWidth: isSelected ? 2.5 : 1.5,
                   },
                 ]}
@@ -153,8 +157,8 @@ export const SettingsScreen: React.FC = () => {
                       styles.sceneThumbFallback,
                       {
                         backgroundColor: isDark
-                          ? 'rgba(140, 213, 180, 0.20)'
-                          : 'rgba(38, 92, 67, 0.12)',
+                          ? '#1A3326'
+                          : '#EAF3EE',
                       },
                     ]}
                   >
@@ -190,7 +194,7 @@ export const SettingsScreen: React.FC = () => {
                   <Text
                     style={[
                       styles.sceneSubtitle,
-                      { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                      { color: isDark ? '#D8E8E0' : '#2E4638' },
                     ]}
                   >
                     {opt.subtitle}
@@ -215,12 +219,10 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark
-                ? 'rgba(17, 29, 37, 0.70)'
-                : 'rgba(255, 255, 255, 0.75)',
+              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.14)'
-                : 'rgba(255, 255, 255, 0.88)',
+                ? 'rgba(255, 255, 255, 0.12)'
+                : '#D6E4DC',
             },
           ]}
         >
@@ -235,7 +237,7 @@ export const SettingsScreen: React.FC = () => {
                     borderBottomWidth: 1,
                     borderBottomColor: isDark
                       ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(0, 0, 0, 0.06)',
+                      : '#EDF3EF',
                   },
                 ]}
                 onPress={() => setThemePreference(opt.id)}
@@ -290,12 +292,10 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark
-                ? 'rgba(17, 29, 37, 0.70)'
-                : 'rgba(255, 255, 255, 0.75)',
+              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.14)'
-                : 'rgba(255, 255, 255, 0.88)',
+                ? 'rgba(255, 255, 255, 0.12)'
+                : '#D6E4DC',
             },
           ]}
         >
@@ -307,7 +307,7 @@ export const SettingsScreen: React.FC = () => {
               <Text
                 style={[
                   styles.settingRowDesc,
-                  { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                  { color: isDark ? '#D8E8E0' : '#2E4638' },
                 ]}
               >
                 Soft chime at the start and completion of each meditation
@@ -340,26 +340,24 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark
-                ? 'rgba(17, 29, 37, 0.70)'
-                : 'rgba(255, 255, 255, 0.75)',
+              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.14)'
-                : 'rgba(255, 255, 255, 0.88)',
+                ? 'rgba(255, 255, 255, 0.12)'
+                : '#D6E4DC',
             },
           ]}
         >
           <View style={styles.aboutRow}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
               Application
             </Text>
             <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
-              Q9 Relax
+              SUKOON
             </Text>
           </View>
 
           <View style={[styles.aboutRow, { marginTop: 10 }]}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
               Design System
             </Text>
             <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
@@ -368,7 +366,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
 
           <View style={[styles.aboutRow, { marginTop: 10 }]}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D0E3D9' : '#4B5F54' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
               Privacy & Network
             </Text>
             <Text style={[styles.aboutValue, { color: '#34D399', fontWeight: '700' }]}>
@@ -379,7 +377,7 @@ export const SettingsScreen: React.FC = () => {
           <Text
             style={[
               styles.aboutDisclaimer,
-              { color: isDark ? '#809E90' : '#788C81' },
+              { color: isDark ? '#B2C8BD' : '#476353' },
             ]}
           >
             A calm, quiet companion designed for mindful breathing, restful meditation, and ambient relaxation. No accounts, no telemetry, no network calls.
@@ -421,7 +419,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    elevation: 2,
   },
   sceneThumb: {
     width: 64,
@@ -474,7 +471,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
-    elevation: 2,
   },
   themeOptionRow: {
     flexDirection: 'row',

@@ -230,7 +230,7 @@ export const MeditationScreen: React.FC = () => {
 
   const haloOpacity = haloAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.25, 0.65],
+    outputRange: [0.25, 0.60],
   });
 
   return (
@@ -250,7 +250,7 @@ export const MeditationScreen: React.FC = () => {
       {!isRunning && !isCompleted && (
         <ScrollView
           style={styles.contentContainer}
-          contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
           {/* STEP 1: DURATION */}
@@ -268,18 +268,18 @@ export const MeditationScreen: React.FC = () => {
                     {
                       backgroundColor: isSelected
                         ? isDark
-                          ? 'rgba(174, 174, 232, 0.35)'
-                          : 'rgba(90, 88, 168, 0.18)'
+                          ? '#201C3E'
+                          : '#E8E7FA'
                         : isDark
-                        ? 'rgba(17, 29, 37, 0.65)'
-                        : 'rgba(255, 255, 255, 0.72)',
+                        ? '#13221B'
+                        : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
                           ? '#AEAEE8'
                           : '#5A58A8'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.14)'
-                        : 'rgba(255, 255, 255, 0.85)',
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : '#E0D8CB',
                       borderWidth: isSelected ? 2 : 1.5,
                     },
                   ]}
@@ -293,7 +293,7 @@ export const MeditationScreen: React.FC = () => {
                         color: isSelected
                           ? isDark
                             ? '#FFFFFF'
-                            : '#14221A'
+                            : '#111F18'
                           : colors.textPrimary,
                       },
                     ]}
@@ -303,7 +303,7 @@ export const MeditationScreen: React.FC = () => {
                   <Text
                     style={[
                       styles.durationUnit,
-                      { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                      { color: isDark ? '#D8E8E0' : '#2E4638' },
                     ]}
                   >
                     min
@@ -317,7 +317,7 @@ export const MeditationScreen: React.FC = () => {
           <Text
             style={[
               styles.sectionTitle,
-              { color: colors.textPrimary, marginTop: 24, marginBottom: 12 },
+              { color: colors.textPrimary, marginTop: 22, marginBottom: 10 },
             ]}
           >
             Soundscape Companion
@@ -333,18 +333,18 @@ export const MeditationScreen: React.FC = () => {
                     {
                       backgroundColor: isSelected
                         ? isDark
-                          ? 'rgba(174, 174, 232, 0.35)'
-                          : 'rgba(90, 88, 168, 0.18)'
+                          ? '#201C3E'
+                          : '#E8E7FA'
                         : isDark
-                        ? 'rgba(17, 29, 37, 0.65)'
-                        : 'rgba(255, 255, 255, 0.72)',
+                        ? '#13221B'
+                        : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
                           ? '#AEAEE8'
                           : '#5A58A8'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.14)'
-                        : 'rgba(255, 255, 255, 0.85)',
+                        ? 'rgba(255, 255, 255, 0.12)'
+                        : '#E0D8CB',
                       borderWidth: isSelected ? 2 : 1.5,
                     },
                   ]}
@@ -359,7 +359,7 @@ export const MeditationScreen: React.FC = () => {
                         color: isSelected
                           ? isDark
                             ? '#FFFFFF'
-                            : '#14221A'
+                            : '#111F18'
                           : colors.textPrimary,
                         fontWeight: isSelected ? '700' : '600',
                       },
@@ -376,14 +376,10 @@ export const MeditationScreen: React.FC = () => {
           {selectedSoundscape.trackId && (
             <View
               style={[
-                styles.volumeGlassCard,
+                styles.volumeCard,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(17, 29, 37, 0.65)'
-                    : 'rgba(255, 255, 255, 0.72)',
-                  borderColor: isDark
-                    ? 'rgba(255, 255, 255, 0.14)'
-                    : 'rgba(255, 255, 255, 0.85)',
+                  backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E0D8CB',
                 },
               ]}
             >
@@ -415,7 +411,7 @@ export const MeditationScreen: React.FC = () => {
           <PrimaryButton
             title="Begin Meditation"
             onPress={handleStartTimer}
-            style={{ marginTop: 32 }}
+            style={{ marginTop: 28 }}
           />
         </ScrollView>
       )}
@@ -428,12 +424,10 @@ export const MeditationScreen: React.FC = () => {
             style={[
               styles.activeSoundscapeBadge,
               {
-                backgroundColor: isDark
-                  ? 'rgba(17, 29, 37, 0.75)'
-                  : 'rgba(255, 255, 255, 0.80)',
+                backgroundColor: isDark ? '#13221B' : '#FFFFFF',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.16)'
-                  : 'rgba(255, 255, 255, 0.90)',
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : '#E0D8CB',
               },
             ]}
           >
@@ -458,7 +452,7 @@ export const MeditationScreen: React.FC = () => {
                   transform: [{ scale: haloScale }],
                   opacity: haloOpacity,
                   backgroundColor: isDark
-                    ? 'rgba(174, 174, 232, 0.22)'
+                    ? 'rgba(174, 174, 232, 0.20)'
                     : 'rgba(90, 88, 168, 0.15)',
                 },
               ]}
@@ -466,7 +460,6 @@ export const MeditationScreen: React.FC = () => {
 
             {/* SVG Circular Ring Progress */}
             <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}>
-              {/* Background faint track circle */}
               <Circle
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
@@ -479,7 +472,6 @@ export const MeditationScreen: React.FC = () => {
                 strokeWidth={STROKE_WIDTH}
                 fill="none"
               />
-              {/* Active animated progress ring */}
               <Circle
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
@@ -507,10 +499,10 @@ export const MeditationScreen: React.FC = () => {
               <Text
                 style={[
                   styles.centerStatusLabel,
-                  { color: isDark ? '#D0E3D9' : '#4B5F54' },
+                  { color: isDark ? '#D8E8E0' : '#2E4638' },
                 ]}
               >
-                {isPaused ? 'Paused' : 'Meditation'}
+                {isPaused ? 'Music Paused' : 'Meditation'}
               </Text>
             </View>
           </View>
@@ -521,12 +513,10 @@ export const MeditationScreen: React.FC = () => {
               style={[
                 styles.activeVolumeRow,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(17, 29, 37, 0.70)'
-                    : 'rgba(255, 255, 255, 0.75)',
+                  backgroundColor: isDark ? '#13221B' : '#FFFFFF',
                   borderColor: isDark
-                    ? 'rgba(255, 255, 255, 0.15)'
-                    : 'rgba(255, 255, 255, 0.90)',
+                    ? 'rgba(255, 255, 255, 0.14)'
+                    : '#E0D8CB',
                 },
               ]}
             >
@@ -576,7 +566,7 @@ export const MeditationScreen: React.FC = () => {
               styles.completedAuraWrap,
               {
                 backgroundColor: isDark
-                  ? 'rgba(174, 174, 232, 0.22)'
+                  ? 'rgba(174, 174, 232, 0.20)'
                   : 'rgba(90, 88, 168, 0.14)',
               },
             ]}
@@ -597,12 +587,10 @@ export const MeditationScreen: React.FC = () => {
             style={[
               styles.quoteCard,
               {
-                backgroundColor: isDark
-                  ? 'rgba(17, 29, 37, 0.70)'
-                  : 'rgba(255, 255, 255, 0.80)',
+                backgroundColor: isDark ? '#13221B' : '#FFFFFF',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.16)'
-                  : 'rgba(255, 255, 255, 0.90)',
+                  ? 'rgba(255, 255, 255, 0.14)'
+                  : '#E0D8CB',
               },
             ]}
           >
@@ -619,7 +607,7 @@ export const MeditationScreen: React.FC = () => {
           <Text
             style={[
               styles.completedStatsSummary,
-              { color: isDark ? '#D0E3D9' : '#4B5F54' },
+              { color: isDark ? '#D8E8E0' : '#2E4638' },
             ]}
           >
             Completed {selectedDurationMin} minutes of quiet meditation.
@@ -651,8 +639,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
-    marginBottom: 12,
+    fontFamily: 'serif',
+    marginBottom: 10,
   },
   durationGrid: {
     flexDirection: 'row',
@@ -661,24 +649,20 @@ const styles = StyleSheet.create({
   },
   durationCard: {
     flex: 1,
-    height: 82,
-    borderRadius: 22,
+    height: 80,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 5,
-    elevation: 2,
   },
   durationNumber: {
     fontSize: 26,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
   },
   durationUnit: {
     fontSize: 12,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
+    fontWeight: '700',
     marginTop: 2,
   },
   soundscapesRow: {
@@ -692,11 +676,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 24,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
   soundscapeIcon: {
     fontSize: 18,
@@ -704,20 +683,20 @@ const styles = StyleSheet.create({
   },
   soundscapeName: {
     fontSize: 14,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
-  volumeGlassCard: {
+  volumeCard: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1.5,
-    marginTop: 18,
+    marginTop: 16,
   },
   volumePercentText: {
     fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     minWidth: 40,
     textAlign: 'right',
   },
@@ -740,7 +719,7 @@ const styles = StyleSheet.create({
   activeBadgeText: {
     fontSize: 14,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   ringCenterWrapper: {
     width: 270,
@@ -763,13 +742,14 @@ const styles = StyleSheet.create({
   centerDigits: {
     fontSize: 48,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
   },
   centerStatusLabel: {
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     marginTop: 4,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   activeVolumeRow: {
     flexDirection: 'row',
@@ -796,7 +776,7 @@ const styles = StyleSheet.create({
   activeVolLabel: {
     fontSize: 13,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   controlsRow: {
     flexDirection: 'row',
@@ -828,31 +808,27 @@ const styles = StyleSheet.create({
   completedTitle: {
     fontSize: 32,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 16,
   },
   quoteCard: {
     padding: 20,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1.5,
     width: '100%',
     marginVertical: 12,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
   },
   quoteText: {
     fontSize: 16,
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     fontStyle: 'italic',
     textAlign: 'center',
     lineHeight: 24,
   },
   completedStatsSummary: {
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     marginTop: 8,
   },
 });

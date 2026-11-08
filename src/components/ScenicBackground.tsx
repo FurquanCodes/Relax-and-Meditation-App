@@ -26,23 +26,23 @@ export const SCENIC_GRADIENTS: Record<
   { light: [string, string, string]; dark: [string, string, string] }
 > = {
   meadow: {
-    light: ['#FCEFD5', '#F5DFC1', '#E7D1B1'],
-    dark: ['#1C160F', '#2A2016', '#3D2F1E'],
+    light: ['#FAF4E8', '#F2ECE0', '#EAE0D0'],
+    dark: ['#1A140E', '#241B13', '#33271B'],
   },
   forest: {
-    light: ['#E6EFE9', '#D0E3D7', '#BAD4C4'],
+    light: ['#F2F6F3', '#E4ECE6', '#D6E2D9'],
     dark: ['#0A1610', '#102219', '#173024'],
   },
   ocean: {
-    light: ['#E4EFF3', '#CBE2E9', '#B3D3DE'],
+    light: ['#F2F6F8', '#E3EDF1', '#D4E3E8'],
     dark: ['#091722', '#0E2333', '#16334A'],
   },
   rain: {
-    light: ['#E8ECF2', '#D3DAE4', '#BDC8D6'],
+    light: ['#F3F5F7', '#E5E9EE', '#D7DEE5'],
     dark: ['#101720', '#16202C', '#1E2C3D'],
   },
   night: {
-    light: ['#ECECF5', '#D6D5E8', '#BFBDDB'],
+    light: ['#F5F5FA', '#E8E8F2', '#DCDCE8'],
     dark: ['#090D18', '#0F1527', '#171F3B'],
   },
 };
@@ -68,16 +68,16 @@ interface ScenicBackgroundProps {
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Lightweight subtle floating particle element (max 8 elements for 60fps performance)
+// Lightweight subtle floating particle element (max 6 elements, 60fps)
 const FloatingParticle: React.FC<{ index: number; isDark: boolean }> = ({
   index,
   isDark,
 }) => {
   const anim = useRef(new Animated.Value(0)).current;
-  const initialX = (index * 47) % SCREEN_WIDTH;
-  const initialY = ((index * 91) % (SCREEN_HEIGHT * 0.7)) + 60;
+  const initialX = (index * 59) % SCREEN_WIDTH;
+  const initialY = ((index * 97) % (SCREEN_HEIGHT * 0.65)) + 80;
   const size = 3 + (index % 3) * 2;
-  const duration = 6000 + (index % 4) * 1500;
+  const duration = 6500 + (index % 4) * 1500;
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -102,17 +102,17 @@ const FloatingParticle: React.FC<{ index: number; isDark: boolean }> = ({
 
   const translateY = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -35 - (index % 3) * 15],
+    outputRange: [0, -30 - (index % 3) * 12],
   });
 
   const translateX = anim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0, (index % 2 === 0 ? 12 : -12), 0],
+    outputRange: [0, index % 2 === 0 ? 10 : -10, 0],
   });
 
   const opacity = anim.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: [0.15, 0.65, 0.15],
+    outputRange: [0.15, 0.55, 0.15],
   });
 
   return (
@@ -126,7 +126,7 @@ const FloatingParticle: React.FC<{ index: number; isDark: boolean }> = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: isDark ? '#A7F3D0' : '#FEF3C7',
+          backgroundColor: isDark ? '#A7F3D0' : '#D1A858',
           opacity,
           transform: [{ translateY }, { translateX }],
         },
@@ -145,24 +145,24 @@ export const ScenicBackground: React.FC<ScenicBackgroundProps> = ({
   const { isDark } = useTheme();
   const effectiveScene = resolveScene(scene);
   const imageSource = SCENIC_IMAGES[effectiveScene];
-  const gradientFallback =
-    SCENIC_GRADIENTS[effectiveScene][isDark ? 'dark' : 'light'];
 
+  // In Light Theme, scrim is 85-94% opaque to guarantee crisp text readability and eliminate glare
+  // In Dark Theme, rich twilight scrim is 75-92%
   const scrimColors: [string, string, string] = isDark
     ? [
-        `rgba(11, 19, 26, ${scrimOpacity ?? 0.50})`,
-        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.75) + 0.12, 0.92)})`,
-        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.90) + 0.08, 0.98)})`,
+        `rgba(11, 19, 26, ${scrimOpacity ?? 0.76})`,
+        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.76) + 0.12, 0.90)})`,
+        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.76) + 0.18, 0.96)})`,
       ]
     : [
-        `rgba(250, 246, 238, ${scrimOpacity ?? 0.52})`,
-        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.76) + 0.10, 0.90)})`,
-        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.90) + 0.06, 0.98)})`,
+        `rgba(250, 246, 238, ${scrimOpacity ?? 0.86})`,
+        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.86) + 0.06, 0.93)})`,
+        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.86) + 0.10, 0.97)})`,
       ];
 
   return (
     <View style={[styles.container, style]}>
-      {/* Background Image with Code Gradient Fallback */}
+      {/* Background Scenic Image with Soft Scrim */}
       <ImageBackground
         source={imageSource}
         style={StyleSheet.absoluteFill}
@@ -175,7 +175,7 @@ export const ScenicBackground: React.FC<ScenicBackgroundProps> = ({
         />
       </ImageBackground>
 
-      {/* Subtle Floating Ambient Particles (Max 6 for optimal frame rate) */}
+      {/* Subtle Floating Ambient Particles (without Android elevation artifacts) */}
       {showParticles && (
         <View pointerEvents="none" style={StyleSheet.absoluteFill}>
           {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -195,11 +195,5 @@ const styles = StyleSheet.create({
   },
   particle: {
     position: 'absolute',
-    shadowColor: '#FFFFFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 4,
-    elevation: 2,
   },
 });
-

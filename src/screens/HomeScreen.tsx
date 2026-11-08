@@ -9,6 +9,7 @@ import {
   Easing,
   Pressable,
   StatusBar,
+  Image,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -32,7 +33,7 @@ const FadeSlideIn: React.FC<{
   useEffect(() => {
     Animated.timing(anim, {
       toValue: 1,
-      duration: 550,
+      duration: 500,
       delay,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
@@ -41,7 +42,7 @@ const FadeSlideIn: React.FC<{
 
   const translateY = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [22, 0],
+    outputRange: [18, 0],
   });
 
   return (
@@ -59,16 +60,28 @@ const FadeSlideIn: React.FC<{
   );
 };
 
-// Premium Glassmorphic Practice Card Component
-const GlassPracticeCard: React.FC<{
+// Clean, Consistent Practice Card (Zero rectangular artifacts)
+const CleanPracticeCard: React.FC<{
   title: string;
   subtitle: string;
   icon: React.ReactNode;
-  gradientColors: [string, string, ...string[]];
-  tintColor: string;
+  bgColor: string;
+  borderColor: string;
+  arrowBg: string;
+  arrowColor: string;
   onPress: () => void;
   isDark: boolean;
-}> = ({ title, subtitle, icon, gradientColors, tintColor, onPress, isDark }) => {
+}> = ({
+  title,
+  subtitle,
+  icon,
+  bgColor,
+  borderColor,
+  arrowBg,
+  arrowColor,
+  onPress,
+  isDark,
+}) => {
   const cardScale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -93,27 +106,16 @@ const GlassPracticeCard: React.FC<{
     <Animated.View style={{ transform: [{ scale: cardScale }], marginVertical: 6 }}>
       <Pressable
         style={[
-          styles.glassCard,
+          styles.practiceCard,
           {
-            backgroundColor: isDark
-              ? 'rgba(17, 29, 37, 0.70)'
-              : 'rgba(255, 255, 255, 0.75)',
-            borderColor: isDark
-              ? 'rgba(255, 255, 255, 0.16)'
-              : 'rgba(255, 255, 255, 0.90)',
+            backgroundColor: bgColor,
+            borderColor: borderColor,
           },
         ]}
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
-        <LinearGradient
-          colors={gradientColors}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.cardGradientOverlay}
-        />
-
         <View style={styles.practiceLeft}>
           <View
             style={[
@@ -121,10 +123,10 @@ const GlassPracticeCard: React.FC<{
               {
                 backgroundColor: isDark
                   ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(255, 255, 255, 0.45)',
+                  : 'rgba(255, 255, 255, 0.65)',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.20)'
-                  : 'rgba(255, 255, 255, 0.80)',
+                  ? 'rgba(255, 255, 255, 0.18)'
+                  : 'rgba(255, 255, 255, 0.90)',
               },
             ]}
           >
@@ -134,7 +136,7 @@ const GlassPracticeCard: React.FC<{
             <Text
               style={[
                 styles.practiceTitle,
-                { color: isDark ? '#FFFFFF' : '#14221A' },
+                { color: isDark ? '#FFFFFF' : '#111F18' },
               ]}
             >
               {title}
@@ -142,7 +144,7 @@ const GlassPracticeCard: React.FC<{
             <Text
               style={[
                 styles.practiceSubtitle,
-                { color: isDark ? '#D8E8E0' : '#2C4235' },
+                { color: isDark ? '#D8E8E0' : '#2E4638' },
               ]}
             >
               {subtitle}
@@ -150,26 +152,19 @@ const GlassPracticeCard: React.FC<{
           </View>
         </View>
 
-        {/* Tactile Circular Glass Arrow Button */}
+        {/* Tactile Circular Arrow Button */}
         <View
           style={[
-            styles.glassArrowCircle,
+            styles.arrowCircle,
             {
-              backgroundColor: isDark
-                ? 'rgba(255, 255, 255, 0.22)'
-                : '#FFFFFF',
+              backgroundColor: arrowBg,
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.25)'
-                : 'rgba(0, 0, 0, 0.05)',
+                ? 'rgba(255, 255, 255, 0.20)'
+                : 'rgba(0, 0, 0, 0.08)',
             },
           ]}
         >
-          <Text
-            style={[
-              styles.arrowGlyph,
-              { color: isDark ? '#FFFFFF' : tintColor },
-            ]}
-          >
+          <Text style={[styles.arrowGlyph, { color: arrowColor }]}>
             ›
           </Text>
         </View>
@@ -198,12 +193,10 @@ const FloatingIslandNav: React.FC<{
         styles.floatingNavContainer,
         {
           bottom: Math.max(insetsBottom + 8, 16),
-          backgroundColor: isDark
-            ? 'rgba(15, 26, 34, 0.88)'
-            : 'rgba(255, 255, 255, 0.88)',
+          backgroundColor: isDark ? '#112019' : '#FFFFFF',
           borderColor: isDark
-            ? 'rgba(255, 255, 255, 0.16)'
-            : 'rgba(255, 255, 255, 0.95)',
+            ? 'rgba(255, 255, 255, 0.14)'
+            : 'rgba(0, 0, 0, 0.08)',
         },
       ]}
     >
@@ -216,8 +209,8 @@ const FloatingIslandNav: React.FC<{
               styles.navTabPill,
               isActive && {
                 backgroundColor: isDark
-                  ? 'rgba(140, 213, 180, 0.25)'
-                  : 'rgba(38, 92, 67, 0.12)',
+                  ? 'rgba(140, 213, 180, 0.22)'
+                  : '#E3EFE9',
               },
             ]}
             onPress={() => onNavigate(tab.id)}
@@ -238,10 +231,10 @@ const FloatingIslandNav: React.FC<{
                   color: isActive
                     ? isDark
                       ? '#FFFFFF'
-                      : '#14221A'
+                      : '#111F18'
                     : isDark
-                    ? '#809E90'
-                    : '#788C81',
+                    ? '#8CAAA0'
+                    : '#486354',
                   fontWeight: isActive ? '700' : '600',
                 },
               ]}
@@ -312,16 +305,20 @@ export const HomeScreen: React.FC = () => {
         style={[
           styles.headerBar,
           {
-            paddingTop: insets.top + 10,
+            paddingTop: insets.top + 8,
             paddingHorizontal: 20,
-            height: 64 + insets.top,
+            height: 60 + insets.top,
           },
         ]}
       >
         <View style={styles.brandContainer}>
-          <LeafLogoIcon size={30} color={isDark ? '#8CD5B4' : '#265C43'} />
+          <Image
+            source={require('../logo.png')}
+            style={styles.brandLogoImg}
+            resizeMode="contain"
+          />
           <Text style={[styles.brandTitle, { color: colors.textPrimary }]}>
-            Q9 Relax
+            SUKOON
           </Text>
         </View>
 
@@ -331,10 +328,10 @@ export const HomeScreen: React.FC = () => {
             {
               backgroundColor: isDark
                 ? 'rgba(255, 255, 255, 0.12)'
-                : 'rgba(255, 255, 255, 0.75)',
+                : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.20)'
-                : 'rgba(255, 255, 255, 0.90)',
+                ? 'rgba(255, 255, 255, 0.18)'
+                : 'rgba(0, 0, 0, 0.08)',
             },
           ]}
           onPress={() => navigation.navigate('Settings')}
@@ -347,7 +344,7 @@ export const HomeScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* 2. Main Scroll Content with Staggered Entrance */}
+      {/* 2. Main Scroll Content */}
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -359,7 +356,7 @@ export const HomeScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Daytime Greeting */}
-        <FadeSlideIn delay={80}>
+        <FadeSlideIn delay={60}>
           <View style={styles.greetingSection}>
             <Text style={[styles.heroGreeting, { color: colors.textPrimary }]}>
               {greeting}
@@ -367,7 +364,7 @@ export const HomeScreen: React.FC = () => {
             <Text
               style={[
                 styles.heroSubtitle,
-                { color: isDark ? '#D8E8E0' : '#2A3F33' },
+                { color: isDark ? '#D8E8E0' : '#2E4638' },
               ]}
             >
               {subtitle}
@@ -376,17 +373,14 @@ export const HomeScreen: React.FC = () => {
         </FadeSlideIn>
 
         {/* Hero Featured Card: "Start your day with calm" */}
-        <FadeSlideIn delay={160}>
+        <FadeSlideIn delay={120}>
           <TouchableOpacity
             style={[
               styles.heroFeaturedCard,
               {
-                backgroundColor: isDark
-                  ? 'rgba(28, 55, 45, 0.75)'
-                  : 'rgba(142, 175, 161, 0.85)',
                 borderColor: isDark
                   ? 'rgba(255, 255, 255, 0.18)'
-                  : 'rgba(255, 255, 255, 0.70)',
+                  : 'rgba(0, 0, 0, 0.06)',
               },
             ]}
             activeOpacity={0.92}
@@ -395,21 +389,16 @@ export const HomeScreen: React.FC = () => {
             <LinearGradient
               colors={
                 isDark
-                  ? ['rgba(28, 55, 45, 0.90)', 'rgba(19, 40, 32, 0.90)']
-                  : ['rgba(142, 175, 161, 0.92)', 'rgba(114, 152, 136, 0.92)']
+                  ? ['#1C372D', '#132820']
+                  : ['#6B9483', '#537C6C']
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, { borderRadius: 24 }]}
             />
 
             <View style={styles.heroLeftContent}>
-              <Text
-                style={[
-                  styles.heroCardTitle,
-                  { color: '#FFFFFF' },
-                ]}
-              >
+              <Text style={styles.heroCardTitle}>
                 Start your day{'\n'}with calm
               </Text>
 
@@ -433,19 +422,17 @@ export const HomeScreen: React.FC = () => {
         </FadeSlideIn>
 
         {/* Progress Stats Split Cards (Sessions & Minutes) */}
-        <FadeSlideIn delay={240}>
+        <FadeSlideIn delay={180}>
           <View style={styles.statsRow}>
             {/* Sessions Card */}
             <View
               style={[
-                styles.statsGlassCard,
+                styles.statsCard,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(42, 36, 18, 0.70)'
-                    : 'rgba(248, 232, 182, 0.85)',
+                  backgroundColor: colors.statsSessionsBg,
                   borderColor: isDark
                     ? 'rgba(253, 230, 138, 0.25)'
-                    : 'rgba(255, 255, 255, 0.80)',
+                    : 'rgba(150, 121, 30, 0.20)',
                 },
               ]}
             >
@@ -474,7 +461,7 @@ export const HomeScreen: React.FC = () => {
               <Text
                 style={[
                   styles.statsLabel,
-                  { color: colors.statsSessionsText, opacity: 0.9 },
+                  { color: colors.statsSessionsText },
                 ]}
               >
                 Sessions
@@ -484,14 +471,12 @@ export const HomeScreen: React.FC = () => {
             {/* Minutes Card */}
             <View
               style={[
-                styles.statsGlassCard,
+                styles.statsCard,
                 {
-                  backgroundColor: isDark
-                    ? 'rgba(47, 27, 21, 0.70)'
-                    : 'rgba(252, 216, 196, 0.85)',
+                  backgroundColor: colors.statsMinutesBg,
                   borderColor: isDark
                     ? 'rgba(255, 237, 213, 0.25)'
-                    : 'rgba(255, 255, 255, 0.80)',
+                    : 'rgba(172, 95, 58, 0.20)',
                 },
               ]}
             >
@@ -520,7 +505,7 @@ export const HomeScreen: React.FC = () => {
               <Text
                 style={[
                   styles.statsLabel,
-                  { color: colors.statsMinutesText, opacity: 0.9 },
+                  { color: colors.statsMinutesText },
                 ]}
               >
                 Minutes
@@ -530,18 +515,18 @@ export const HomeScreen: React.FC = () => {
         </FadeSlideIn>
 
         {/* Section Heading: "Choose a practice" */}
-        <FadeSlideIn delay={320}>
+        <FadeSlideIn delay={240}>
           <Text
             style={[
               styles.practiceHeader,
-              { color: colors.textPrimary, marginTop: 24, marginBottom: 10 },
+              { color: colors.textPrimary, marginTop: 20, marginBottom: 8 },
             ]}
           >
             Choose a practice
           </Text>
 
-          {/* Three Big Glass-Style Practice Cards */}
-          <GlassPracticeCard
+          {/* Three Clean Practice Cards (Zero artifact, pure smooth styling) */}
+          <CleanPracticeCard
             title="Breathe"
             subtitle="Guided rhythmic breathing with visual cues"
             icon={
@@ -551,17 +536,15 @@ export const HomeScreen: React.FC = () => {
                 secondaryColor={isDark ? 'rgba(140,213,180,0.3)' : 'rgba(38,92,67,0.25)'}
               />
             }
-            gradientColors={
-              isDark
-                ? ['rgba(30, 58, 47, 0.40)', 'rgba(21, 44, 35, 0.40)']
-                : ['rgba(146, 181, 165, 0.25)', 'rgba(118, 157, 140, 0.25)']
-            }
-            tintColor={colors.accentGreen}
+            bgColor={colors.cardBreatheBg}
+            borderColor={isDark ? 'rgba(255, 255, 255, 0.14)' : '#CDE2D6'}
+            arrowBg={isDark ? 'rgba(255, 255, 255, 0.16)' : '#FFFFFF'}
+            arrowColor={isDark ? '#FFFFFF' : '#265C43'}
             onPress={() => navigation.navigate('Breathing')}
             isDark={isDark}
           />
 
-          <GlassPracticeCard
+          <CleanPracticeCard
             title="Meditate"
             subtitle="Quiet timer with soothing background sounds"
             icon={
@@ -571,17 +554,15 @@ export const HomeScreen: React.FC = () => {
                 secondaryColor={isDark ? 'rgba(174,174,232,0.3)' : 'rgba(90,88,168,0.25)'}
               />
             }
-            gradientColors={
-              isDark
-                ? ['rgba(40, 35, 77, 0.40)', 'rgba(26, 23, 54, 0.40)']
-                : ['rgba(207, 206, 245, 0.25)', 'rgba(174, 174, 232, 0.25)']
-            }
-            tintColor="#5A58A8"
+            bgColor={colors.cardMeditateBg}
+            borderColor={isDark ? 'rgba(255, 255, 255, 0.14)' : '#D6D5F2'}
+            arrowBg={isDark ? 'rgba(255, 255, 255, 0.16)' : '#FFFFFF'}
+            arrowColor={isDark ? '#FFFFFF' : '#5A58A8'}
             onPress={() => navigation.navigate('Meditation')}
             isDark={isDark}
           />
 
-          <GlassPracticeCard
+          <CleanPracticeCard
             title="Sounds"
             subtitle="Calming ambient loops with sleep timer"
             icon={
@@ -591,12 +572,10 @@ export const HomeScreen: React.FC = () => {
                 secondaryColor={isDark ? 'rgba(224,122,95,0.3)' : 'rgba(214,109,82,0.25)'}
               />
             }
-            gradientColors={
-              isDark
-                ? ['rgba(72, 35, 27, 0.40)', 'rgba(50, 21, 14, 0.40)']
-                : ['rgba(230, 139, 116, 0.25)', 'rgba(205, 112, 88, 0.25)']
-            }
-            tintColor={colors.accentTerracotta}
+            bgColor={colors.cardSoundsBg}
+            borderColor={isDark ? 'rgba(255, 255, 255, 0.14)' : '#F5D3C8'}
+            arrowBg={isDark ? 'rgba(255, 255, 255, 0.16)' : '#FFFFFF'}
+            arrowColor={isDark ? '#FFFFFF' : '#D66D52'}
             onPress={() => navigation.navigate('Sounds')}
             isDark={isDark}
           />
@@ -626,13 +605,18 @@ const styles = StyleSheet.create({
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
+  },
+  brandLogoImg: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
   },
   brandTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     fontFamily: 'serif',
-    letterSpacing: -0.2,
+    letterSpacing: 2,
   },
   settingsCircleBtn: {
     width: 44,
@@ -651,7 +635,7 @@ const styles = StyleSheet.create({
   },
   greetingSection: {
     marginTop: 6,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   heroGreeting: {
     fontSize: 34,
@@ -661,12 +645,12 @@ const styles = StyleSheet.create({
   },
   heroSubtitle: {
     fontSize: 16,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     fontWeight: '600',
     marginTop: 4,
   },
   heroFeaturedCard: {
-    borderRadius: 26,
+    borderRadius: 24,
     borderWidth: 1.5,
     overflow: 'hidden',
     padding: 22,
@@ -674,12 +658,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     minHeight: 140,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   heroLeftContent: {
     flex: 1,
@@ -691,23 +670,19 @@ const styles = StyleSheet.create({
     fontFamily: 'serif',
     lineHeight: 28,
     marginBottom: 14,
+    color: '#FFFFFF',
   },
   heroPillBtn: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 24,
     alignSelf: 'flex-start',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 3,
   },
   heroPillBtnText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   heroOrbGlow: {
     width: 90,
@@ -729,16 +704,11 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 8,
   },
-  statsGlassCard: {
+  statsCard: {
     flex: 1,
-    borderRadius: 22,
+    borderRadius: 20,
     borderWidth: 1.5,
     padding: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
   },
   statsHeaderRow: {
     flexDirection: 'row',
@@ -768,23 +738,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'serif',
   },
-  glassCard: {
-    borderRadius: 24,
+  practiceCard: {
+    borderRadius: 22,
     borderWidth: 1.5,
     overflow: 'hidden',
-    padding: 18,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 88,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  cardGradientOverlay: {
-    ...StyleSheet.absoluteFill,
+    minHeight: 84,
   },
   practiceLeft: {
     flexDirection: 'row',
@@ -793,9 +755,9 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   iconOrbBadge: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -808,15 +770,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     fontFamily: 'serif',
-    marginBottom: 3,
+    marginBottom: 2,
   },
   practiceSubtitle: {
     fontSize: 13.5,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     fontWeight: '600',
     lineHeight: 18,
   },
-  glassArrowCircle: {
+  arrowCircle: {
     width: 42,
     height: 42,
     borderRadius: 21,
@@ -833,18 +795,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     right: 20,
-    height: 68,
-    borderRadius: 34,
+    height: 66,
+    borderRadius: 33,
     borderWidth: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 10,
   },
   navTabPill: {
     flexDirection: 'column',
@@ -852,21 +809,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 6,
     paddingHorizontal: 14,
-    borderRadius: 20,
+    borderRadius: 18,
     position: 'relative',
   },
   navTabIcon: {
-    fontSize: 20,
+    fontSize: 19,
     marginBottom: 2,
   },
   navTabLabel: {
     fontSize: 11,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   activeDot: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    marginTop: 3,
+    marginTop: 2,
   },
 });

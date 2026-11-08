@@ -1,6 +1,7 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export type RootStackParamList = {
+  Splash: undefined;
   Home: undefined;
   Breathing: undefined;
   Meditation: undefined;

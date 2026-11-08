@@ -14,7 +14,7 @@ export interface ThemeColors {
   accentRed: string;
   cardShadow: string;
 
-  // Glassmorphic tokens
+  // Glassmorphic & Surface tokens
   glassSurface: string;
   glassBorder: string;
   glassTextSecondary: string;
@@ -27,24 +27,20 @@ export interface ThemeColors {
   cardMeditateGradient: [string, string, ...string[]];
   cardSoundsGradient: [string, string, ...string[]];
 
-  // Organic calm pastel tokens
-  accentTerracotta: string;
-  accentSage: string;
-  accentLavender: string;
-  accentPeach: string;
-  accentButter: string;
-
+  // Card Backgrounds
   cardHeroBg: string;
   cardHeroBtn: string;
   cardBreatheBg: string;
   cardMeditateBg: string;
   cardSoundsBg: string;
 
+  // Navigation
   navActive: string;
   navInactive: string;
   navBackground: string;
   navBorder: string;
 
+  // Stats
   statsSessionsBg: string;
   statsSessionsText: string;
   statsSessionsIcon: string;
@@ -52,55 +48,55 @@ export interface ThemeColors {
   statsMinutesText: string;
   statsMinutesIcon: string;
 
+  // Icons & Buttons
   iconBtnBg: string;
   iconBtnBorder: string;
+  accentTerracotta: string;
+  accentSage: string;
+  accentLavender: string;
+  accentPeach: string;
+  accentButter: string;
 }
 
 export const lightColors: ThemeColors = {
   background: '#FAF6EE', // Warm organic ivory mist
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceBorder: '#E6DECF',
-  primary: '#14221A', // Deep forest obsidian
-  primaryLight: '#789F8E',
-  primaryMuted: '#EBF2EE',
-  secondary: '#43584C',
-  textPrimary: '#14221A',
-  textSecondary: '#2C4235',
-  textMuted: '#5C7365',
+  surfaceBorder: '#E0D8CB',
+  primary: '#111F18', // Deep forest charcoal - ultra high contrast
+  primaryLight: '#265C43',
+  primaryMuted: '#E4F0E9',
+  secondary: '#2E4638',
+  textPrimary: '#111F18', // Solid readable charcoal
+  textSecondary: '#2E4638', // Deep slate moss - crisp & readable
+  textMuted: '#587063',
   accentGreen: '#265C43',
-  accentRed: '#D66D52',
-  cardShadow: 'rgba(20, 34, 26, 0.08)',
+  accentRed: '#C7513B',
+  cardShadow: 'rgba(17, 31, 24, 0.06)',
 
-  glassSurface: 'rgba(255, 255, 255, 0.78)',
-  glassBorder: 'rgba(255, 255, 255, 0.92)',
-  glassTextSecondary: '#2C4235',
+  glassSurface: '#FFFFFF',
+  glassBorder: '#E0D8CB',
+  glassTextSecondary: '#2E4638',
 
-  bgGradient: ['#FAF6EE', '#F3ECE0', '#E7DDD0'],
-  scrimGradient: ['rgba(250, 246, 238, 0.82)', 'rgba(250, 246, 238, 0.94)'],
-  cardHeroGradient: ['#8EAFA1', '#729888'],
-  cardBreatheGradient: ['#92B5A5', '#769D8C'],
-  cardMeditateGradient: ['#CFCEF5', '#AEAEE8'],
-  cardSoundsGradient: ['#E68B74', '#CD7058'],
+  bgGradient: ['#FAF6EE', '#F2ECE0', '#E5DDD0'],
+  scrimGradient: ['rgba(250, 246, 238, 0.88)', 'rgba(250, 246, 238, 0.95)'],
+  cardHeroGradient: ['#6B9483', '#537C6C'],
+  cardBreatheGradient: ['#E4F0E9', '#D0E3D8'],
+  cardMeditateGradient: ['#E8E7FA', '#D5D4F5'],
+  cardSoundsGradient: ['#FCEBE6', '#F7D6CC'],
 
-  accentTerracotta: '#D66D52',
-  accentSage: '#8EAFA1',
-  accentLavender: '#CFCEF5',
-  accentPeach: '#FAD5C0',
-  accentButter: '#F7E5A9',
-
-  cardHeroBg: '#8EAFA1',
+  cardHeroBg: '#537C6C',
   cardHeroBtn: '#D66D52',
-  cardBreatheBg: '#8EAFA1',
-  cardMeditateBg: '#CFCEF5',
-  cardSoundsBg: '#E68B74',
+  cardBreatheBg: '#E4F0E9',
+  cardMeditateBg: '#E8E7FA',
+  cardSoundsBg: '#FCEBE6',
 
-  navActive: '#14221A',
-  navInactive: '#7C8E84',
+  navActive: '#111F18',
+  navInactive: '#587063',
   navBackground: '#FFFFFF',
-  navBorder: '#E6DECF',
+  navBorder: '#E0D8CB',
 
-  statsSessionsBg: '#F8E8B6',
+  statsSessionsBg: '#F7E7B4',
   statsSessionsText: '#2C220E',
   statsSessionsIcon: '#96791E',
   statsMinutesBg: '#FCD8C4',
@@ -108,52 +104,52 @@ export const lightColors: ThemeColors = {
   statsMinutesIcon: '#AC5F3A',
 
   iconBtnBg: '#FFFFFF',
-  iconBtnBorder: '#E6DECF',
+  iconBtnBorder: '#E0D8CB',
+
+  accentTerracotta: '#D66D52',
+  accentSage: '#265C43',
+  accentLavender: '#5A58A8',
+  accentPeach: '#E29775',
+  accentButter: '#D4AF37',
 };
 
 export const darkColors: ThemeColors = {
   background: '#0B131A', // Deep night navy-teal
-  surface: '#111D25',
-  surfaceElevated: '#172732',
-  surfaceBorder: '#203442',
+  surface: '#13221B',
+  surfaceElevated: '#182C23',
+  surfaceBorder: 'rgba(255, 255, 255, 0.12)',
   primary: '#FFFFFF',
   primaryLight: '#8CD5B4',
-  primaryMuted: '#14252D',
-  secondary: '#ADC7BA',
+  primaryMuted: '#1A3327',
+  secondary: '#D8E8E0',
   textPrimary: '#FFFFFF',
-  textSecondary: '#D8E8E0',
-  textMuted: '#809E90',
+  textSecondary: '#D8E8E0', // Highly legible luminous mint
+  textMuted: '#8CAAA0',
   accentGreen: '#4ADE80',
   accentRed: '#F87171',
-  cardShadow: 'rgba(0, 0, 0, 0.55)',
+  cardShadow: 'rgba(0, 0, 0, 0.40)',
 
-  glassSurface: 'rgba(17, 29, 37, 0.72)',
-  glassBorder: 'rgba(255, 255, 255, 0.16)',
+  glassSurface: '#13221B',
+  glassBorder: 'rgba(255, 255, 255, 0.14)',
   glassTextSecondary: '#D8E8E0',
 
   bgGradient: ['#0B131A', '#0F1A24', '#152431'],
-  scrimGradient: ['rgba(11, 19, 26, 0.70)', 'rgba(11, 19, 26, 0.92)'],
+  scrimGradient: ['rgba(11, 19, 26, 0.78)', 'rgba(11, 19, 26, 0.94)'],
   cardHeroGradient: ['#1C372D', '#132820'],
-  cardBreatheGradient: ['#1E3A2F', '#152C23'],
-  cardMeditateGradient: ['#28234D', '#1A1736'],
-  cardSoundsGradient: ['#48231B', '#32150E'],
-
-  accentTerracotta: '#E07A5F',
-  accentSage: '#76A691',
-  accentLavender: '#8D8AC9',
-  accentPeach: '#E29775',
-  accentButter: '#E6C665',
+  cardBreatheGradient: ['#162E23', '#0F2119'],
+  cardMeditateGradient: ['#201C3E', '#16132D'],
+  cardSoundsGradient: ['#351C17', '#25120E'],
 
   cardHeroBg: '#1C372D',
   cardHeroBtn: '#E07A5F',
-  cardBreatheBg: '#1E3A2F',
-  cardMeditateBg: '#28234D',
-  cardSoundsBg: '#48231B',
+  cardBreatheBg: '#162E23',
+  cardMeditateBg: '#201C3E',
+  cardSoundsBg: '#351C17',
 
   navActive: '#FFFFFF',
-  navInactive: '#769485',
-  navBackground: '#0F1A24',
-  navBorder: '#203442',
+  navInactive: '#8CAAA0',
+  navBackground: '#112019',
+  navBorder: 'rgba(255, 255, 255, 0.12)',
 
   statsSessionsBg: '#2A2412',
   statsSessionsText: '#FDE68A',
@@ -164,6 +160,12 @@ export const darkColors: ThemeColors = {
 
   iconBtnBg: 'rgba(255, 255, 255, 0.10)',
   iconBtnBorder: 'rgba(255, 255, 255, 0.18)',
+
+  accentTerracotta: '#E07A5F',
+  accentSage: '#8CD5B4',
+  accentLavender: '#AEAEE8',
+  accentPeach: '#E29775',
+  accentButter: '#FDE68A',
 };
 
 export const spacing = {
