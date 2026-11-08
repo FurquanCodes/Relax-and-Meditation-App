@@ -318,7 +318,7 @@ export const HomeScreen: React.FC = () => {
             resizeMode="contain"
           />
           <Text style={[styles.brandTitle, { color: colors.textPrimary }]}>
-            SUKOON
+            SOVAELI
           </Text>
         </View>
 

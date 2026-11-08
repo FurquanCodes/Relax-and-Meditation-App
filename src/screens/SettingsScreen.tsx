@@ -352,7 +352,7 @@ export const SettingsScreen: React.FC = () => {
               Application
             </Text>
             <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
-              SUKOON
+              SOVAELI
             </Text>
           </View>
 

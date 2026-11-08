@@ -239,7 +239,7 @@ export const SplashScreen: React.FC = () => {
             },
           ]}
         >
-          <Text style={styles.brandTitle}>SUKOON</Text>
+          <Text style={styles.brandTitle}>SOVAELI</Text>
 
           {/* Delicate glowing golden/emerald divider line */}
           <Animated.View
