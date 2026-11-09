@@ -23,7 +23,10 @@ import {
 } from '../services/audioService';
 import { formatTimeMMSS } from '../logic/formatters';
 import { ScenicBackground } from '../components/ScenicBackground';
-import { SceneId } from '../data/settingsStore';
+import { settingsStore, SceneId } from '../data/settingsStore';
+import { progressStore } from '../data/progressStore';
+import { BottomNavBar } from '../components/BottomNavBar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SLEEP_OPTIONS = [0, 15, 30, 60];
 
@@ -116,17 +119,68 @@ const AnimatedSoundWaves: React.FC<{ isPlaying: boolean; color: string }> = ({
 export const SoundsScreen: React.FC = () => {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const playbackState = usePlaybackState();
 
-  const [selectedCategory, setSelectedCategory] = useState<SoundCategoryId>('rain');
-  const [activeTrackId, setActiveTrackId] = useState<string>(AMBIENT_TRACKS[0].id);
-  const [volume, setVolume] = useState<number>(0.7);
-  const [selectedSleepMin, setSelectedSleepMin] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<SoundCategoryId>(
+    settingsStore.getSoundCategory()
+  );
+  const [activeTrackId, setActiveTrackId] = useState<string>(
+    settingsStore.getSoundTrackId()
+  );
+  const [volume, setVolume] = useState<number>(settingsStore.getSoundVolume());
+  const [selectedSleepMin, setSelectedSleepMin] = useState<number>(
+    settingsStore.getSoundSleepMinutes()
+  );
   const [sleepRemainingSeconds, setSleepRemainingSeconds] = useState<number | null>(null);
 
   const isPlaying =
     playbackState.state === State.Playing ||
     playbackState.state === State.Buffering;
+
+  // Mindful Audio Listening Tracking
+  const playbackStartRef = useRef<number | null>(null);
+  const sessionCountedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    if (isPlaying) {
+      playbackStartRef.current = Date.now();
+
+      // Every 30 seconds of active playback, record progress
+      interval = setInterval(() => {
+        const countSession = !sessionCountedRef.current;
+        sessionCountedRef.current = true;
+        progressStore.recordListeningSeconds(30, countSession);
+      }, 30000);
+    } else {
+      if (playbackStartRef.current) {
+        const elapsedSec = Math.round((Date.now() - playbackStartRef.current) / 1000);
+        const remainder = elapsedSec % 30;
+        if (remainder >= 15) {
+          const countSession = !sessionCountedRef.current && elapsedSec >= 30;
+          if (countSession) sessionCountedRef.current = true;
+          progressStore.recordListeningSeconds(remainder, countSession);
+        }
+        playbackStartRef.current = null;
+      }
+      sessionCountedRef.current = false;
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (playbackStartRef.current) {
+        const elapsedSec = Math.round((Date.now() - playbackStartRef.current) / 1000);
+        const remainder = elapsedSec % 30;
+        if (remainder >= 15) {
+          const countSession = !sessionCountedRef.current && elapsedSec >= 30;
+          progressStore.recordListeningSeconds(remainder, countSession);
+        }
+        playbackStartRef.current = null;
+      }
+    };
+  }, [isPlaying]);
 
   useEffect(() => {
     audioService.setupPlayerIfNeeded();
@@ -157,8 +211,6 @@ export const SoundsScreen: React.FC = () => {
     }
   };
 
-
-
   const filteredTracks = AMBIENT_TRACKS.filter(
     (track) => track.categoryId === selectedCategory
   );
@@ -170,11 +222,27 @@ export const SoundsScreen: React.FC = () => {
   const activeTrack =
     AMBIENT_TRACKS.find((t) => t.id === activeTrackId) || AMBIENT_TRACKS[0];
 
+  const handleSelectCategory = (catId: SoundCategoryId) => {
+    setSelectedCategory(catId);
+    settingsStore.setSoundCategory(catId);
+  };
+
   const handleSelectTrack = async (track: AmbientTrack) => {
-    setActiveTrackId(track.id);
     if (activeTrackId === track.id && isPlaying) {
       await audioService.pause();
     } else {
+      if (playbackStartRef.current && isPlaying) {
+        const elapsedSec = Math.round((Date.now() - playbackStartRef.current) / 1000);
+        const remainder = elapsedSec % 30;
+        if (remainder >= 15) {
+          const countSession = !sessionCountedRef.current && elapsedSec >= 30;
+          if (countSession) sessionCountedRef.current = true;
+          await progressStore.recordListeningSeconds(remainder, countSession);
+        }
+        playbackStartRef.current = Date.now();
+      }
+      setActiveTrackId(track.id);
+      settingsStore.setSoundTrackId(track.id);
       await audioService.playTrack(track.id);
     }
   };
@@ -189,17 +257,20 @@ export const SoundsScreen: React.FC = () => {
 
   const handleVolumeChange = async (val: number) => {
     setVolume(val);
+    settingsStore.setSoundVolume(val);
     await audioService.setVolume(val);
   };
 
   const handleVolumeStep = async (delta: number) => {
     const newVol = Math.max(0, Math.min(1, Math.round((volume + delta) * 10) / 10));
     setVolume(newVol);
+    settingsStore.setSoundVolume(newVol);
     await audioService.setVolume(newVol);
   };
 
   const handleSelectSleep = (min: number) => {
     setSelectedSleepMin(min);
+    settingsStore.setSoundSleepMinutes(min);
     if (min === 0) {
       audioService.cancelSleepTimer();
     } else {
@@ -234,21 +305,21 @@ export const SoundsScreen: React.FC = () => {
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? '#8CD5B4'
+                        ? '#FFFFFF'
                         : '#265C43'
                       : isDark
-                      ? '#13221B'
+                      ? '#141418'
                       : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
-                        ? '#8CD5B4'
+                        ? '#FFFFFF'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.14)'
-                      : '#CDE2D6',
+                      ? 'rgba(255, 255, 255, 0.10)'
+                      : '#D6E4DC',
                   },
                 ]}
-                onPress={() => setSelectedCategory(cat.id)}
+                onPress={() => handleSelectCategory(cat.id)}
                 activeOpacity={0.8}
               >
                 <Text style={styles.categoryPillIcon}>{cat.icon}</Text>
@@ -258,7 +329,7 @@ export const SoundsScreen: React.FC = () => {
                     {
                       color: isSelected
                         ? isDark
-                          ? '#0B131A'
+                          ? '#000000'
                           : '#FFFFFF'
                         : colors.textPrimary,
                     },
@@ -275,13 +346,16 @@ export const SoundsScreen: React.FC = () => {
       {/* 2. TRACK LIST */}
       <ScrollView
         style={styles.tracksScroll}
-        contentContainerStyle={[styles.tracksContainer, { paddingBottom: 220 }]}
+        contentContainerStyle={[
+          styles.tracksContainer,
+          { paddingBottom: Math.max(insets.bottom + 270, 290) },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.categoryHeaderTitle, { color: colors.textPrimary }]}>
           {activeCategoryMeta?.icon} {activeCategoryMeta?.title} Atmosphere
         </Text>
-        <Text style={[styles.categorySubtitle, { color: isDark ? '#D8E8E0' : '#2A3F33' }]}>
+        <Text style={[styles.categorySubtitle, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
           {activeCategoryMeta?.subtitle}
         </Text>
 
@@ -297,17 +371,17 @@ export const SoundsScreen: React.FC = () => {
                 {
                   backgroundColor: isThisActive
                     ? isDark
-                      ? '#162E23'
+                      ? '#222228'
                       : '#E4F0E9'
                     : isDark
-                    ? '#13221B'
+                    ? '#141418'
                     : '#FFFFFF',
                   borderColor: isThisActive
                     ? isDark
-                      ? '#8CD5B4'
+                      ? 'rgba(255, 255, 255, 0.35)'
                       : '#265C43'
                     : isDark
-                    ? 'rgba(255, 255, 255, 0.12)'
+                    ? 'rgba(255, 255, 255, 0.10)'
                     : '#D6E4DC',
                   borderWidth: isThisActive ? 2 : 1.5,
                 },
@@ -322,10 +396,10 @@ export const SoundsScreen: React.FC = () => {
                     {
                       backgroundColor: isThisActive
                         ? isDark
-                          ? '#8CD5B4'
+                          ? '#FFFFFF'
                           : '#265C43'
                         : isDark
-                        ? '#1C3127'
+                        ? '#1C1C22'
                         : '#EAF2ED',
                     },
                   ]}
@@ -334,7 +408,7 @@ export const SoundsScreen: React.FC = () => {
                     style={{
                       color: isThisActive
                         ? isDark
-                          ? '#0B131A'
+                          ? '#000000'
                           : '#FFFFFF'
                         : colors.textPrimary,
                       fontSize: 14,
@@ -349,7 +423,7 @@ export const SoundsScreen: React.FC = () => {
                   <Text style={[styles.trackTitle, { color: colors.textPrimary }]}>
                     {track.title}
                   </Text>
-                  <Text style={[styles.trackDesc, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+                  <Text style={[styles.trackDesc, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
                     {track.subtitle}
                   </Text>
                 </View>
@@ -358,7 +432,7 @@ export const SoundsScreen: React.FC = () => {
               {isThisPlaying && (
                 <AnimatedSoundWaves
                   isPlaying={isThisPlaying}
-                  color={isDark ? '#8CD5B4' : '#265C43'}
+                  color={isDark ? '#FFFFFF' : '#265C43'}
                 />
               )}
             </TouchableOpacity>
@@ -371,10 +445,11 @@ export const SoundsScreen: React.FC = () => {
         style={[
           styles.dockedPlayer,
           {
-            backgroundColor: isDark ? '#112019' : '#FFFFFF',
+            bottom: Math.max(insets.bottom + 92, 100),
+            backgroundColor: isDark ? '#101014' : '#FFFFFF',
             borderColor: isDark
-              ? 'rgba(255, 255, 255, 0.16)'
-              : '#CDE2D6',
+              ? 'rgba(255, 255, 255, 0.10)'
+              : '#D6E4DC',
           },
         ]}
       >
@@ -383,7 +458,7 @@ export const SoundsScreen: React.FC = () => {
             <Text style={[styles.dockedTrackTitle, { color: colors.textPrimary }]} numberOfLines={1}>
               {activeTrack.title}
             </Text>
-            <Text style={[styles.dockedTrackSubtitle, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+            <Text style={[styles.dockedTrackSubtitle, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
               {isPlaying ? 'Now Playing Loop' : 'Paused'}
               {sleepRemainingSeconds !== null && ` • 🌙 ${formatTimeMMSS(sleepRemainingSeconds)}`}
             </Text>
@@ -394,14 +469,14 @@ export const SoundsScreen: React.FC = () => {
             style={[
               styles.largePlayPauseCircle,
               {
-                backgroundColor: isDark ? '#8CD5B4' : '#265C43',
-                shadowColor: isDark ? '#8CD5B4' : '#265C43',
+                backgroundColor: isDark ? '#FFFFFF' : '#265C43',
+                shadowColor: isDark ? '#000000' : '#265C43',
               },
             ]}
             onPress={handleTogglePlay}
             activeOpacity={0.8}
           >
-            <Text style={[styles.largePlayPauseGlyph, { color: isDark ? '#0B131A' : '#FFFFFF' }]}>
+            <Text style={[styles.largePlayPauseGlyph, { color: isDark ? '#000000' : '#FFFFFF' }]}>
               {isPlaying ? '❚❚' : '▶'}
             </Text>
           </TouchableOpacity>
@@ -412,7 +487,7 @@ export const SoundsScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.volStepBtn,
-              { backgroundColor: isDark ? '#1C3127' : '#EAF2ED' },
+              { backgroundColor: isDark ? '#1C1C22' : '#EAF2ED' },
             ]}
             onPress={() => handleVolumeStep(-0.1)}
           >
@@ -426,15 +501,15 @@ export const SoundsScreen: React.FC = () => {
             step={0.05}
             value={volume}
             onValueChange={handleVolumeChange}
-            minimumTrackTintColor={isDark ? '#8CD5B4' : '#265C43'}
+            minimumTrackTintColor={isDark ? '#FFFFFF' : '#265C43'}
             maximumTrackTintColor={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-            thumbTintColor={isDark ? '#8CD5B4' : '#265C43'}
+            thumbTintColor={isDark ? '#FFFFFF' : '#265C43'}
           />
 
           <TouchableOpacity
             style={[
               styles.volStepBtn,
-              { backgroundColor: isDark ? '#1C3127' : '#EAF2ED' },
+              { backgroundColor: isDark ? '#1C1C22' : '#EAF2ED' },
             ]}
             onPress={() => handleVolumeStep(0.1)}
           >
@@ -448,7 +523,7 @@ export const SoundsScreen: React.FC = () => {
 
         {/* Sleep Timer Pills */}
         <View style={styles.sleepRow}>
-          <Text style={[styles.sleepLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+          <Text style={[styles.sleepLabel, { color: isDark ? '#C8C8D4' : '#2E4638' }]}>
             🌙 Timer:
           </Text>
           <View style={styles.sleepChips}>
@@ -462,10 +537,10 @@ export const SoundsScreen: React.FC = () => {
                     {
                       backgroundColor: isSelected
                         ? isDark
-                          ? '#8CD5B4'
+                          ? '#FFFFFF'
                           : '#265C43'
                         : isDark
-                        ? '#1C3127'
+                        ? '#1C1C22'
                         : '#EAF2ED',
                     },
                   ]}
@@ -477,7 +552,7 @@ export const SoundsScreen: React.FC = () => {
                       {
                         color: isSelected
                           ? isDark
-                            ? '#0B131A'
+                            ? '#000000'
                             : '#FFFFFF'
                           : colors.textPrimary,
                         fontWeight: isSelected ? '700' : '600',
@@ -492,6 +567,9 @@ export const SoundsScreen: React.FC = () => {
           </View>
         </View>
       </View>
+
+      {/* 4. Global Floating Capsule Navigation Bar */}
+      <BottomNavBar activeTab="sounds" />
     </ScenicBackground>
   );
 };
@@ -514,10 +592,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 24,
     borderWidth: 1.5,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    overflow: 'hidden',
   },
   categoryPillIcon: {
     fontSize: 18,
@@ -526,7 +601,7 @@ const styles = StyleSheet.create({
   categoryPillText: {
     fontSize: 14,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   tracksScroll: {
     flex: 1,
@@ -538,12 +613,12 @@ const styles = StyleSheet.create({
   categoryHeaderTitle: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 4,
   },
   categorySubtitle: {
     fontSize: 14,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     fontWeight: '600',
     marginBottom: 16,
   },
@@ -557,10 +632,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 74,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
   },
   trackCardLeft: {
     flexDirection: 'row',
@@ -581,12 +652,12 @@ const styles = StyleSheet.create({
   trackTitle: {
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 2,
   },
   trackDesc: {
     fontSize: 13,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
     fontWeight: '600',
   },
   equalizerWrap: {
@@ -602,73 +673,75 @@ const styles = StyleSheet.create({
   },
   dockedPlayer: {
     position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    borderRadius: 28,
+    left: 20,
+    right: 20,
+    borderRadius: 24,
     borderWidth: 1.5,
-    padding: 16,
+    overflow: 'hidden',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 0,
+    zIndex: 90,
   },
   dockedMainRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   dockedTrackDetails: {
     flex: 1,
-    paddingRight: 12,
+    paddingRight: 10,
   },
   dockedTrackTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
   },
   dockedTrackSubtitle: {
     fontSize: 12,
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     marginTop: 2,
   },
   largePlayPauseCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
   },
   largePlayPauseGlyph: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
   },
   playerVolumeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   volStepBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
   volStepGlyph: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   volPercentText: {
     fontSize: 12,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
-    minWidth: 36,
+    fontFamily: 'sans-serif',
+    minWidth: 34,
     textAlign: 'right',
   },
   sleepRow: {
@@ -677,20 +750,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sleepLabel: {
-    fontSize: 13,
-    fontFamily: 'Nunito-Bold',
+    fontSize: 12,
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
   },
   sleepChips: {
     flexDirection: 'row',
     gap: 6,
   },
   sleepChip: {
-    paddingVertical: 5,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   sleepChipText: {
-    fontSize: 12,
-    fontFamily: 'Nunito-Bold',
+    fontSize: 11,
+    fontFamily: 'sans-serif',
+    fontWeight: '700',
   },
 });

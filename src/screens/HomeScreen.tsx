@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,10 @@ import {
   Pressable,
   StatusBar,
   Image,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { getDaytimeGreeting } from '../logic/formatters';
@@ -21,6 +22,8 @@ import { settingsStore, SceneId } from '../data/settingsStore';
 import { NavigationProp } from '../navigation/types';
 import { ScenicBackground } from '../components/ScenicBackground';
 import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../components/SvgIcons';
+import { BottomNavBar } from '../components/BottomNavBar';
+import { ResetConfirmModal } from '../components/ResetConfirmModal';
 
 // Staggered animated entrance wrapper
 const FadeSlideIn: React.FC<{
@@ -136,7 +139,7 @@ const CleanPracticeCard: React.FC<{
             <Text
               style={[
                 styles.practiceTitle,
-                { color: isDark ? '#FFFFFF' : '#111F18' },
+                { color: isDark ? '#FFFFFF' : '#0F1D15' },
               ]}
             >
               {title}
@@ -144,7 +147,7 @@ const CleanPracticeCard: React.FC<{
             <Text
               style={[
                 styles.practiceSubtitle,
-                { color: isDark ? '#D8E8E0' : '#2E4638' },
+                { color: isDark ? '#D8E8E0' : '#1E3528' },
               ]}
             >
               {subtitle}
@@ -170,91 +173,6 @@ const CleanPracticeCard: React.FC<{
         </View>
       </Pressable>
     </Animated.View>
-  );
-};
-
-// Floating Island Bottom Navigation
-const FloatingIslandNav: React.FC<{
-  activeTab: 'home' | 'practice' | 'sounds' | 'settings';
-  onNavigate: (tab: 'home' | 'practice' | 'sounds' | 'settings') => void;
-  isDark: boolean;
-  insetsBottom: number;
-}> = ({ activeTab, onNavigate, isDark, insetsBottom }) => {
-  const tabs = [
-    { id: 'home' as const, label: 'Home', icon: '🌿' },
-    { id: 'practice' as const, label: 'Breathe', icon: '🫧' },
-    { id: 'sounds' as const, label: 'Sounds', icon: '🎵' },
-    { id: 'settings' as const, label: 'Settings', icon: '⚙️' },
-  ];
-
-  return (
-    <View
-      style={[
-        styles.floatingNavContainer,
-        {
-          bottom: Math.max(insetsBottom + 8, 16),
-          backgroundColor: isDark ? '#112019' : '#FFFFFF',
-          borderColor: isDark
-            ? 'rgba(255, 255, 255, 0.14)'
-            : 'rgba(0, 0, 0, 0.08)',
-        },
-      ]}
-    >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            style={[
-              styles.navTabPill,
-              isActive && {
-                backgroundColor: isDark
-                  ? 'rgba(140, 213, 180, 0.22)'
-                  : '#E3EFE9',
-              },
-            ]}
-            onPress={() => onNavigate(tab.id)}
-            activeOpacity={0.7}
-          >
-            <Text
-              style={[
-                styles.navTabIcon,
-                { transform: [{ scale: isActive ? 1.15 : 1.0 }] },
-              ]}
-            >
-              {tab.icon}
-            </Text>
-            <Text
-              style={[
-                styles.navTabLabel,
-                {
-                  color: isActive
-                    ? isDark
-                      ? '#FFFFFF'
-                      : '#111F18'
-                    : isDark
-                    ? '#8CAAA0'
-                    : '#486354',
-                  fontWeight: isActive ? '700' : '600',
-                },
-              ]}
-            >
-              {tab.label}
-            </Text>
-            {isActive && (
-              <View
-                style={[
-                  styles.activeDot,
-                  {
-                    backgroundColor: isDark ? '#8CD5B4' : '#265C43',
-                  },
-                ]}
-              />
-            )}
-          </TouchableOpacity>
-        );
-      })}
-    </View>
   );
 };
 
@@ -287,14 +205,30 @@ export const HomeScreen: React.FC = () => {
     };
   }, []);
 
-  const { greeting, subtitle } = getDaytimeGreeting();
+  // Guarantee stats refresh on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      setCompletedSessions(progressStore.getCompletedSessions());
+      setTotalMinutes(progressStore.getTotalMinutes());
+    }, [])
+  );
 
-  const handleNavPress = (tab: 'home' | 'practice' | 'sounds' | 'settings') => {
-    if (tab === 'home') return;
-    if (tab === 'practice') navigation.navigate('Breathing');
-    if (tab === 'sounds') navigation.navigate('Sounds');
-    if (tab === 'settings') navigation.navigate('Settings');
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+
+  const handlePromptResetStats = () => {
+    setIsResetModalVisible(true);
   };
+
+  const handleConfirmReset = async () => {
+    setIsResetModalVisible(false);
+    await progressStore.resetProgress();
+  };
+
+  const handleCancelReset = () => {
+    setIsResetModalVisible(false);
+  };
+
+  const { greeting, subtitle } = getDaytimeGreeting();
 
   return (
     <ScenicBackground scene={scenePreference} style={styles.safeArea}>
@@ -364,7 +298,7 @@ export const HomeScreen: React.FC = () => {
             <Text
               style={[
                 styles.heroSubtitle,
-                { color: isDark ? '#D8E8E0' : '#2E4638' },
+                { color: isDark ? '#D8E8E0' : '#1E3528' },
               ]}
             >
               {subtitle}
@@ -389,8 +323,8 @@ export const HomeScreen: React.FC = () => {
             <LinearGradient
               colors={
                 isDark
-                  ? ['#1C372D', '#132820']
-                  : ['#6B9483', '#537C6C']
+                  ? ['#222228', '#141418']
+                  : ['#5E8574', '#456B5B']
               }
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -423,9 +357,35 @@ export const HomeScreen: React.FC = () => {
 
         {/* Progress Stats Split Cards (Sessions & Minutes) */}
         <FadeSlideIn delay={180}>
+          <View style={styles.statsSectionHeader}>
+            <Text style={[styles.statsSectionTitle, { color: colors.textPrimary }]}>
+              Your Progress
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.statsResetPill,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.10)'
+                    : 'rgba(255, 255, 255, 0.65)',
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.16)'
+                    : 'rgba(0, 0, 0, 0.08)',
+                },
+              ]}
+              onPress={handlePromptResetStats}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={[styles.statsResetPillText, { color: isDark ? '#D8E8E0' : '#1E3528' }]}>
+                ↺ Reset
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.statsRow}>
             {/* Sessions Card */}
-            <View
+            <TouchableOpacity
               style={[
                 styles.statsCard,
                 {
@@ -435,6 +395,8 @@ export const HomeScreen: React.FC = () => {
                     : 'rgba(150, 121, 30, 0.20)',
                 },
               ]}
+              onPress={handlePromptResetStats}
+              activeOpacity={0.8}
             >
               <View style={styles.statsHeaderRow}>
                 <View
@@ -466,10 +428,10 @@ export const HomeScreen: React.FC = () => {
               >
                 Sessions
               </Text>
-            </View>
+            </TouchableOpacity>
 
             {/* Minutes Card */}
-            <View
+            <TouchableOpacity
               style={[
                 styles.statsCard,
                 {
@@ -479,6 +441,8 @@ export const HomeScreen: React.FC = () => {
                     : 'rgba(172, 95, 58, 0.20)',
                 },
               ]}
+              onPress={handlePromptResetStats}
+              activeOpacity={0.8}
             >
               <View style={styles.statsHeaderRow}>
                 <View
@@ -510,7 +474,7 @@ export const HomeScreen: React.FC = () => {
               >
                 Minutes
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
         </FadeSlideIn>
 
@@ -582,12 +546,16 @@ export const HomeScreen: React.FC = () => {
         </FadeSlideIn>
       </ScrollView>
 
-      {/* 3. Floating Island Navigation Bar */}
-      <FloatingIslandNav
-        activeTab="home"
-        onNavigate={handleNavPress}
-        isDark={isDark}
-        insetsBottom={insets.bottom}
+      {/* 3. Global Floating Capsule Navigation Bar */}
+      <BottomNavBar activeTab="home" />
+
+      {/* 4. Elegant Custom Reset Confirmation Modal */}
+      <ResetConfirmModal
+        visible={isResetModalVisible}
+        completedSessions={completedSessions}
+        totalMinutes={totalMinutes}
+        onConfirm={handleConfirmReset}
+        onCancel={handleCancelReset}
       />
     </ScenicBackground>
   );
@@ -698,6 +666,30 @@ const styles = StyleSheet.create({
     borderRadius: 29,
     backgroundColor: 'rgba(255, 255, 255, 0.35)',
   },
+  statsSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    marginTop: 4,
+    paddingHorizontal: 2,
+  },
+  statsSectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'serif',
+  },
+  statsResetPill: {
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  statsResetPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: 'sans-serif',
+  },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -708,6 +700,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     borderWidth: 1.5,
+    overflow: 'hidden',
     padding: 16,
   },
   statsHeaderRow: {
@@ -790,40 +783,5 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     lineHeight: 24,
-  },
-  floatingNavContainer: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    height: 66,
-    borderRadius: 33,
-    borderWidth: 1.5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 8,
-  },
-  navTabPill: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 18,
-    position: 'relative',
-  },
-  navTabIcon: {
-    fontSize: 19,
-    marginBottom: 2,
-  },
-  navTabLabel: {
-    fontSize: 11,
-    fontFamily: 'sans-serif',
-  },
-  activeDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    marginTop: 2,
   },
 });

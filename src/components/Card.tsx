@@ -47,6 +47,7 @@ export const Card: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1.5,
+    overflow: 'hidden',
     marginVertical: 6,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,

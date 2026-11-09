@@ -62,49 +62,49 @@ export const lightColors: ThemeColors = {
   background: '#FAF6EE', // Warm organic ivory mist
   surface: '#FFFFFF',
   surfaceElevated: '#FFFFFF',
-  surfaceBorder: '#E0D8CB',
-  primary: '#111F18', // Deep forest charcoal - ultra high contrast
+  surfaceBorder: '#D6E4DC',
+  primary: '#0F1D15', // Deep forest charcoal - ultra high contrast
   primaryLight: '#265C43',
   primaryMuted: '#E4F0E9',
-  secondary: '#2E4638',
-  textPrimary: '#111F18', // Solid readable charcoal
-  textSecondary: '#2E4638', // Deep slate moss - crisp & readable
-  textMuted: '#587063',
+  secondary: '#1E3528',
+  textPrimary: '#0F1D15', // Solid readable charcoal (WCAG AAA)
+  textSecondary: '#1E3528', // Deep slate moss - crisp & readable
+  textMuted: '#3D5A4A', // High contrast readable muted forest
   accentGreen: '#265C43',
   accentRed: '#C7513B',
-  cardShadow: 'rgba(17, 31, 24, 0.06)',
+  cardShadow: 'rgba(15, 29, 21, 0.05)',
 
   glassSurface: '#FFFFFF',
-  glassBorder: '#E0D8CB',
-  glassTextSecondary: '#2E4638',
+  glassBorder: '#D6E4DC',
+  glassTextSecondary: '#1E3528',
 
   bgGradient: ['#FAF6EE', '#F2ECE0', '#E5DDD0'],
-  scrimGradient: ['rgba(250, 246, 238, 0.88)', 'rgba(250, 246, 238, 0.95)'],
-  cardHeroGradient: ['#6B9483', '#537C6C'],
+  scrimGradient: ['rgba(250, 246, 238, 0.92)', 'rgba(250, 246, 238, 0.96)'],
+  cardHeroGradient: ['#5E8574', '#456B5B'],
   cardBreatheGradient: ['#E4F0E9', '#D0E3D8'],
   cardMeditateGradient: ['#E8E7FA', '#D5D4F5'],
   cardSoundsGradient: ['#FCEBE6', '#F7D6CC'],
 
-  cardHeroBg: '#537C6C',
+  cardHeroBg: '#456B5B',
   cardHeroBtn: '#D66D52',
   cardBreatheBg: '#E4F0E9',
   cardMeditateBg: '#E8E7FA',
   cardSoundsBg: '#FCEBE6',
 
-  navActive: '#111F18',
-  navInactive: '#587063',
+  navActive: '#0F1D15',
+  navInactive: '#4E6B5A',
   navBackground: '#FFFFFF',
-  navBorder: '#E0D8CB',
+  navBorder: '#D6E4DC',
 
   statsSessionsBg: '#F7E7B4',
-  statsSessionsText: '#2C220E',
-  statsSessionsIcon: '#96791E',
+  statsSessionsText: '#1A1508',
+  statsSessionsIcon: '#856915',
   statsMinutesBg: '#FCD8C4',
-  statsMinutesText: '#3B1E12',
-  statsMinutesIcon: '#AC5F3A',
+  statsMinutesText: '#25120B',
+  statsMinutesIcon: '#964E2A',
 
   iconBtnBg: '#FFFFFF',
-  iconBtnBorder: '#E0D8CB',
+  iconBtnBorder: '#D6E4DC',
 
   accentTerracotta: '#D66D52',
   accentSage: '#265C43',
@@ -114,52 +114,52 @@ export const lightColors: ThemeColors = {
 };
 
 export const darkColors: ThemeColors = {
-  background: '#0B131A', // Deep night navy-teal
-  surface: '#13221B',
-  surfaceElevated: '#182C23',
-  surfaceBorder: 'rgba(255, 255, 255, 0.12)',
+  background: '#09090B', // Pitch dark obsidian black
+  surface: '#141418', // Sleek dark charcoal surface (replaces forest green)
+  surfaceElevated: '#1C1C22',
+  surfaceBorder: 'rgba(255, 255, 255, 0.10)',
   primary: '#FFFFFF',
-  primaryLight: '#8CD5B4',
-  primaryMuted: '#1A3327',
-  secondary: '#D8E8E0',
+  primaryLight: '#E2E2EA',
+  primaryMuted: '#22222A',
+  secondary: '#D0D0DA',
   textPrimary: '#FFFFFF',
-  textSecondary: '#D8E8E0', // Highly legible luminous mint
-  textMuted: '#8CAAA0',
-  accentGreen: '#4ADE80',
+  textSecondary: '#C8C8D4', // Crisp light silver
+  textMuted: '#8E8E98', // Neutral soft graphite
+  accentGreen: '#34D399',
   accentRed: '#F87171',
-  cardShadow: 'rgba(0, 0, 0, 0.40)',
+  cardShadow: 'rgba(0, 0, 0, 0.60)',
 
-  glassSurface: '#13221B',
-  glassBorder: 'rgba(255, 255, 255, 0.14)',
-  glassTextSecondary: '#D8E8E0',
+  glassSurface: '#141418',
+  glassBorder: 'rgba(255, 255, 255, 0.10)',
+  glassTextSecondary: '#C8C8D4',
 
-  bgGradient: ['#0B131A', '#0F1A24', '#152431'],
-  scrimGradient: ['rgba(11, 19, 26, 0.78)', 'rgba(11, 19, 26, 0.94)'],
-  cardHeroGradient: ['#1C372D', '#132820'],
-  cardBreatheGradient: ['#162E23', '#0F2119'],
-  cardMeditateGradient: ['#201C3E', '#16132D'],
-  cardSoundsGradient: ['#351C17', '#25120E'],
+  bgGradient: ['#09090B', '#0E0E12', '#141418'],
+  scrimGradient: ['rgba(9, 9, 11, 0.90)', 'rgba(9, 9, 11, 0.96)'],
+  cardHeroGradient: ['#222228', '#141418'],
+  cardBreatheGradient: ['#1C1E22', '#141518'],
+  cardMeditateGradient: ['#1E1C28', '#14131C'],
+  cardSoundsGradient: ['#241C1A', '#181312'],
 
-  cardHeroBg: '#1C372D',
+  cardHeroBg: '#18181D',
   cardHeroBtn: '#E07A5F',
-  cardBreatheBg: '#162E23',
-  cardMeditateBg: '#201C3E',
-  cardSoundsBg: '#351C17',
+  cardBreatheBg: '#18181D',
+  cardMeditateBg: '#1A1824',
+  cardSoundsBg: '#201816',
 
   navActive: '#FFFFFF',
-  navInactive: '#8CAAA0',
-  navBackground: '#112019',
-  navBorder: 'rgba(255, 255, 255, 0.12)',
+  navInactive: '#8E8E98',
+  navBackground: '#101014', // Pure deep black capsule
+  navBorder: 'rgba(255, 255, 255, 0.10)',
 
-  statsSessionsBg: '#2A2412',
+  statsSessionsBg: '#1C1A14',
   statsSessionsText: '#FDE68A',
   statsSessionsIcon: '#F59E0B',
-  statsMinutesBg: '#2F1B15',
+  statsMinutesBg: '#221614',
   statsMinutesText: '#FFEDD5',
   statsMinutesIcon: '#F97316',
 
-  iconBtnBg: 'rgba(255, 255, 255, 0.10)',
-  iconBtnBorder: 'rgba(255, 255, 255, 0.18)',
+  iconBtnBg: 'rgba(255, 255, 255, 0.08)',
+  iconBtnBorder: 'rgba(255, 255, 255, 0.14)',
 
   accentTerracotta: '#E07A5F',
   accentSage: '#8CD5B4',

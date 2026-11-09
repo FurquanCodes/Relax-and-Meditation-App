@@ -27,23 +27,23 @@ export const SCENIC_GRADIENTS: Record<
 > = {
   meadow: {
     light: ['#FAF4E8', '#F2ECE0', '#EAE0D0'],
-    dark: ['#1A140E', '#241B13', '#33271B'],
+    dark: ['#12100E', '#181412', '#201B18'],
   },
   forest: {
     light: ['#F2F6F3', '#E4ECE6', '#D6E2D9'],
-    dark: ['#0A1610', '#102219', '#173024'],
+    dark: ['#0A0A0E', '#121216', '#181820'],
   },
   ocean: {
     light: ['#F2F6F8', '#E3EDF1', '#D4E3E8'],
-    dark: ['#091722', '#0E2333', '#16334A'],
+    dark: ['#0A0B10', '#101218', '#161822'],
   },
   rain: {
     light: ['#F3F5F7', '#E5E9EE', '#D7DEE5'],
-    dark: ['#101720', '#16202C', '#1E2C3D'],
+    dark: ['#0A0A0E', '#121216', '#1A1A22'],
   },
   night: {
     light: ['#F5F5FA', '#E8E8F2', '#DCDCE8'],
-    dark: ['#090D18', '#0F1527', '#171F3B'],
+    dark: ['#08080C', '#0E0E14', '#14141E'],
   },
 };
 
@@ -126,7 +126,7 @@ const FloatingParticle: React.FC<{ index: number; isDark: boolean }> = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: isDark ? '#A7F3D0' : '#D1A858',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.45)' : '#D1A858',
           opacity,
           transform: [{ translateY }, { translateX }],
         },
@@ -146,18 +146,19 @@ export const ScenicBackground: React.FC<ScenicBackgroundProps> = ({
   const effectiveScene = resolveScene(scene);
   const imageSource = SCENIC_IMAGES[effectiveScene];
 
-  // In Light Theme, scrim is 85-94% opaque to guarantee crisp text readability and eliminate glare
-  // In Dark Theme, rich twilight scrim is 75-92%
+  // High-contrast, glare-free scrim over scenic imagery:
+  // In Light Theme: 92-98% soft ivory scrim ensures subtitle and body text is 100% crisp and readable
+  // In Dark Theme: 88-97% pure obsidian black scrim ensures text is crisp, clean and glare-free
   const scrimColors: [string, string, string] = isDark
     ? [
-        `rgba(11, 19, 26, ${scrimOpacity ?? 0.76})`,
-        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.76) + 0.12, 0.90)})`,
-        `rgba(11, 19, 26, ${Math.min((scrimOpacity ?? 0.76) + 0.18, 0.96)})`,
+        `rgba(9, 9, 11, ${scrimOpacity ?? 0.88})`,
+        `rgba(9, 9, 11, ${Math.min((scrimOpacity ?? 0.88) + 0.06, 0.94)})`,
+        `rgba(9, 9, 11, ${Math.min((scrimOpacity ?? 0.88) + 0.10, 0.98)})`,
       ]
     : [
-        `rgba(250, 246, 238, ${scrimOpacity ?? 0.86})`,
-        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.86) + 0.06, 0.93)})`,
-        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.86) + 0.10, 0.97)})`,
+        `rgba(250, 246, 238, ${scrimOpacity ?? 0.92})`,
+        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.92) + 0.04, 0.96)})`,
+        `rgba(250, 246, 238, ${Math.min((scrimOpacity ?? 0.92) + 0.06, 0.98)})`,
       ];
 
   return (

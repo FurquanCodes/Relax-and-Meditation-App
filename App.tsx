@@ -7,12 +7,13 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
+import { SplashScreen } from './src/screens/SplashScreen';
 import { settingsStore } from './src/data/settingsStore';
 import { progressStore } from './src/data/progressStore';
 import { audioService } from './src/services/audioService';
 
 const MainAppContent: React.FC = () => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
 
   return (
     <>
@@ -25,7 +26,8 @@ const MainAppContent: React.FC = () => {
 };
 
 export default function App() {
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isBootstrapped, setIsBootstrapped] = useState(false);
+  const [isSplashDone, setIsSplashDone] = useState(false);
 
   useEffect(() => {
     async function bootstrap() {
@@ -38,18 +40,28 @@ export default function App() {
         } catch {}
       }
 
-      // 2. Load settings and progress before rendering UI (prevents theme flash)
+      // 2. Pre-load all settings and session progress before rendering main UI
+      // This completely guarantees ZERO theme flash or lost state on launch.
       await Promise.all([
         settingsStore.init(),
         progressStore.init(),
         audioService.setupPlayerIfNeeded(),
       ]);
 
-      setIsInitialized(true);
+      setIsBootstrapped(true);
     }
 
     bootstrap();
   }, []);
+
+  // Display warm, light, elegant splash screen during startup and initialization
+  if (!isBootstrapped || !isSplashDone) {
+    return (
+      <SafeAreaProvider>
+        <SplashScreen onFinish={() => setIsSplashDone(true)} />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>

@@ -53,8 +53,12 @@ export const MeditationScreen: React.FC = () => {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation();
 
-  const [selectedDurationMin, setSelectedDurationMin] = useState<number>(5);
-  const [selectedSoundscapeId, setSelectedSoundscapeId] = useState<string>('forest');
+  const [selectedDurationMin, setSelectedDurationMin] = useState<number>(
+    settingsStore.getMeditationDurationMinutes()
+  );
+  const [selectedSoundscapeId, setSelectedSoundscapeId] = useState<string>(
+    settingsStore.getMeditationThemeId()
+  );
   const [ambientVolume, setAmbientVolume] = useState<number>(0.6);
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -199,6 +203,10 @@ export const MeditationScreen: React.FC = () => {
   };
 
   const handleStopTimer = async () => {
+    const elapsedSeconds = durationSeconds - remainingSeconds;
+    if (elapsedSeconds >= 15) {
+      await progressStore.recordCompletedSession(elapsedSeconds);
+    }
     await nativeTimer.stopTimer();
     await audioService.stop();
     setIsRunning(false);
@@ -271,19 +279,22 @@ export const MeditationScreen: React.FC = () => {
                           ? '#201C3E'
                           : '#E8E7FA'
                         : isDark
-                        ? '#13221B'
+                        ? '#141418'
                         : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
                           ? '#AEAEE8'
                           : '#5A58A8'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : '#E0D8CB',
+                        ? 'rgba(255, 255, 255, 0.10)'
+                        : '#D6E4DC',
                       borderWidth: isSelected ? 2 : 1.5,
                     },
                   ]}
-                  onPress={() => setSelectedDurationMin(min)}
+                  onPress={() => {
+                    setSelectedDurationMin(min);
+                    settingsStore.setMeditationDurationMinutes(min);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text
@@ -293,7 +304,7 @@ export const MeditationScreen: React.FC = () => {
                         color: isSelected
                           ? isDark
                             ? '#FFFFFF'
-                            : '#111F18'
+                            : '#0F1D15'
                           : colors.textPrimary,
                       },
                     ]}
@@ -303,7 +314,7 @@ export const MeditationScreen: React.FC = () => {
                   <Text
                     style={[
                       styles.durationUnit,
-                      { color: isDark ? '#D8E8E0' : '#2E4638' },
+                      { color: isDark ? '#D8E8E0' : '#1E3528' },
                     ]}
                   >
                     min
@@ -336,19 +347,22 @@ export const MeditationScreen: React.FC = () => {
                           ? '#201C3E'
                           : '#E8E7FA'
                         : isDark
-                        ? '#13221B'
+                        ? '#141418'
                         : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
                           ? '#AEAEE8'
                           : '#5A58A8'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.12)'
-                        : '#E0D8CB',
+                        ? 'rgba(255, 255, 255, 0.10)'
+                        : '#D6E4DC',
                       borderWidth: isSelected ? 2 : 1.5,
                     },
                   ]}
-                  onPress={() => setSelectedSoundscapeId(s.id)}
+                  onPress={() => {
+                    setSelectedSoundscapeId(s.id);
+                    settingsStore.setMeditationThemeId(s.id);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text style={styles.soundscapeIcon}>{s.icon}</Text>
@@ -378,8 +392,8 @@ export const MeditationScreen: React.FC = () => {
               style={[
                 styles.volumeCard,
                 {
-                  backgroundColor: isDark ? '#13221B' : '#FFFFFF',
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#E0D8CB',
+                  backgroundColor: isDark ? '#141418' : '#FFFFFF',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.10)' : '#E0D8CB',
                 },
               ]}
             >
@@ -424,9 +438,9 @@ export const MeditationScreen: React.FC = () => {
             style={[
               styles.activeSoundscapeBadge,
               {
-                backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+                backgroundColor: isDark ? '#141418' : '#FFFFFF',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.14)'
+                  ? 'rgba(255, 255, 255, 0.10)'
                   : '#E0D8CB',
               },
             ]}
@@ -513,9 +527,9 @@ export const MeditationScreen: React.FC = () => {
               style={[
                 styles.activeVolumeRow,
                 {
-                  backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+                  backgroundColor: isDark ? '#141418' : '#FFFFFF',
                   borderColor: isDark
-                    ? 'rgba(255, 255, 255, 0.14)'
+                    ? 'rgba(255, 255, 255, 0.10)'
                     : '#E0D8CB',
                 },
               ]}
@@ -587,9 +601,9 @@ export const MeditationScreen: React.FC = () => {
             style={[
               styles.quoteCard,
               {
-                backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+                backgroundColor: isDark ? '#141418' : '#FFFFFF',
                 borderColor: isDark
-                  ? 'rgba(255, 255, 255, 0.14)'
+                  ? 'rgba(255, 255, 255, 0.10)'
                   : '#E0D8CB',
               },
             ]}
@@ -651,6 +665,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 80,
     borderRadius: 20,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -676,6 +691,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 24,
+    overflow: 'hidden',
   },
   soundscapeIcon: {
     fontSize: 18,
@@ -691,6 +707,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 1.5,
+    overflow: 'hidden',
     marginTop: 16,
   },
   volumePercentText: {
@@ -815,6 +832,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     borderWidth: 1.5,
+    overflow: 'hidden',
     width: '100%',
     marginVertical: 12,
   },

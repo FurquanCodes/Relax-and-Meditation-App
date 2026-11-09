@@ -8,12 +8,17 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { settingsStore, ThemePreference, SceneId } from '../data/settingsStore';
+import { progressStore } from '../data/progressStore';
 import { ScenicBackground, SCENIC_IMAGES } from '../components/ScenicBackground';
+import { BottomNavBar } from '../components/BottomNavBar';
+import { ResetConfirmModal } from '../components/ResetConfirmModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SceneOption {
   id: SceneId;
@@ -70,17 +75,46 @@ const SCENE_OPTIONS: SceneOption[] = [
 export const SettingsScreen: React.FC = () => {
   const { colors, isDark, themePreference, setThemePreference } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const [bellEnabled, setBellEnabled] = useState<boolean>(settingsStore.isBellEnabled());
   const [selectedScene, setSelectedScene] = useState<SceneId>(settingsStore.getScenePreference());
+  const [completedSessions, setCompletedSessions] = useState<number>(
+    progressStore.getCompletedSessions()
+  );
+  const [totalMinutes, setTotalMinutes] = useState<number>(
+    progressStore.getTotalMinutes()
+  );
 
   useEffect(() => {
-    const unsub = settingsStore.subscribe(() => {
+    const unsubSettings = settingsStore.subscribe(() => {
       setBellEnabled(settingsStore.isBellEnabled());
       setSelectedScene(settingsStore.getScenePreference());
     });
-    return unsub;
+    const unsubProgress = progressStore.subscribe(() => {
+      setCompletedSessions(progressStore.getCompletedSessions());
+      setTotalMinutes(progressStore.getTotalMinutes());
+    });
+    return () => {
+      unsubSettings();
+      unsubProgress();
+    };
   }, []);
+
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+
+  const handlePromptResetStats = () => {
+    setIsResetModalVisible(true);
+  };
+
+  const handleConfirmReset = async () => {
+    setIsResetModalVisible(false);
+    await progressStore.resetProgress();
+  };
+
+  const handleCancelReset = () => {
+    setIsResetModalVisible(false);
+  };
 
   const handleToggleBell = async (value: boolean) => {
     setBellEnabled(value);
@@ -109,14 +143,17 @@ export const SettingsScreen: React.FC = () => {
       />
 
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: 18, paddingBottom: 60 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { padding: 18, paddingBottom: Math.max(insets.bottom + 110, 120) },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* 1. SCENE THEMES PICKER */}
         <Text style={[styles.sectionHeading, { color: colors.textPrimary }]}>
           Background Scene
         </Text>
-        <Text style={[styles.sectionDesc, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+        <Text style={[styles.sectionDesc, { color: isDark ? '#D8E8E0' : '#1E3528' }]}>
           Choose your favorite scenic environment for Home and rest screens
         </Text>
 
@@ -131,17 +168,17 @@ export const SettingsScreen: React.FC = () => {
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? '#162E23'
+                        ? '#222228'
                         : '#E4F0E9'
                       : isDark
-                      ? '#13221B'
+                      ? '#141418'
                       : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
-                        ? '#8CD5B4'
+                        ? 'rgba(255, 255, 255, 0.35)'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.12)'
+                      ? 'rgba(255, 255, 255, 0.10)'
                       : '#D6E4DC',
                     borderWidth: isSelected ? 2.5 : 1.5,
                   },
@@ -157,7 +194,7 @@ export const SettingsScreen: React.FC = () => {
                       styles.sceneThumbFallback,
                       {
                         backgroundColor: isDark
-                          ? '#1A3326'
+                          ? '#1C1C22'
                           : '#EAF3EE',
                       },
                     ]}
@@ -176,14 +213,14 @@ export const SettingsScreen: React.FC = () => {
                         style={[
                           styles.activeCheckPill,
                           {
-                            backgroundColor: isDark ? '#8CD5B4' : '#265C43',
+                            backgroundColor: isDark ? '#FFFFFF' : '#265C43',
                           },
                         ]}
                       >
                         <Text
                           style={[
                             styles.activeCheckText,
-                            { color: isDark ? '#0B131A' : '#FFFFFF' },
+                            { color: isDark ? '#000000' : '#FFFFFF' },
                           ]}
                         >
                           Active
@@ -194,7 +231,7 @@ export const SettingsScreen: React.FC = () => {
                   <Text
                     style={[
                       styles.sceneSubtitle,
-                      { color: isDark ? '#D8E8E0' : '#2E4638' },
+                      { color: isDark ? '#D8E8E0' : '#1E3528' },
                     ]}
                   >
                     {opt.subtitle}
@@ -219,9 +256,9 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+              backgroundColor: isDark ? '#141418' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.12)'
+                ? 'rgba(255, 255, 255, 0.10)'
                 : '#D6E4DC',
             },
           ]}
@@ -260,13 +297,13 @@ export const SettingsScreen: React.FC = () => {
                   <View
                     style={[
                       styles.checkCircle,
-                      { backgroundColor: isDark ? '#8CD5B4' : '#265C43' },
+                      { backgroundColor: isDark ? '#FFFFFF' : '#265C43' },
                     ]}
                   >
                     <Text
                       style={[
                         styles.checkmarkText,
-                        { color: isDark ? '#0B131A' : '#FFFFFF' },
+                        { color: isDark ? '#000000' : '#FFFFFF' },
                       ]}
                     >
                       ✓
@@ -292,9 +329,9 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+              backgroundColor: isDark ? '#141418' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.12)'
+                ? 'rgba(255, 255, 255, 0.10)'
                 : '#D6E4DC',
             },
           ]}
@@ -307,7 +344,7 @@ export const SettingsScreen: React.FC = () => {
               <Text
                 style={[
                   styles.settingRowDesc,
-                  { color: isDark ? '#D8E8E0' : '#2E4638' },
+                  { color: isDark ? '#C8C8D4' : '#1E3528' },
                 ]}
               >
                 Soft chime at the start and completion of each meditation
@@ -318,15 +355,74 @@ export const SettingsScreen: React.FC = () => {
               value={bellEnabled}
               onValueChange={handleToggleBell}
               trackColor={{
-                false: isDark ? '#263D31' : '#E6DECF',
-                true: isDark ? '#8CD5B4' : '#265C43',
+                false: isDark ? '#26262E' : '#E6DECF',
+                true: isDark ? '#FFFFFF' : '#265C43',
               }}
               thumbColor={bellEnabled ? colors.accentTerracotta : '#F4F3F4'}
             />
           </View>
         </View>
 
-        {/* 4. ABOUT */}
+        {/* 4. PROGRESS & STATISTICS */}
+        <Text
+          style={[
+            styles.sectionHeading,
+            { color: colors.textPrimary, marginTop: 24 },
+          ]}
+        >
+          Progress & Statistics
+        </Text>
+        <Text style={[styles.sectionDesc, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
+          Track your mindful breathing, meditation, and ambient sound sessions
+        </Text>
+
+        <View
+          style={[
+            styles.glassSectionCard,
+            {
+              backgroundColor: isDark ? '#141418' : '#FFFFFF',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.10)'
+                : '#D6E4DC',
+            },
+          ]}
+        >
+          <View style={styles.aboutRow}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
+              Completed Sessions
+            </Text>
+            <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
+              {completedSessions} {completedSessions === 1 ? 'session' : 'sessions'}
+            </Text>
+          </View>
+
+          <View style={[styles.aboutRow, { marginTop: 12 }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#C8C8D4' : '#1E3528' }]}>
+              Mindful Minutes
+            </Text>
+            <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
+              {totalMinutes} {totalMinutes === 1 ? 'min' : 'mins'}
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.resetStatsBtn,
+              {
+                backgroundColor: isDark ? 'rgba(248, 113, 113, 0.15)' : '#FEE2E2',
+                borderColor: isDark ? 'rgba(248, 113, 113, 0.32)' : '#FCA5A5',
+              },
+            ]}
+            onPress={handlePromptResetStats}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.resetStatsBtnText, { color: isDark ? '#F87171' : '#B91C1C' }]}>
+              ↺ Reset All Statistics
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 5. ABOUT */}
         <Text
           style={[
             styles.sectionHeading,
@@ -340,15 +436,15 @@ export const SettingsScreen: React.FC = () => {
           style={[
             styles.glassSectionCard,
             {
-              backgroundColor: isDark ? '#13221B' : '#FFFFFF',
+              backgroundColor: isDark ? '#141418' : '#FFFFFF',
               borderColor: isDark
-                ? 'rgba(255, 255, 255, 0.12)'
+                ? 'rgba(255, 255, 255, 0.10)'
                 : '#D6E4DC',
             },
           ]}
         >
           <View style={styles.aboutRow}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#1E3528' }]}>
               Application
             </Text>
             <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
@@ -357,7 +453,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
 
           <View style={[styles.aboutRow, { marginTop: 10 }]}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#1E3528' }]}>
               Design System
             </Text>
             <Text style={[styles.aboutValue, { color: colors.textPrimary }]}>
@@ -366,7 +462,7 @@ export const SettingsScreen: React.FC = () => {
           </View>
 
           <View style={[styles.aboutRow, { marginTop: 10 }]}>
-            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#2E4638' }]}>
+            <Text style={[styles.aboutLabel, { color: isDark ? '#D8E8E0' : '#1E3528' }]}>
               Privacy & Network
             </Text>
             <Text style={[styles.aboutValue, { color: '#34D399', fontWeight: '700' }]}>
@@ -377,13 +473,25 @@ export const SettingsScreen: React.FC = () => {
           <Text
             style={[
               styles.aboutDisclaimer,
-              { color: isDark ? '#B2C8BD' : '#476353' },
+              { color: isDark ? '#B2C8BD' : '#2D4B39' },
             ]}
           >
             A calm, quiet companion designed for mindful breathing, restful meditation, and ambient relaxation. No accounts, no telemetry, no network calls.
           </Text>
         </View>
       </ScrollView>
+
+      {/* Global Bottom Navigation */}
+      <BottomNavBar activeTab="settings" />
+
+      {/* Elegant Custom Reset Confirmation Modal */}
+      <ResetConfirmModal
+        visible={isResetModalVisible}
+        completedSessions={completedSessions}
+        totalMinutes={totalMinutes}
+        onConfirm={handleConfirmReset}
+        onCancel={handleCancelReset}
+      />
     </ScenicBackground>
   );
 };
@@ -398,12 +506,13 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 20,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 4,
   },
   sectionDesc: {
     fontSize: 13,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     marginBottom: 14,
   },
   scenesGrid: {
@@ -415,10 +524,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
   },
   sceneThumb: {
     width: 64,
@@ -429,6 +534,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 14,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -445,32 +551,31 @@ const styles = StyleSheet.create({
   sceneTitle: {
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
   },
   sceneSubtitle: {
     fontSize: 12,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     lineHeight: 16,
   },
   activeCheckPill: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
+    overflow: 'hidden',
   },
   activeCheckText: {
     fontSize: 11,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   glassSectionCard: {
     borderRadius: 22,
     borderWidth: 1.5,
+    overflow: 'hidden',
     padding: 16,
     marginTop: 8,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
   },
   themeOptionRow: {
     flexDirection: 'row',
@@ -483,12 +588,13 @@ const styles = StyleSheet.create({
   },
   themeLabel: {
     fontSize: 15,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
   },
   checkCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -504,12 +610,13 @@ const styles = StyleSheet.create({
   settingRowTitle: {
     fontSize: 16,
     fontWeight: '700',
-    fontFamily: 'PlayfairDisplay-Bold',
+    fontFamily: 'serif',
     marginBottom: 2,
   },
   settingRowDesc: {
     fontSize: 13,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
     lineHeight: 17,
   },
   aboutRow: {
@@ -519,17 +626,32 @@ const styles = StyleSheet.create({
   },
   aboutLabel: {
     fontSize: 14,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
+    fontWeight: '600',
   },
   aboutValue: {
     fontSize: 14,
     fontWeight: '700',
-    fontFamily: 'Nunito-Bold',
+    fontFamily: 'sans-serif',
   },
   aboutDisclaimer: {
     fontSize: 12,
-    fontFamily: 'Nunito-Regular',
+    fontFamily: 'sans-serif',
     marginTop: 14,
     lineHeight: 18,
+  },
+  resetStatsBtn: {
+    marginTop: 14,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetStatsBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: 'sans-serif',
   },
 });

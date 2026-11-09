@@ -6,165 +6,95 @@ import {
   Animated,
   Easing,
   StatusBar,
-  Dimensions,
   Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import LinearGradient from 'react-native-linear-gradient';
-import { RootStackParamList } from '../navigation/types';
 
-const { width } = Dimensions.get('window');
+interface SplashScreenProps {
+  onFinish?: () => void;
+  isStandalone?: boolean;
+}
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
-
-export const SplashScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
+export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
+  let navigation: any = null;
+  try {
+    navigation = useNavigation();
+  } catch {
+    // Graceful fallback if rendered outside NavigationContainer during bootstrap
+  }
 
   // Animation values
-  const logoScale = useRef(new Animated.Value(0.6)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoFloat = useRef(new Animated.Value(0)).current;
-  const auraPulse = useRef(new Animated.Value(0)).current;
-
-  const titleOpacity = useRef(new Animated.Value(0)).current;
-  const titleTranslateY = useRef(new Animated.Value(20)).current;
-  const lineScale = useRef(new Animated.Value(0)).current;
-
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
-
+  const logoScale = useRef(new Animated.Value(0.94)).current;
+  const textOpacity = useRef(new Animated.Value(0)).current;
+  const textTranslateY = useRef(new Animated.Value(8)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
   const screenFade = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // 1. Initial Logo Entrance (Bloom + Scale up + Fade in)
+    // 1. Gentle natural logo entrance
     Animated.parallel([
-      Animated.spring(logoScale, {
-        toValue: 1,
-        friction: 6,
-        tension: 40,
-        useNativeDriver: true,
-      }),
       Animated.timing(logoOpacity, {
         toValue: 1,
-        duration: 800,
+        duration: 750,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoScale, {
+        toValue: 1,
+        duration: 750,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
 
-    // 2. Title & Line Reveal (Staggered after 400ms)
+    // 2. Brand text gentle fade-in (staggered by 300ms)
     Animated.sequence([
-      Animated.delay(400),
+      Animated.delay(300),
       Animated.parallel([
-        Animated.timing(titleOpacity, {
+        Animated.timing(textOpacity, {
           toValue: 1,
-          duration: 700,
+          duration: 650,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
-        Animated.timing(titleTranslateY, {
+        Animated.timing(textTranslateY, {
           toValue: 0,
-          duration: 700,
-          easing: Easing.out(Easing.back(1.5)),
-          useNativeDriver: true,
-        }),
-        Animated.timing(lineScale, {
-          toValue: 1,
-          duration: 800,
+          duration: 650,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
       ]),
-      // 3. Tagline Reveal
-      Animated.timing(taglineOpacity, {
-        toValue: 1,
-        duration: 600,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
     ]).start();
 
-    // 4. Continuous Ambient Floating & Breathing
-    const floatLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(logoFloat, {
-          toValue: -8,
-          duration: 2200,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoFloat, {
-          toValue: 6,
-          duration: 2200,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    floatLoop.start();
-
-    // 5. Rhythmic Aura Breathing Pulse
-    const auraLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(auraPulse, {
-          toValue: 1,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(auraPulse, {
-          toValue: 0,
-          duration: 2000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    auraLoop.start();
-
-    // 6. Smooth Progress Bar Animation (0 to 1 over 2.4s)
+    // 3. Minimal progress line animation (0 to 1 over 2.0s)
     Animated.timing(progressAnim, {
       toValue: 1,
-      duration: 2400,
+      duration: 2000,
       easing: Easing.inOut(Easing.quad),
       useNativeDriver: false,
     }).start();
 
-    // 7. Transition to Home Screen after ~2.8s
-    const timeout = setTimeout(() => {
+    // 4. Smooth transition to Home screen
+    const transitionTimer = setTimeout(() => {
       Animated.timing(screenFade, {
         toValue: 0,
-        duration: 400,
+        duration: 350,
         easing: Easing.in(Easing.cubic),
         useNativeDriver: true,
       }).start(() => {
-        navigation.replace('Home');
+        if (onFinish) {
+          onFinish();
+        } else if (navigation) {
+          navigation.replace('Home');
+        }
       });
-    }, 2800);
+    }, 2400);
 
     return () => {
-      clearTimeout(timeout);
-      floatLoop.stop();
-      auraLoop.stop();
+      clearTimeout(transitionTimer);
     };
-  }, [navigation]);
-
-  // Interpolations
-  const auraScale1 = auraPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1.0, 1.35],
-  });
-
-  const auraScale2 = auraPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1.15, 1.6],
-  });
-
-  const auraOpacity = auraPulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.45, 0.12],
-  });
+  }, [navigation, onFinish]);
 
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
@@ -173,52 +103,17 @@ export const SplashScreen: React.FC = () => {
 
   return (
     <Animated.View style={[styles.container, { opacity: screenFade }]}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
 
-      {/* Deep, tranquil cosmic emerald background */}
-      <LinearGradient
-        colors={['#07140E', '#0D2118', '#091710']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-
-      {/* Center Hero Logo & Glowing Halos */}
-      <View style={styles.centerContainer}>
-        {/* Outer Radiant Aura Ring */}
+      {/* Centered Brand Presentation */}
+      <View style={styles.centerContent}>
+        {/* Official SOVAELI Logo with subtle natural shadow */}
         <Animated.View
           style={[
-            styles.auraRing,
-            styles.outerAura,
-            {
-              opacity: auraOpacity,
-              transform: [{ scale: auraScale2 }],
-            },
-          ]}
-        />
-
-        {/* Inner Radiant Aura Ring */}
-        <Animated.View
-          style={[
-            styles.auraRing,
-            styles.innerAura,
-            {
-              opacity: auraOpacity,
-              transform: [{ scale: auraScale1 }],
-            },
-          ]}
-        />
-
-        {/* Main Floating Animated Logo */}
-        <Animated.View
-          style={[
-            styles.logoWrapper,
+            styles.logoContainer,
             {
               opacity: logoOpacity,
-              transform: [
-                { scale: logoScale },
-                { translateY: logoFloat },
-              ],
+              transform: [{ scale: logoScale }],
             },
           ]}
         >
@@ -229,38 +124,26 @@ export const SplashScreen: React.FC = () => {
           />
         </Animated.View>
 
-        {/* Brand Name: SUKOON */}
+        {/* Brand Name & Tagline */}
         <Animated.View
           style={[
-            styles.titleContainer,
+            styles.textContainer,
             {
-              opacity: titleOpacity,
-              transform: [{ translateY: titleTranslateY }],
+              opacity: textOpacity,
+              transform: [{ translateY: textTranslateY }],
             },
           ]}
         >
           <Text style={styles.brandTitle}>SOVAELI</Text>
-
-          {/* Delicate glowing golden/emerald divider line */}
-          <Animated.View
-            style={[
-              styles.accentLine,
-              { transform: [{ scaleX: lineScale }] },
-            ]}
-          />
-
-          {/* Tagline */}
-          <Animated.Text style={[styles.tagline, { opacity: taglineOpacity }]}>
-            Breathe • Meditate • Find Peace
-          </Animated.Text>
+          <View style={styles.accentDivider} />
+          <Text style={styles.brandSubtitle}>Mindful Calm & Inner Peace</Text>
         </Animated.View>
       </View>
 
-      {/* Bottom Loading Progress & Peaceful Message */}
-      <View style={styles.bottomContainer}>
-        <Text style={styles.loadingMessage}>Entering your space of peace...</Text>
-        <View style={styles.progressBarTrack}>
-          <Animated.View style={[styles.progressBarFill, { width: progressWidth }]} />
+      {/* Minimal, elegant bottom progress cue */}
+      <View style={styles.bottomArea}>
+        <View style={styles.progressTrack}>
+          <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
         </View>
       </View>
     </Animated.View>
@@ -270,101 +153,79 @@ export const SplashScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#07140E',
+    backgroundColor: '#F8F6F0',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  centerContainer: {
+  centerContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
+    paddingHorizontal: 24,
   },
-  auraRing: {
-    position: 'absolute',
-    borderRadius: 9999,
+  logoContainer: {
+    width: 108,
+    height: 108,
+    borderRadius: 28,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-  },
-  outerAura: {
-    width: 250,
-    height: 250,
-    borderColor: '#8CD5B4',
-  },
-  innerAura: {
-    width: 200,
-    height: 200,
-    borderColor: '#4EA375',
-  },
-  logoWrapper: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#8CD5B4',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 20,
+    borderColor: '#E8E4DA',
+    shadowColor: '#1A3326',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
   },
   logoImage: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+    width: 82,
+    height: 82,
+    borderRadius: 20,
   },
-  titleContainer: {
+  textContainer: {
     alignItems: 'center',
-    marginTop: 28,
+    marginTop: 22,
   },
   brandTitle: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: '700',
     fontFamily: 'serif',
-    color: '#FFFFFF',
-    letterSpacing: 8,
+    color: '#111F18',
+    letterSpacing: 6,
     textAlign: 'center',
-    textShadowColor: 'rgba(140, 213, 180, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
   },
-  accentLine: {
-    width: 90,
+  accentDivider: {
+    width: 36,
     height: 2,
     backgroundColor: '#8CD5B4',
     borderRadius: 1,
     marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  tagline: {
+  brandSubtitle: {
     fontSize: 13,
     fontFamily: 'sans-serif',
-    fontWeight: '600',
-    color: '#B5D6C5',
-    letterSpacing: 2,
+    fontWeight: '500',
+    color: '#3D5A4A',
+    letterSpacing: 1.5,
     textAlign: 'center',
   },
-  bottomContainer: {
+  bottomArea: {
     position: 'absolute',
-    bottom: 52,
+    bottom: 56,
     alignItems: 'center',
-    width: width * 0.7,
-  },
-  loadingMessage: {
-    fontSize: 12,
-    fontFamily: 'sans-serif',
-    fontWeight: '500',
-    color: '#7EA693',
-    letterSpacing: 1,
-    marginBottom: 12,
-  },
-  progressBarTrack: {
     width: '100%',
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 2,
+  },
+  progressTrack: {
+    width: 100,
+    height: 2.5,
+    backgroundColor: 'rgba(38, 92, 67, 0.12)',
+    borderRadius: 1.5,
     overflow: 'hidden',
   },
-  progressBarFill: {
+  progressFill: {
     height: '100%',
-    backgroundColor: '#8CD5B4',
-    borderRadius: 2,
+    backgroundColor: '#265C43',
+    borderRadius: 1.5,
   },
 });

@@ -25,18 +25,25 @@ import { formatTimeMMSS } from '../logic/formatters';
 import { progressStore } from '../data/progressStore';
 import { ScenicBackground } from '../components/ScenicBackground';
 import { BreatheIcon } from '../components/SvgIcons';
+import { settingsStore } from '../data/settingsStore';
+import { BottomNavBar } from '../components/BottomNavBar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ScreenState = 'setup' | 'active' | 'completed';
 
 export const BreathingScreen: React.FC = () => {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
-  // Setup state
-  const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>(
-    BREATHING_PATTERNS[0]
-  );
-  const [selectedDurationMin, setSelectedDurationMin] = useState<number>(1);
+  // Setup state with global persistence
+  const savedPatternId = settingsStore.getBreathingPatternId();
+  const initialPattern =
+    BREATHING_PATTERNS.find((p) => p.id === savedPatternId) || BREATHING_PATTERNS[0];
+  const initialDuration = settingsStore.getBreathingDurationMinutes();
+
+  const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>(initialPattern);
+  const [selectedDurationMin, setSelectedDurationMin] = useState<number>(initialDuration);
   const [screenState, setScreenState] = useState<ScreenState>('setup');
 
   // Active session state
@@ -62,6 +69,24 @@ export const BreathingScreen: React.FC = () => {
 
   const activePhase: BreathingPhase =
     selectedPattern.phases[currentPhaseIndex] || selectedPattern.phases[0];
+
+  const screenStateRef = useRef<ScreenState>(screenState);
+  screenStateRef.current = screenState;
+  const sessionSecondsLeftRef = useRef<number>(sessionSecondsLeft);
+  sessionSecondsLeftRef.current = sessionSecondsLeft;
+  const totalSessionSecondsRef = useRef<number>(totalSessionSeconds);
+  totalSessionSecondsRef.current = totalSessionSeconds;
+
+  useEffect(() => {
+    return () => {
+      if (screenStateRef.current === 'active') {
+        const elapsed = totalSessionSecondsRef.current - sessionSecondsLeftRef.current;
+        if (elapsed >= 15) {
+          progressStore.recordCompletedSession(elapsed);
+        }
+      }
+    };
+  }, []);
 
   // Start breathing session
   const handleStartSession = () => {
@@ -210,7 +235,11 @@ export const BreathingScreen: React.FC = () => {
     }
   };
 
-  const handleStopSession = () => {
+  const handleStopSession = async () => {
+    const elapsedSeconds = totalSessionSeconds - sessionSecondsLeft;
+    if (elapsedSeconds >= 15) {
+      await progressStore.recordCompletedSession(elapsedSeconds);
+    }
     currentAnimation.current?.stop();
     Animated.parallel([
       Animated.timing(orbScale, { toValue: 1.0, duration: 300, useNativeDriver: true }),
@@ -260,13 +289,13 @@ export const BreathingScreen: React.FC = () => {
       {screenState === 'setup' && (
         <ScrollView
           style={styles.contentContainer}
-          contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
+          contentContainerStyle={{ padding: 18, paddingBottom: insets.bottom + 110 }}
           showsVerticalScrollIndicator={false}
         >
           <Text
             style={[
               styles.screenSubtitle,
-              { color: isDark ? '#D8E8E0' : '#2E4638' },
+              { color: isDark ? '#D8E8E0' : '#1E3528' },
             ]}
           >
             Select a soothing rhythm and session duration.
@@ -291,22 +320,25 @@ export const BreathingScreen: React.FC = () => {
                   {
                     backgroundColor: isSelected
                       ? isDark
-                        ? '#162E23'
+                        ? '#222228'
                         : '#E4F0E9'
                       : isDark
-                      ? '#13221B'
+                      ? '#141418'
                       : '#FFFFFF',
                     borderColor: isSelected
                       ? isDark
-                        ? '#8CD5B4'
+                        ? 'rgba(255, 255, 255, 0.35)'
                         : '#265C43'
                       : isDark
-                      ? 'rgba(255, 255, 255, 0.12)'
-                      : '#E0D8CB',
+                      ? 'rgba(255, 255, 255, 0.10)'
+                      : '#D6E4DC',
                     borderWidth: isSelected ? 2 : 1.5,
                   },
                 ]}
-                onPress={() => setSelectedPattern(pattern)}
+                onPress={() => {
+                  setSelectedPattern(pattern);
+                  settingsStore.setBreathingPatternId(pattern.id);
+                }}
               >
                 <View style={styles.patternLeft}>
                   <View
@@ -315,10 +347,10 @@ export const BreathingScreen: React.FC = () => {
                       {
                         backgroundColor: isSelected
                           ? isDark
-                            ? 'rgba(140, 213, 180, 0.25)'
+                            ? 'rgba(255, 255, 255, 0.18)'
                             : 'rgba(38, 92, 67, 0.15)'
                           : isDark
-                          ? 'rgba(255, 255, 255, 0.10)'
+                          ? 'rgba(255, 255, 255, 0.08)'
                           : 'rgba(0, 0, 0, 0.05)',
                       },
                     ]}
@@ -328,11 +360,11 @@ export const BreathingScreen: React.FC = () => {
                       color={
                         isSelected
                           ? isDark
-                            ? '#8CD5B4'
+                            ? '#FFFFFF'
                             : '#265C43'
                           : isDark
-                          ? '#D8E8E0'
-                          : '#2E4638'
+                          ? '#C8C8D4'
+                          : '#1E3528'
                       }
                     />
                   </View>
@@ -348,7 +380,7 @@ export const BreathingScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.patternDesc,
-                        { color: isDark ? '#D8E8E0' : '#2E4638' },
+                        { color: isDark ? '#C8C8D4' : '#1E3528' },
                       ]}
                     >
                       {pattern.subtitle}
@@ -362,7 +394,7 @@ export const BreathingScreen: React.FC = () => {
                     {
                       borderColor: isSelected
                         ? isDark
-                          ? '#8CD5B4'
+                          ? '#FFFFFF'
                           : '#265C43'
                         : isDark
                         ? 'rgba(255, 255, 255, 0.25)'
@@ -375,7 +407,7 @@ export const BreathingScreen: React.FC = () => {
                       style={[
                         styles.radioDot,
                         {
-                          backgroundColor: isDark ? '#8CD5B4' : '#265C43',
+                          backgroundColor: isDark ? '#FFFFFF' : '#265C43',
                         },
                       ]}
                     />
@@ -405,21 +437,24 @@ export const BreathingScreen: React.FC = () => {
                     {
                       backgroundColor: isSelected
                         ? isDark
-                          ? '#8CD5B4'
+                          ? '#FFFFFF'
                           : '#265C43'
                         : isDark
-                        ? '#13221B'
+                        ? '#141418'
                         : '#FFFFFF',
                       borderColor: isSelected
                         ? isDark
-                          ? '#8CD5B4'
+                          ? '#FFFFFF'
                           : '#265C43'
                         : isDark
-                        ? 'rgba(255, 255, 255, 0.14)'
-                        : '#E0D8CB',
+                        ? 'rgba(255, 255, 255, 0.10)'
+                        : '#D6E4DC',
                     },
                   ]}
-                  onPress={() => setSelectedDurationMin(min)}
+                  onPress={() => {
+                    setSelectedDurationMin(min);
+                    settingsStore.setBreathingDurationMinutes(min);
+                  }}
                   activeOpacity={0.8}
                 >
                   <Text
@@ -428,7 +463,7 @@ export const BreathingScreen: React.FC = () => {
                       {
                         color: isSelected
                           ? isDark
-                            ? '#0B131A'
+                            ? '#000000'
                             : '#FFFFFF'
                           : colors.textPrimary,
                       },
@@ -457,7 +492,7 @@ export const BreathingScreen: React.FC = () => {
             style={[
               StyleSheet.absoluteFill,
               {
-                backgroundColor: isDark ? '#1C3E32' : '#C7E2D5',
+                backgroundColor: isDark ? '#1C1C22' : '#C7E2D5',
                 opacity: bgInhaleOpacity,
               },
             ]}
@@ -468,7 +503,7 @@ export const BreathingScreen: React.FC = () => {
             <Text
               style={[
                 styles.patternBadgeText,
-                { color: isDark ? '#A7F3D0' : '#265C43' },
+                { color: isDark ? '#E2E2EA' : '#265C43' },
               ]}
             >
               {selectedPattern.name.toUpperCase()}
@@ -492,7 +527,7 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring3,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.20)'
+                    ? 'rgba(255, 255, 255, 0.12)'
                     : 'rgba(38, 92, 67, 0.18)',
                   transform: [{ scale: ring3Scale }],
                 },
@@ -506,7 +541,7 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring2,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.32)'
+                    ? 'rgba(255, 255, 255, 0.20)'
                     : 'rgba(38, 92, 67, 0.28)',
                   transform: [{ scale: ring2Scale }],
                 },
@@ -520,7 +555,7 @@ export const BreathingScreen: React.FC = () => {
                 styles.ring1,
                 {
                   borderColor: isDark
-                    ? 'rgba(140, 213, 180, 0.45)'
+                    ? 'rgba(255, 255, 255, 0.32)'
                     : 'rgba(38, 92, 67, 0.38)',
                   transform: [{ scale: ring1Scale }],
                 },
@@ -533,14 +568,14 @@ export const BreathingScreen: React.FC = () => {
                 styles.mainGlowingOrb,
                 {
                   transform: [{ scale: orbScale }],
-                  borderColor: isDark ? '#8CD5B4' : '#265C43',
+                  borderColor: isDark ? 'rgba(255, 255, 255, 0.40)' : '#265C43',
                 },
               ]}
             >
               <LinearGradient
                 colors={
                   isDark
-                    ? ['#1C372D', '#132820']
+                    ? ['#26262E', '#141418']
                     : ['#8EAFA1', '#6B9483']
                 }
                 start={{ x: 0, y: 0 }}
@@ -641,6 +676,11 @@ export const BreathingScreen: React.FC = () => {
           />
         </View>
       )}
+
+      {/* Global Bottom Navigation (Visible during setup, hidden during active breathing for zero distraction) */}
+      {screenState === 'setup' && (
+        <BottomNavBar activeTab="practice" />
+      )}
     </ScenicBackground>
   );
 };
@@ -666,6 +706,8 @@ const styles = StyleSheet.create({
   },
   patternCard: {
     borderRadius: 20,
+    borderWidth: 1.5,
+    overflow: 'hidden',
     padding: 16,
     marginVertical: 6,
     flexDirection: 'row',
@@ -721,6 +763,7 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 27,
     borderWidth: 1.5,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },
