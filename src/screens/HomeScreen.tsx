@@ -17,7 +17,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../shared/theme/ThemeContext';
 import { getDaytimeGreeting } from '../shared/logic/formatters';
-import { progressStore } from '../data/progressStore';
+import { progressStore } from '../features/progress';
 import { settingsStore, SceneId } from '../shared/store/settingsStore';
 import { NavigationProp } from '../navigation/types';
 import { ScenicBackground } from '../shared/components/ScenicBackground';

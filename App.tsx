@@ -9,8 +9,8 @@ import { ThemeProvider, useTheme } from './src/shared/theme/ThemeContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { SplashScreen } from './src/screens/SplashScreen';
 import { settingsStore } from './src/shared/store/settingsStore';
-import { progressStore } from './src/data/progressStore';
-import { audioService } from './src/services/audioService';
+import { progressStore } from './src/features/progress';
+import { audioService } from './src/features/sounds';
 
 const MainAppContent: React.FC = () => {
   const { isDark } = useTheme();

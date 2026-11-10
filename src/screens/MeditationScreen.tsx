@@ -18,9 +18,9 @@ import { useTheme } from '../shared/theme/ThemeContext';
 import { Header } from '../shared/components/Header';
 import { PrimaryButton } from '../shared/components/PrimaryButton';
 import { nativeTimer } from '../services/nativeTimer';
-import { audioService } from '../services/audioService';
+import { audioService } from '../features/sounds';
 import { settingsStore, SceneId } from '../shared/store/settingsStore';
-import { progressStore } from '../data/progressStore';
+import { progressStore } from '../features/progress';
 import { formatTimeMMSS } from '../shared/logic/formatters';
 import { ScenicBackground } from '../shared/components/ScenicBackground';
 

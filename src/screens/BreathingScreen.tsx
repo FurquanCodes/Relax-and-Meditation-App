@@ -22,7 +22,7 @@ import {
   BreathingPhase,
 } from '../logic/patterns';
 import { formatTimeMMSS } from '../shared/logic/formatters';
-import { progressStore } from '../data/progressStore';
+import { progressStore } from '../features/progress';
 import { ScenicBackground } from '../shared/components/ScenicBackground';
 import { BreatheIcon } from '../shared/components/SvgIcons';
 import { settingsStore } from '../shared/store/settingsStore';

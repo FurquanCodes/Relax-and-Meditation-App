@@ -5,7 +5,7 @@ import { RootStackParamList } from './types';
 import { HomeScreen } from '../screens/HomeScreen';
 import { BreathingScreen } from '../screens/BreathingScreen';
 import { MeditationScreen } from '../screens/MeditationScreen';
-import { SoundsScreen } from '../screens/SoundsScreen';
+import { SoundsScreen } from '../features/sounds';
 import { SettingsScreen } from '../screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
