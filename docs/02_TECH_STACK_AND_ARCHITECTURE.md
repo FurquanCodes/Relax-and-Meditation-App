@@ -13,25 +13,27 @@
 - **Bell sound:** a short audio clip played through a small, maintained audio library or the same player, chosen during the spike. The bell must not break ambient playback or the media notification.
 - No Firebase, no accounts, no network calls. The app is fully offline.
 
-## Folder structure (keep layers separate)
+## Folder structure (feature-based modular architecture)
 ```
 Q9Relax/
+  App.tsx, index.js (root entry)
   src/
-    app/            App.tsx entry wiring, navigation setup, providers
-    ui/
-      screens/      HomeScreen, BreatheScreen, MeditateScreen, SoundsScreen, SettingsScreen
-      components/   Buttons, Card, Chip, BreathingCircle, TimerDisplay, VolumeSlider...
-      theme/        colors (light + dark tokens), typography, spacing
-    logic/
-      breathing/    patterns.ts (data), useBreathingSession.ts (engine/hook)
-      timer/        meditation timer logic (wall-clock based)
-      sleepTimer/   sleep timer logic
-    data/
-      storage/      settingsStore.ts, progressStore.ts (AsyncStorage wrappers)
-      sounds.ts     catalog of ambient sounds
-    services/
-      audio/        track player setup, playback service, controls
-      session/      foreground service / bell helpers
+    navigation/     AppNavigator.tsx, types.ts
+    features/
+      splash/       screens/SplashScreen.tsx, index.ts
+      home/         screens/HomeScreen.tsx, index.ts
+      breathing/    screens/BreathingScreen.tsx, logic/patterns.ts, index.ts
+      meditation/   screens/MeditationScreen.tsx, services/nativeTimer.ts, index.ts
+      sounds/       screens/SoundsScreen.tsx, services/audioService.ts, services/audio/playbackService.ts, index.ts
+      progress/     progressStore.ts, index.ts
+      settings/     screens/SettingsScreen.tsx, index.ts
+    shared/
+      components/   BottomNavBar, Header, PrimaryButton, ScenicBackground, SvgIcons, ResetConfirmModal, Card, AtmosphereThemeView
+      store/        settingsStore.ts
+      logic/        formatters.ts
+      storage.ts    AsyncStorage wrapper
+      theme/        ThemeContext.tsx, tokens.ts
+    logo.png
   assets/
     audio/ambient/  *.ogg loops
     audio/bells/    start/end bell
@@ -39,7 +41,7 @@ Q9Relax/
   PROGRESS.md
   README.md
 ```
-Rule: **UI must not talk to AsyncStorage or the player directly.** UI calls hooks/functions in `logic/`, `data/`, `services/`.
+Rule: **UI must not talk to AsyncStorage directly.** UI calls stores in `shared/store/`, `features/progress/`, or services in `features/sounds/`, `features/meditation/`.
 
 ## Key technical risks (address in this order)
 
