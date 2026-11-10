@@ -15,15 +15,15 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../theme/ThemeContext';
-import { getDaytimeGreeting } from '../logic/formatters';
+import { useTheme } from '../shared/theme/ThemeContext';
+import { getDaytimeGreeting } from '../shared/logic/formatters';
 import { progressStore } from '../data/progressStore';
-import { settingsStore, SceneId } from '../data/settingsStore';
+import { settingsStore, SceneId } from '../shared/store/settingsStore';
 import { NavigationProp } from '../navigation/types';
-import { ScenicBackground } from '../components/ScenicBackground';
-import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../components/SvgIcons';
-import { BottomNavBar } from '../components/BottomNavBar';
-import { ResetConfirmModal } from '../components/ResetConfirmModal';
+import { ScenicBackground } from '../shared/components/ScenicBackground';
+import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../shared/components/SvgIcons';
+import { BottomNavBar } from '../shared/components/BottomNavBar';
+import { ResetConfirmModal } from '../shared/components/ResetConfirmModal';
 
 // Staggered animated entrance wrapper
 const FadeSlideIn: React.FC<{

@@ -12,21 +12,21 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../theme/ThemeContext';
-import { Header } from '../components/Header';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { useTheme } from '../shared/theme/ThemeContext';
+import { Header } from '../shared/components/Header';
+import { PrimaryButton } from '../shared/components/PrimaryButton';
 import {
   BREATHING_PATTERNS,
   BREATHING_DURATIONS_MINUTES,
   BreathingPattern,
   BreathingPhase,
 } from '../logic/patterns';
-import { formatTimeMMSS } from '../logic/formatters';
+import { formatTimeMMSS } from '../shared/logic/formatters';
 import { progressStore } from '../data/progressStore';
-import { ScenicBackground } from '../components/ScenicBackground';
-import { BreatheIcon } from '../components/SvgIcons';
-import { settingsStore } from '../data/settingsStore';
-import { BottomNavBar } from '../components/BottomNavBar';
+import { ScenicBackground } from '../shared/components/ScenicBackground';
+import { BreatheIcon } from '../shared/components/SvgIcons';
+import { settingsStore } from '../shared/store/settingsStore';
+import { BottomNavBar } from '../shared/components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ScreenState = 'setup' | 'active' | 'completed';

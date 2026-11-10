@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
-import { NavigationProp } from '../navigation/types';
+import { NavigationProp } from '../../navigation/types';
 
 export type NavTabId = 'home' | 'practice' | 'sounds' | 'settings';
 

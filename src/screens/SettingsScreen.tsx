@@ -11,13 +11,13 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../theme/ThemeContext';
-import { Header } from '../components/Header';
-import { settingsStore, ThemePreference, SceneId } from '../data/settingsStore';
+import { useTheme } from '../shared/theme/ThemeContext';
+import { Header } from '../shared/components/Header';
+import { settingsStore, ThemePreference, SceneId } from '../shared/store/settingsStore';
 import { progressStore } from '../data/progressStore';
-import { ScenicBackground, SCENIC_IMAGES } from '../components/ScenicBackground';
-import { BottomNavBar } from '../components/BottomNavBar';
-import { ResetConfirmModal } from '../components/ResetConfirmModal';
+import { ScenicBackground, SCENIC_IMAGES } from '../shared/components/ScenicBackground';
+import { BottomNavBar } from '../shared/components/BottomNavBar';
+import { ResetConfirmModal } from '../shared/components/ResetConfirmModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SceneOption {

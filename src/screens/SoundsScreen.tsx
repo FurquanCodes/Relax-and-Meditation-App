@@ -12,8 +12,8 @@ import {
 import Slider from '@react-native-community/slider';
 import { useNavigation } from '@react-navigation/native';
 import { usePlaybackState, State } from 'react-native-track-player';
-import { useTheme } from '../theme/ThemeContext';
-import { Header } from '../components/Header';
+import { useTheme } from '../shared/theme/ThemeContext';
+import { Header } from '../shared/components/Header';
 import {
   audioService,
   AMBIENT_TRACKS,
@@ -21,11 +21,11 @@ import {
   SoundCategoryId,
   AmbientTrack,
 } from '../services/audioService';
-import { formatTimeMMSS } from '../logic/formatters';
-import { ScenicBackground } from '../components/ScenicBackground';
-import { settingsStore, SceneId } from '../data/settingsStore';
+import { formatTimeMMSS } from '../shared/logic/formatters';
+import { ScenicBackground } from '../shared/components/ScenicBackground';
+import { settingsStore, SceneId } from '../shared/store/settingsStore';
 import { progressStore } from '../data/progressStore';
-import { BottomNavBar } from '../components/BottomNavBar';
+import { BottomNavBar } from '../shared/components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const SLEEP_OPTIONS = [0, 15, 30, 60];
