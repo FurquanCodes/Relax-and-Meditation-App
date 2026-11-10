@@ -15,15 +15,15 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '../shared/theme/ThemeContext';
-import { getDaytimeGreeting } from '../shared/logic/formatters';
-import { progressStore } from '../features/progress';
-import { settingsStore, SceneId } from '../shared/store/settingsStore';
-import { NavigationProp } from '../navigation/types';
-import { ScenicBackground } from '../shared/components/ScenicBackground';
-import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../shared/components/SvgIcons';
-import { BottomNavBar } from '../shared/components/BottomNavBar';
-import { ResetConfirmModal } from '../shared/components/ResetConfirmModal';
+import { useTheme } from '../../../shared/theme/ThemeContext';
+import { getDaytimeGreeting } from '../../../shared/logic/formatters';
+import { progressStore } from '../../progress';
+import { settingsStore, SceneId } from '../../../shared/store/settingsStore';
+import { NavigationProp } from '../../../navigation/types';
+import { ScenicBackground } from '../../../shared/components/ScenicBackground';
+import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../../../shared/components/SvgIcons';
+import { BottomNavBar } from '../../../shared/components/BottomNavBar';
+import { ResetConfirmModal } from '../../../shared/components/ResetConfirmModal';
 
 // Staggered animated entrance wrapper
 const FadeSlideIn: React.FC<{
@@ -247,7 +247,7 @@ export const HomeScreen: React.FC = () => {
       >
         <View style={styles.brandContainer}>
           <Image
-            source={require('../logo.png')}
+            source={require('../../../logo.png')}
             style={styles.brandLogoImg}
             resizeMode="contain"
           />

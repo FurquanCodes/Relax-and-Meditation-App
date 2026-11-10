@@ -7,7 +7,7 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from './src/shared/theme/ThemeContext';
 import { AppNavigator } from './src/navigation/AppNavigator';
-import { SplashScreen } from './src/screens/SplashScreen';
+import { SplashScreen } from './src/features/splash';
 import { settingsStore } from './src/shared/store/settingsStore';
 import { progressStore } from './src/features/progress';
 import { audioService } from './src/features/sounds';

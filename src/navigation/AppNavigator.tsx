@@ -2,11 +2,11 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
-import { HomeScreen } from '../screens/HomeScreen';
-import { BreathingScreen } from '../screens/BreathingScreen';
-import { MeditationScreen } from '../screens/MeditationScreen';
+import { HomeScreen } from '../features/home';
+import { BreathingScreen } from '../features/breathing';
+import { MeditationScreen } from '../features/meditation';
 import { SoundsScreen } from '../features/sounds';
-import { SettingsScreen } from '../screens/SettingsScreen';
+import { SettingsScreen } from '../features/settings';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

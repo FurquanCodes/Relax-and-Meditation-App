@@ -14,15 +14,15 @@ import {
 import Svg, { Circle } from 'react-native-svg';
 import Slider from '@react-native-community/slider';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../shared/theme/ThemeContext';
-import { Header } from '../shared/components/Header';
-import { PrimaryButton } from '../shared/components/PrimaryButton';
+import { useTheme } from '../../../shared/theme/ThemeContext';
+import { Header } from '../../../shared/components/Header';
+import { PrimaryButton } from '../../../shared/components/PrimaryButton';
 import { nativeTimer } from '../services/nativeTimer';
-import { audioService } from '../features/sounds';
-import { settingsStore, SceneId } from '../shared/store/settingsStore';
-import { progressStore } from '../features/progress';
-import { formatTimeMMSS } from '../shared/logic/formatters';
-import { ScenicBackground } from '../shared/components/ScenicBackground';
+import { audioService } from '../../sounds';
+import { settingsStore, SceneId } from '../../../shared/store/settingsStore';
+import { progressStore } from '../../progress';
+import { formatTimeMMSS } from '../../../shared/logic/formatters';
+import { ScenicBackground } from '../../../shared/components/ScenicBackground';
 
 const DURATION_OPTIONS = [1, 5, 10, 15, 20];
 
