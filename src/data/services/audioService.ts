@@ -73,7 +73,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Soft falling raindrops on a quiet evening',
     categoryId: 'rain',
     artworkIcon: '🌧️',
-    fileRequire: require('../../assets/audio/ambient/gentle_night_rain.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/gentle_night_rain.mp3'),
   },
   {
     id: 'sleepy_rain_music',
@@ -81,7 +81,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Calm rain texture blended with peaceful harmony',
     categoryId: 'rain',
     artworkIcon: '🎵',
-    fileRequire: require('../../assets/audio/ambient/sleepy_rain_music.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/sleepy_rain_music.mp3'),
   },
   {
     id: 'rain_thunder',
@@ -89,7 +89,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Deep soothing rainfall with gentle rumble',
     categoryId: 'rain',
     artworkIcon: '⛈️',
-    fileRequire: require('../../assets/audio/ambient/rain_thunder.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/rain_thunder.mp3'),
   },
 
   // 2. Forest Sounds
@@ -99,7 +99,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Morning birdsong and peaceful tree canopy breeze',
     categoryId: 'forest',
     artworkIcon: '🍃',
-    fileRequire: require('../../assets/audio/ambient/forest_ambience_birds.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/forest_ambience_birds.mp3'),
   },
   {
     id: 'forest_river_birds',
@@ -107,7 +107,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Babbling woodland stream with singing birds',
     categoryId: 'forest',
     artworkIcon: '🏞️',
-    fileRequire: require('../../assets/audio/ambient/forest_river_birds.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/forest_river_birds.mp3'),
   },
   {
     id: 'forest_bird_chirping',
@@ -115,7 +115,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Vibrant uplifting forest birds greeting the dawn',
     categoryId: 'forest',
     artworkIcon: '🐦',
-    fileRequire: require('../../assets/audio/ambient/forest_bird_chirping.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/forest_bird_chirping.mp3'),
   },
 
   // 3. Ocean Sounds
@@ -125,7 +125,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Rhythmic rolling swells and receding sea foam',
     categoryId: 'ocean',
     artworkIcon: '🌊',
-    fileRequire: require('../../assets/audio/ambient/ocean_waves.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/ocean_waves.mp3'),
   },
   {
     id: 'ocean_vibes',
@@ -133,7 +133,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Gentle coastal surf with soft tidal wash',
     categoryId: 'ocean',
     artworkIcon: '🏖️',
-    fileRequire: require('../../assets/audio/ambient/ocean_vibes.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/ocean_vibes.mp3'),
   },
   {
     id: 'ocean_waves_music',
@@ -141,7 +141,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Soothing oceanic swells with ambient harmony',
     categoryId: 'ocean',
     artworkIcon: '🌅',
-    fileRequire: require('../../assets/audio/ambient/ocean_waves_music.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/ocean_waves_music.mp3'),
   },
 
   // 4. Calm & Meditation Sounds
@@ -151,7 +151,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Serene resonant soundscape for mindfulness',
     categoryId: 'calm',
     artworkIcon: '🧘',
-    fileRequire: require('../../assets/audio/ambient/meditation_audio.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/meditation_audio.mp3'),
   },
   {
     id: 'calm_sound',
@@ -159,7 +159,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Slow, soothing harmonic chords to release tension',
     categoryId: 'calm',
     artworkIcon: '🎶',
-    fileRequire: require('../../assets/audio/ambient/calm_sound.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/calm_sound.mp3'),
   },
   {
     id: 'white_noise_relax',
@@ -167,7 +167,7 @@ export const AMBIENT_TRACKS: AmbientTrack[] = [
     subtitle: 'Constant calming static to mask distractions',
     categoryId: 'calm',
     artworkIcon: '💨',
-    fileRequire: require('../../assets/audio/ambient/white_noise_relax.mp3'),
+    fileRequire: require('../../../assets/audio/ambient/white_noise_relax.mp3'),
   },
 ];
 

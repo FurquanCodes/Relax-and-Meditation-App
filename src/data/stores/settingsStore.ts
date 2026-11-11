@@ -1,4 +1,4 @@
-import { storage } from './storage';
+import { storage } from '../storage/storage';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 export type SceneId = 'auto' | 'meadow' | 'forest' | 'ocean' | 'rain' | 'night';

@@ -20,12 +20,12 @@ import {
   BREATHING_DURATIONS_MINUTES,
   BreathingPattern,
   BreathingPhase,
-} from '../logic/patterns';
-import { formatTimeMMSS } from '../logic/formatters';
-import { progressStore } from '../data/progressStore';
+} from '../../domain/breathing/patterns';
+import { formatTimeMMSS } from '../../domain/formatters';
+import { progressStore } from '../../data/stores/progressStore';
 import { ScenicBackground } from '../components/ScenicBackground';
 import { BreatheIcon } from '../components/SvgIcons';
-import { settingsStore } from '../data/settingsStore';
+import { settingsStore } from '../../data/stores/settingsStore';
 import { BottomNavBar } from '../components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

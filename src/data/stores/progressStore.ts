@@ -1,4 +1,4 @@
-import { storage } from './storage';
+import { storage } from '../storage/storage';
 
 export interface ProgressData {
   completedSessions: number;

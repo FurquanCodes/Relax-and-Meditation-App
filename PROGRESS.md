@@ -8,7 +8,7 @@
   - Spike B verified: Wall-clock meditation timer with Android native Foreground Service (`TimerService.kt`), ongoing notification, wake lock, and completion bell ringing with screen off.
   - TurboModules and Bridgeless New Architecture patches persisted via `patch-package`.
 - [x] **Milestone 1: Foundation**
-  - Design tokens for Light and Dark modes (`src/theme/tokens.ts`, `ThemeContext.tsx`).
+  - Design tokens for Light and Dark modes (`src/presentation/theme/tokens.ts`, `ThemeContext.tsx`).
   - Storage layer: `settingsStore.ts` and `progressStore.ts` loaded before render with `@react-native-async-storage/async-storage`.
   - Navigation: React Navigation Native Stack (`AppNavigator.tsx`).
   - Home screen: Daytime greeting ("Good morning", "Good afternoon", "Good evening"), stored progress strip (sessions and minutes), practice cards, and settings shortcut.

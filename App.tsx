@@ -5,12 +5,12 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
-import { AppNavigator } from './src/navigation/AppNavigator';
-import { SplashScreen } from './src/screens/SplashScreen';
-import { settingsStore } from './src/data/settingsStore';
-import { progressStore } from './src/data/progressStore';
-import { audioService } from './src/services/audioService';
+import { ThemeProvider, useTheme } from './src/presentation/theme/ThemeContext';
+import { AppNavigator } from './src/presentation/navigation/AppNavigator';
+import { SplashScreen } from './src/presentation/screens/SplashScreen';
+import { settingsStore } from './src/data/stores/settingsStore';
+import { progressStore } from './src/data/stores/progressStore';
+import { audioService } from './src/data/services/audioService';
 
 const MainAppContent: React.FC = () => {
   const { isDark } = useTheme();

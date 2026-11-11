@@ -16,9 +16,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
-import { getDaytimeGreeting } from '../logic/formatters';
-import { progressStore } from '../data/progressStore';
-import { settingsStore, SceneId } from '../data/settingsStore';
+import { getDaytimeGreeting } from '../../domain/formatters';
+import { progressStore } from '../../data/stores/progressStore';
+import { settingsStore, SceneId } from '../../data/stores/settingsStore';
 import { NavigationProp } from '../navigation/types';
 import { ScenicBackground } from '../components/ScenicBackground';
 import { BreatheIcon, MeditateIcon, SoundsIcon, LeafLogoIcon } from '../components/SvgIcons';
@@ -247,7 +247,7 @@ export const HomeScreen: React.FC = () => {
       >
         <View style={styles.brandContainer}>
           <Image
-            source={require('../logo.png')}
+            source={require('../../logo.png')}
             style={styles.brandLogoImg}
             resizeMode="contain"
           />

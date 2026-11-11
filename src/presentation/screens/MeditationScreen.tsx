@@ -17,11 +17,11 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { nativeTimer } from '../services/nativeTimer';
-import { audioService } from '../services/audioService';
-import { settingsStore, SceneId } from '../data/settingsStore';
-import { progressStore } from '../data/progressStore';
-import { formatTimeMMSS } from '../logic/formatters';
+import { nativeTimer } from '../../data/services/nativeTimer';
+import { audioService } from '../../data/services/audioService';
+import { settingsStore, SceneId } from '../../data/stores/settingsStore';
+import { progressStore } from '../../data/stores/progressStore';
+import { formatTimeMMSS } from '../../domain/formatters';
 import { ScenicBackground } from '../components/ScenicBackground';
 
 const DURATION_OPTIONS = [1, 5, 10, 15, 20];
