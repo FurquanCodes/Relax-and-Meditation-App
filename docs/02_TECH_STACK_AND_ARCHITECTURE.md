@@ -13,33 +13,31 @@
 - **Bell sound:** a short audio clip played through a small, maintained audio library or the same player, chosen during the spike. The bell must not break ambient playback or the media notification.
 - No Firebase, no accounts, no network calls. The app is fully offline.
 
-## Folder structure (keep layers separate)
+## Folder structure (Clean Architecture)
 ```
 Q9Relax/
+  App.tsx, index.js (root entry)
   src/
-    app/            App.tsx entry wiring, navigation setup, providers
-    ui/
-      screens/      HomeScreen, BreatheScreen, MeditateScreen, SoundsScreen, SettingsScreen
-      components/   Buttons, Card, Chip, BreathingCircle, TimerDisplay, VolumeSlider...
-      theme/        colors (light + dark tokens), typography, spacing
-    logic/
-      breathing/    patterns.ts (data), useBreathingSession.ts (engine/hook)
-      timer/        meditation timer logic (wall-clock based)
-      sleepTimer/   sleep timer logic
-    data/
-      storage/      settingsStore.ts, progressStore.ts (AsyncStorage wrappers)
-      sounds.ts     catalog of ambient sounds
-    services/
-      audio/        track player setup, playback service, controls
-      session/      foreground service / bell helpers
+    presentation/   UI Layer (Screens, Components, Navigation, Theme)
+      screens/      HomeScreen, BreathingScreen, MeditationScreen, SoundsScreen, SettingsScreen, SplashScreen
+      components/   Buttons, Header, ScenicBackground, SvgIcons, BottomNavBar, ResetModal, Card, AtmosphereView
+      navigation/   AppNavigator.tsx, types.ts
+      theme/        ThemeContext.tsx, tokens.ts (light & dark palettes, typography, spacing)
+    domain/         Domain Layer (Pure Business Rules & Models)
+      breathing/    patterns.ts (breathing phases & patterns)
+      formatters.ts (daytime greetings, time MM:SS formatters)
+    data/           Data & Infrastructure Layer (Persistence, Hardware & Services)
+      storage/      storage.ts (AsyncStorage wrapper)
+      stores/       settingsStore.ts, progressStore.ts
+      services/     audioService.ts, playbackService.ts, nativeTimer.ts
+    logo.png
   assets/
-    audio/ambient/  *.ogg loops
-    audio/bells/    start/end bell
-    audio/SOURCES.md   source + licence of every audio file
+    audio/ambient/  *.mp3 loops
+    images/         scenic backgrounds
   PROGRESS.md
   README.md
 ```
-Rule: **UI must not talk to AsyncStorage or the player directly.** UI calls hooks/functions in `logic/`, `data/`, `services/`.
+Rule: **UI must not talk to AsyncStorage or native drivers directly.** Presentation calls stores and services in `src/data/`.
 
 ## Key technical risks (address in this order)
 

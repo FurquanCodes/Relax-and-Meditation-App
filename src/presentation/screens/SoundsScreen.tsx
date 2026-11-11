@@ -20,11 +20,11 @@ import {
   SOUND_CATEGORIES,
   SoundCategoryId,
   AmbientTrack,
-} from '../services/audioService';
-import { formatTimeMMSS } from '../logic/formatters';
+} from '../../data/services/audioService';
+import { formatTimeMMSS } from '../../domain/formatters';
 import { ScenicBackground } from '../components/ScenicBackground';
-import { settingsStore, SceneId } from '../data/settingsStore';
-import { progressStore } from '../data/progressStore';
+import { settingsStore, SceneId } from '../../data/stores/settingsStore';
+import { progressStore } from '../../data/stores/progressStore';
 import { BottomNavBar } from '../components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

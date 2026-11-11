@@ -13,8 +13,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../theme/ThemeContext';
 import { Header } from '../components/Header';
-import { settingsStore, ThemePreference, SceneId } from '../data/settingsStore';
-import { progressStore } from '../data/progressStore';
+import { settingsStore, ThemePreference, SceneId } from '../../data/stores/settingsStore';
+import { progressStore } from '../../data/stores/progressStore';
 import { ScenicBackground, SCENIC_IMAGES } from '../components/ScenicBackground';
 import { BottomNavBar } from '../components/BottomNavBar';
 import { ResetConfirmModal } from '../components/ResetConfirmModal';

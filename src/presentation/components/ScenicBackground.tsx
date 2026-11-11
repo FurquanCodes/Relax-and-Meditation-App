@@ -11,14 +11,14 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useTheme } from '../theme/ThemeContext';
-import { SceneId } from '../data/settingsStore';
+import { SceneId } from '../../data/stores/settingsStore';
 
 export const SCENIC_IMAGES: Record<Exclude<SceneId, 'auto'>, any> = {
-  meadow: require('../../assets/images/meadow_sunrise.jpg'),
-  forest: require('../../assets/images/forest_mist.jpg'),
-  ocean: require('../../assets/images/ocean_sunset.jpg'),
-  rain: require('../../assets/images/rain_drops.jpg'),
-  night: require('../../assets/images/night_stars.jpg'),
+  meadow: require('../../../assets/images/meadow_sunrise.jpg'),
+  forest: require('../../../assets/images/forest_mist.jpg'),
+  ocean: require('../../../assets/images/ocean_sunset.jpg'),
+  rain: require('../../../assets/images/rain_drops.jpg'),
+  night: require('../../../assets/images/night_stars.jpg'),
 };
 
 export const SCENIC_GRADIENTS: Record<
